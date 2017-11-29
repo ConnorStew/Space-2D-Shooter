@@ -1,7 +1,5 @@
 package ui;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -15,6 +13,7 @@ import entities.Entity;
 import entities.InanimateEntity;
 import entities.Player;
 import logic.CollisionManager;
+import logic.EntityManager;
 import projectiles.Projectile;
 
 /**
@@ -25,7 +24,8 @@ public class GameScreen implements Screen {
 	
 	private static GameScreen instance = new GameScreen();
 	
-	private static ArrayList<Entity> activeEntities = new ArrayList<Entity>();
+	/** The entity manager. */
+	private static EntityManager em = new EntityManager();
 	
 	/** Font used to display score. */
 	private BitmapFont font;
@@ -75,7 +75,7 @@ public class GameScreen implements Screen {
 		font.getData().setScale(0.2f);
 		font.setUseIntegerPositions(false);
 		
-		activeEntities.add(player);
+		em.addEntity(player);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class GameScreen implements Screen {
 		spawner.spawnEnemy(delta);
 		
 		//check for collisions
-		cm.checkCollision(delta, activeEntities);
+		cm.checkCollision(delta, em);
 		
 		//poll for user input
 		checkInput(delta);
@@ -124,8 +124,10 @@ public class GameScreen implements Screen {
 		//draw the players score
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
 		
+		System.out.println(em.getActiveEntities().size());
+		
 		//draw 
-		for (Entity entity : activeEntities)
+		for (Entity entity : em.getActiveEntities())
 			entity.draw(batch);
 		
 		//stop drawing sprites
@@ -135,7 +137,7 @@ public class GameScreen implements Screen {
 		sr.begin(ShapeRenderer.ShapeType.Filled);
 		
 		//draw health bars
-		for (Entity entity : activeEntities) {
+		for (Entity entity : em.getActiveEntities()) {
 			if (entity.hasHealth())
 				entity.drawHP(sr, cam); //draw health bar
 		}
@@ -144,8 +146,10 @@ public class GameScreen implements Screen {
 		sr.end();
 		
 		//move entities
-		for (Entity entity : activeEntities)
+		for (Entity entity : em.getActiveEntities())
 			entity.update(delta);
+		
+		em.cycle();
 	}
 
 	/**
@@ -155,7 +159,7 @@ public class GameScreen implements Screen {
 	private void checkInput(float delta) {
 		Projectile potentialProjectile = player.fire(delta);
 		if (potentialProjectile != null)
-			activeEntities.add(potentialProjectile);
+			em.addEntity(potentialProjectile);
 	}
 	
 	/**
@@ -203,7 +207,7 @@ public class GameScreen implements Screen {
 	}
 
 	public static void addEntity(Entity toAdd) {
-		activeEntities.add(toAdd);
+		em.addEntity(toAdd);
 	}
 
 }

@@ -45,6 +45,8 @@ public class Spawner {
 	private void spawnDropship(float delta) {
 		dropshipSpawnTimer += delta;
 		
+		System.out.println("Dropship spawn timer :" + asteroidSpawnTimer);
+		
 		if (dropshipSpawnTimer >= dropshipSpawnInterval) {
 			dropshipSpawnTimer = 0;
 			
@@ -80,6 +82,8 @@ public class Spawner {
 
 	private void spawnAsteroid(float delta) {
 		asteroidSpawnTimer += delta;
+		
+		System.out.println("Asteroid spawn timer :" + asteroidSpawnTimer);
 		
 		if (asteroidSpawnTimer >= asteroidSpawnInterval) {
 			asteroidSpawnTimer = 0;
@@ -123,6 +127,8 @@ public class Spawner {
 	
 	private void spawnOrb(float delta) {
 		orbSpawnTimer += delta;
+		
+		System.out.println("Orb spawn timer :" + orbSpawnTimer);
 		
 		int x = 0;
 		int y = 0;

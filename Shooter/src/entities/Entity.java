@@ -181,8 +181,4 @@ public abstract class Entity extends InanimateEntity {
 		health -= reduction;
 	}
 	
-	public void newMethod() {
-		//git test
-	}
-
 }
