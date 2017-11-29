@@ -180,5 +180,9 @@ public abstract class Entity extends InanimateEntity {
 	public void reduceHealth(double reduction) {
 		health -= reduction;
 	}
+	
+	public void newMethod() {
+		//git test
+	}
 
 }
