@@ -7,7 +7,7 @@ import java.util.List;
 import entities.Entity;
 
 /**
- * This class is responsible for handling looping through entity storage.
+ * This class is responsible for handling entity storage.
  * @author Connor Stewart
  */
 public class EntityManager {
@@ -51,6 +51,7 @@ public class EntityManager {
 		for (Entity newEntity : newEntities)
 			activeEntities.add(newEntity);
 		
+		//clear the arrays when they've been dealt with
 		newEntities.clear();
 		deadEntities.clear();
 	}

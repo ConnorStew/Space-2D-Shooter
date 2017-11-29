@@ -21,6 +21,12 @@ class Dropship extends Enemy {
 	/** Distance in pixels for dropships to keep away from the player. */
 	private static final double distance = 25;
 	
+	/** The seconds in between spawning enemies. */
+	private static final double spawnDelay = 2;
+	
+	/** The time since an enemy was spawned. */
+	private double spawnTimer = 0;
+	
 	Dropship(float x, float y) {
 		super(x, y, points, speed, damage, maxHealth, "dropship.png");
 	}
@@ -44,9 +50,18 @@ class Dropship extends Enemy {
 
 	@Override
 	public void update(float delta) {
+		spawnTimer += delta;
 		//move towards the player, but keep distance
 		if (distanceBetween(GameScreen.getPlayer()) > Dropship.distance) {
+			spawnTimer = 0; //reset timer if dropship movesddd
 			moveTowards(GameScreen.getPlayer(), delta);
+		} else {
+			//spawn enemies if not moving
+			if (spawnTimer > spawnDelay) {
+				spawnTimer = 0; //reset spawn timerw
+				GameScreen.addEntity(new Orb(getCenterX(), getCenterY()));
+			}
+			
 		}
 	}
 	
