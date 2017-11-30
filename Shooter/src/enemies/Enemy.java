@@ -2,6 +2,7 @@ package enemies;
 
 import entities.Entity;
 import projectiles.Projectile;
+import projectiles.ProjectileType;
 import ui.GameScreen;
 
 /**
@@ -24,13 +25,14 @@ public abstract class Enemy extends Entity {
 	 * @param speed how many pixels this enemy moves per second
 	 * @param damage the amount of damage the enemy does
 	 * @param maxHealth the maximum health of this enemy
+	 * @param size the size of the sprite
 	 * @param imageLocation the location of this enemies image
 	 */
-	Enemy(float x, float y , int points, int speed, int damage, int maxHealth, String imageLocation) {
+	Enemy(float x, float y , int points, int speed, int damage, int maxHealth, int size, String imageLocation) {
 		super(imageLocation, maxHealth, speed);
 		this.POINTS = points;
 		this.DAMAGE = damage;
-		setSize(2,2);
+		setSize(size,size);
 		setPosition(x, y);
 		setOriginCenter();
 	}
@@ -42,11 +44,13 @@ public abstract class Enemy extends Entity {
 	 */
 	protected boolean takeProjectileDamage(Entity collidedWith) {
 		if (collidedWith instanceof Projectile) {
-			reduceHealth(((Projectile) collidedWith).getDamage());
-			
-			if (health <= 0) { //remove the enemy if it has no health left
-				GameScreen.addToScore(POINTS); //add this enemies points to the score
-				return true; //destroy this enemy
+			if (((Projectile) collidedWith).getType().equals(ProjectileType.PLAYER)) { //if the projectile was fired by a player
+				reduceHealth(((Projectile) collidedWith).getDamage());
+				
+				if (health <= 0) { //remove the enemy if it has no health left
+					GameScreen.addToScore(POINTS); //add this enemies points to the score
+					return true; //destroy this enemy
+				}
 			}
 		}
 		return false;

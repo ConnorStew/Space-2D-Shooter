@@ -27,6 +27,9 @@ class Dropship extends Enemy {
 	/** The seconds in between spawning enemies. */
 	private static final double SPAWN_DELAY = 2;
 	
+	/** The size of the sprite. */
+	private static final int SIZE = 4;
+	
 	/** The time since an enemy was spawned. */
 	private double spawnTimer = 0;
 	
@@ -36,7 +39,7 @@ class Dropship extends Enemy {
 	 * @param y the y location to spawn the dropship at
 	 */
 	Dropship(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, "dropship.png");
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "dropship.png");
 	}
 
 	@Override
@@ -55,7 +58,7 @@ class Dropship extends Enemy {
 		spawnTimer += delta; //update spawn timer every update
 		
 		//move towards the player, but keep distance
-		if (distanceBetween(GameScreen.getPlayer()) > Dropship.DISTANCE) {
+		if (distanceBetween(GameScreen.getPlayer()) > DISTANCE) {
 			moveTowards(GameScreen.getPlayer(), delta);
 		} else { //can only spawn when not moving
 			if (spawnTimer > SPAWN_DELAY) {

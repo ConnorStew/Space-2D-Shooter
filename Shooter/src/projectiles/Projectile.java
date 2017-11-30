@@ -3,6 +3,7 @@ package projectiles;
 import com.badlogic.gdx.Gdx;
 import enemies.Enemy;
 import entities.Entity;
+import entities.Player;
 
 /**
  * Represents something the player can fire.
@@ -13,6 +14,9 @@ public abstract class Projectile extends Entity {
 	/** The amount of damage the projectile does when it hits. */
 	private final double damage;
 	
+	/** The type of projectile. */
+	private final ProjectileType type;
+	
 	/**
 	 * Creates a bullet at an x/y location.
 	 * @param x the x coordinate
@@ -20,10 +24,12 @@ public abstract class Projectile extends Entity {
 	 * @param rotation the rotation
 	 * @param size the size of the image
 	 * @param imageLocation the location of this projectiles image
+	 * @param type the type of projectile
 	 */
-	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation) {
-		super(imageLocation, 0, speed);
+	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type) {
+		super(imageLocation, 0, speed); //zero because projectiles do not have health
 
+		this.type = type;
 		this.damage = damage;
 		
 		setSize(size, size);
@@ -36,7 +42,12 @@ public abstract class Projectile extends Entity {
 	@Override
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Enemy) //destroy the projectile if it collides with an enemy
-			return true;
+			if (getType().equals(ProjectileType.PLAYER)) //if the projectile was fired by the player
+				return true;
+		
+		if (collidedWith instanceof Player) //destroy the projectile if it collides with a player
+			if (getType().equals(ProjectileType.ENEMEY)) //if the projectile was fired by an enemy
+				return true;
 		
 		return false;
 	}
@@ -51,6 +62,13 @@ public abstract class Projectile extends Entity {
 	 */
 	public double getDamage() {
 		return damage;
+	}
+	
+	/**
+	 * @return the type of projectile
+	 */
+	public ProjectileType getType() {
+		return type;
 	}
 	
 }

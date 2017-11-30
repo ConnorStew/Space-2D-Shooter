@@ -18,16 +18,22 @@ public class Spawner {
 	private float runnerSpawnTimer = 0;
 
 	/** Time in between asteroids spawning. */
-	private final static float ASTEROID_SPAWN_INTERVAL = 1;
+	private final static float ASTEROID_SPAWN_INTERVAL = 5;
 	
 	/** The time since an asteroid has spawned. */
 	private float asteroidSpawnTimer = 0;
 	
 	/** Time in between dropship spawning. */
-	private final static float DROPSHIP_SPAWN_INTERVAL = 10;
+	private final static float DROPSHIP_SPAWN_INTERVAL = 30;
 	
 	/** The time since a dropship has spawned. */
 	private float dropshipSpawnTimer = 0;
+	
+	/** Time in between laser spawning. */
+	private final static float LASER_SPAWN_INTERVAL = 10;
+	
+	/** The time since a laser has spawned. */
+	private float laserSpawnTimer = 0;
 	
 	/** Random object to generate spawn points. */
 	private static final Random RND = new Random();
@@ -40,6 +46,7 @@ public class Spawner {
 		spawnRunner(delta);
 		spawnAsteroid(delta);
 		spawnDropship(delta);
+		spawnLaser(delta);
 	}
 	
 	
@@ -74,6 +81,22 @@ public class Spawner {
 		}
 		
 		return new Point(x,y);
+	}
+	
+	/**
+	 * Spawn a laser.
+	 * @param delta the time since the last frame was rendered
+	 */
+	private void spawnLaser(float delta) {
+		laserSpawnTimer += delta;
+		
+		if (laserSpawnTimer >= LASER_SPAWN_INTERVAL) {
+			laserSpawnTimer = 0;
+			
+			Point spawnLoc = getSpawnLocation();
+			GameScreen.addEntity(new Laser(spawnLoc.x, spawnLoc.y));
+		}
+		
 	}
 	
 	/**

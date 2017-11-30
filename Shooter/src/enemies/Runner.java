@@ -30,6 +30,9 @@ class Runner extends Enemy {
 	
 	/** Orbs maximum health. */
 	private static final int MAX_HEALTH = 20;
+	
+	/** The size of the sprite. */
+	private static final int SIZE = 2;
 
 	/**
 	 * Create a runner at an x and y location.
@@ -37,7 +40,7 @@ class Runner extends Enemy {
 	 * @param y the y location to spawn the runner at
 	 */
 	Runner(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, "enemy.png");
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemy.png");
 	}
 
 	@Override
