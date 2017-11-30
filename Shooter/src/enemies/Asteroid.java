@@ -8,7 +8,7 @@ import entities.Player;
  * This enemy cannot be damaged and can only be destroyed by colliding with it.
  * @author Connor Stewart
  */
-class Asteroid extends Enemy {
+public class Asteroid extends Enemy {
 
 	/** An asteroids default pixels per second. */
 	private static final int SPEED = 15;
@@ -22,13 +22,16 @@ class Asteroid extends Enemy {
 	/** An asteroids maximum health. */
 	private static final int MAX_HEALTH = 0; //zero because it cannot be damaged
 	
+	/** The size of the sprite. */
+	private static final int SIZE = 2;
+	
 	/**
 	 * Create an asteroid at an x and y location.
 	 * @param x the x location to spawn the asteroid at
 	 * @param y the y location to spawn the asteroid at
 	 */
-	Asteroid(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, "asteroid.png");
+	public Asteroid(float x, float y) {
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "asteroid.png");
 	}
 
 	@Override

@@ -4,9 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import enemies.Enemy;
-import projectiles.Laser;
+import projectiles.Beam;
 import projectiles.Missile;
 import projectiles.Projectile;
+import projectiles.ProjectileType;
 import ui.GameScreen;
 
 /**
@@ -63,7 +64,7 @@ public class Player extends Entity {
 		//if the lmb is pressed and the light weapon is above or equal to the cooldown time
 		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lightTimer >= lightCD) {
 			lightTimer = 0;
-			return new Laser(getCenterX(), getCenterY(), getRotation());
+			return new Beam(getCenterX(), getCenterY(), getRotation());
 		}
 		
 		//if the rmb is pressed and the heavy weapon is above or equal to the cooldown time
@@ -79,6 +80,13 @@ public class Player extends Entity {
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Enemy)
 			reduceHealth(((Enemy) collidedWith).getDamage());
+		
+		if (collidedWith instanceof Projectile) {
+			//if colliding with an enemy projectile
+			if (((Projectile) collidedWith).getType().equals(ProjectileType.ENEMEY)) {
+				reduceHealth(((Projectile) collidedWith).getDamage());
+			}
+		}
 		
 		if (getHealth() <= 0)
 			return true;

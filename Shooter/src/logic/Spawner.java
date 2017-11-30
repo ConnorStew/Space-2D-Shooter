@@ -1,8 +1,12 @@
-package enemies;
+package logic;
 
 import java.awt.Point;
 import java.util.Random;
 
+import enemies.Asteroid;
+import enemies.Dropship;
+import enemies.Laser;
+import enemies.Runner;
 import ui.GameScreen;
 
 /**
@@ -12,7 +16,7 @@ import ui.GameScreen;
 public class Spawner {
 	
 	/** Time in between orbs spawning. */
-	private final static float RUNNER_SPAWN_INTERVAL = 2;
+	private final static float RUNNER_SPAWN_INTERVAL = 5;
 	
 	/** The time since an orb has spawned. */
 	private float runnerSpawnTimer = 0;
@@ -24,10 +28,16 @@ public class Spawner {
 	private float asteroidSpawnTimer = 0;
 	
 	/** Time in between dropship spawning. */
-	private final static float DROPSHIP_SPAWN_INTERVAL = 10;
+	private final static float DROPSHIP_SPAWN_INTERVAL = 30;
 	
 	/** The time since a dropship has spawned. */
-	private float dropshipSpawnTimer = 0;
+	private float dropshipSpawnTimer = 20; //first spawn 10 seconds after the game starts
+	
+	/** Time in between laser spawning. */
+	private final static float LASER_SPAWN_INTERVAL = 10;
+	
+	/** The time since a laser has spawned. */
+	private float laserSpawnTimer = 0;
 	
 	/** Random object to generate spawn points. */
 	private static final Random RND = new Random();
@@ -40,8 +50,8 @@ public class Spawner {
 		spawnRunner(delta);
 		spawnAsteroid(delta);
 		spawnDropship(delta);
+		spawnLaser(delta);
 	}
-	
 	
 	/**
 	 * Generates a point for the enemy to spawn on.
@@ -74,6 +84,22 @@ public class Spawner {
 		}
 		
 		return new Point(x,y);
+	}
+	
+	/**
+	 * Spawn a laser.
+	 * @param delta the time since the last frame was rendered
+	 */
+	private void spawnLaser(float delta) {
+		laserSpawnTimer += delta;
+		
+		if (laserSpawnTimer >= LASER_SPAWN_INTERVAL) {
+			laserSpawnTimer = 0;
+			
+			Point spawnLoc = getSpawnLocation();
+			GameScreen.addEntity(new Laser(spawnLoc.x, spawnLoc.y));
+		}
+		
 	}
 	
 	/**
