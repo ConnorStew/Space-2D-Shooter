@@ -1,8 +1,12 @@
-package enemies;
+package logic;
 
 import java.awt.Point;
 import java.util.Random;
 
+import enemies.Asteroid;
+import enemies.Dropship;
+import enemies.Laser;
+import enemies.Runner;
 import ui.GameScreen;
 
 /**
@@ -12,13 +16,13 @@ import ui.GameScreen;
 public class Spawner {
 	
 	/** Time in between orbs spawning. */
-	private final static float RUNNER_SPAWN_INTERVAL = 2;
+	private final static float RUNNER_SPAWN_INTERVAL = 5;
 	
 	/** The time since an orb has spawned. */
 	private float runnerSpawnTimer = 0;
 
 	/** Time in between asteroids spawning. */
-	private final static float ASTEROID_SPAWN_INTERVAL = 5;
+	private final static float ASTEROID_SPAWN_INTERVAL = 1;
 	
 	/** The time since an asteroid has spawned. */
 	private float asteroidSpawnTimer = 0;
@@ -27,7 +31,7 @@ public class Spawner {
 	private final static float DROPSHIP_SPAWN_INTERVAL = 30;
 	
 	/** The time since a dropship has spawned. */
-	private float dropshipSpawnTimer = 0;
+	private float dropshipSpawnTimer = 20; //first spawn 10 seconds after the game starts
 	
 	/** Time in between laser spawning. */
 	private final static float LASER_SPAWN_INTERVAL = 10;
@@ -48,7 +52,6 @@ public class Spawner {
 		spawnDropship(delta);
 		spawnLaser(delta);
 	}
-	
 	
 	/**
 	 * Generates a point for the enemy to spawn on.

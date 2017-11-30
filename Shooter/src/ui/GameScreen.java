@@ -8,12 +8,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
-import enemies.Spawner;
 import entities.Entity;
 import entities.InanimateEntity;
 import entities.Player;
 import logic.CollisionManager;
 import logic.EntityManager;
+import logic.Spawner;
 import projectiles.Projectile;
 
 /**

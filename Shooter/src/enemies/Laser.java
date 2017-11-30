@@ -39,7 +39,7 @@ public class Laser extends Enemy {
 	 * @param x the x location to spawn the dropship at
 	 * @param y the y location to spawn the dropship at
 	 */
-	Laser(float x, float y) {
+	public Laser(float x, float y) {
 		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "laserShip.png");
 	}
 

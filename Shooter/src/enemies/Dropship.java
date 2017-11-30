@@ -7,7 +7,7 @@ import ui.GameScreen;
  * An enemy that keeps a distance away from the player and spawns some {@link Runner}s.
  * @author Connor Stewart
  */
-class Dropship extends Enemy {
+public class Dropship extends Enemy {
 
 	/** The dropship's default pixels per second. */
 	private static final int SPEED = 5;
@@ -38,7 +38,7 @@ class Dropship extends Enemy {
 	 * @param x the x location to spawn the dropship at
 	 * @param y the y location to spawn the dropship at
 	 */
-	Dropship(float x, float y) {
+	public Dropship(float x, float y) {
 		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "dropship.png");
 	}
 

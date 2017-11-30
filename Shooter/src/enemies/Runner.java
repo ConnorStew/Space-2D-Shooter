@@ -11,7 +11,7 @@ import ui.GameScreen;
  * An enemy that flies towards the player and deals damage on contact.
  * @author Connor Stewart
  */
-class Runner extends Enemy {
+public class Runner extends Enemy {
 	
 	/** The sound plays when this enemy dies. */
 	private static final Sound DEATH_SOUND = Gdx.audio.newSound(Gdx.files.internal("atari_boom.wav"));
@@ -39,7 +39,7 @@ class Runner extends Enemy {
 	 * @param x the x location to spawn the runner at
 	 * @param y the y location to spawn the runner at
 	 */
-	Runner(float x, float y) {
+	public Runner(float x, float y) {
 		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemy.png");
 	}
 
