@@ -1,5 +1,6 @@
 package enemies;
 
+import java.awt.Point;
 import java.util.Random;
 
 import ui.GameScreen;
@@ -11,156 +12,133 @@ import ui.GameScreen;
 public class Spawner {
 	
 	/** Time in between orbs spawning. */
-	private final float orbSpawnInterval = 2;
+	private final static float RUNNER_SPAWN_INTERVAL = 2;
 	
 	/** The time since an orb has spawned. */
-	private float orbSpawnTimer = 0;
+	private float runnerSpawnTimer = 0;
 
 	/** Time in between asteroids spawning. */
-	private final float asteroidSpawnInterval = 1;
+	private final static float ASTEROID_SPAWN_INTERVAL = 1;
 	
 	/** The time since an asteroid has spawned. */
 	private float asteroidSpawnTimer = 0;
 	
 	/** Time in between dropship spawning. */
-	private final float dropshipSpawnInterval = 10;
+	private final static float DROPSHIP_SPAWN_INTERVAL = 10;
 	
 	/** The time since a dropship has spawned. */
 	private float dropshipSpawnTimer = 0;
 	
 	/** Random object to generate spawn points. */
-	private static final Random rnd = new Random();
+	private static final Random RND = new Random();
 	
 	/**
-	 * Spawn an enemy based on spawn timers.
+	 * Spawns enemies based on spawn timers.
 	 * @param delta the time since the last frame was rendered
-	 * @param activeEntities the entities active in the game
 	 */
-	public void spawnEnemy(float delta) {
-		spawnOrb(delta);
+	public void spawnEnemies(float delta) {
+		spawnRunner(delta);
 		spawnAsteroid(delta);
 		spawnDropship(delta);
 	}
 	
+	
+	/**
+	 * Generates a point for the enemy to spawn on.
+	 * @return the point for the enemy to spawn on
+	 */
+	private Point getSpawnLocation() {
+		int x = 0;
+		int y = 0;
+		int maxHeight = (int) GameScreen.getMapHeight();
+		int maxWidth = (int) GameScreen.getMapWidth();
+
+		//pick a side to spawn on
+		switch(RND.nextInt(4)) {
+			case 0: //left
+				x = 0;
+				y = RND.nextInt(maxHeight);
+				break;
+			case 1: //right
+				x = RND.nextInt(maxWidth);
+				y = maxWidth;
+				break;
+			case 2: //top
+				x = RND.nextInt(maxWidth);
+				y = maxHeight;
+				break;
+			case 3: //bottom
+				x = RND.nextInt(maxWidth);
+				y = 0;
+				break;
+		}
+		
+		return new Point(x,y);
+	}
+	
+	/**
+	 * Spawn a dropship.
+	 * @param delta the time since the last frame was rendered
+	 */
 	private void spawnDropship(float delta) {
 		dropshipSpawnTimer += delta;
 		
-		System.out.println("Dropship spawn timer :" + asteroidSpawnTimer);
-		
-		if (dropshipSpawnTimer >= dropshipSpawnInterval) {
+		if (dropshipSpawnTimer >= DROPSHIP_SPAWN_INTERVAL) {
 			dropshipSpawnTimer = 0;
 			
-			int x = 0;
-			int y = 0;
-			int maxHeight = (int) GameScreen.getMapHeight();
-			int maxWidth = (int) GameScreen.getMapWidth();
-
-			//pick a side to spawn on
-			switch(rnd.nextInt(4)) {
-				case 0: //left
-					x = 0;
-					y = rnd.nextInt(maxHeight);
-					break;
-				case 1: //right
-					x = rnd.nextInt(maxWidth);
-					y = maxWidth;
-					break;
-				case 2: //top
-					x = rnd.nextInt(maxWidth);
-					y = maxHeight;
-					break;
-				case 3: //bottom
-					x = rnd.nextInt(maxWidth);
-					y = 0;
-					break;
-			}
-			
-			GameScreen.addEntity(new Dropship(x, y));
+			Point spawnLoc = getSpawnLocation();
+			GameScreen.addEntity(new Dropship(spawnLoc.x, spawnLoc.y));
 		}
 		
 	}
+	
+	/**
+	 * Spawn a runner.
+	 * @param delta the time since the last frame was rendered
+	 */
+	private void spawnRunner(float delta) {
+		runnerSpawnTimer += delta;
 
+		if (runnerSpawnTimer >= RUNNER_SPAWN_INTERVAL) {
+			runnerSpawnTimer = 0;
+
+			Point spawnLoc = getSpawnLocation();
+			GameScreen.addEntity(new Runner(spawnLoc.x, spawnLoc.y));
+		}
+	}
+
+	/**
+	 * Spawn an asteroid.
+	 * @param delta the time since the last frame was rendered
+	 */
 	private void spawnAsteroid(float delta) {
 		asteroidSpawnTimer += delta;
 		
-		System.out.println("Asteroid spawn timer :" + asteroidSpawnTimer);
-		
-		if (asteroidSpawnTimer >= asteroidSpawnInterval) {
+		if (asteroidSpawnTimer >= ASTEROID_SPAWN_INTERVAL) {
 			asteroidSpawnTimer = 0;
+
+			Point spawnLoc = getSpawnLocation();
 			
-			int x = 0;
-			int y = 0;
 			int maxHeight = (int) GameScreen.getMapHeight();
 			int maxWidth = (int) GameScreen.getMapWidth();
-			float rotation = 0;
+			float rotation;
 			
-			//pick a side to spawn on
-			switch(rnd.nextInt(4)) {
-				case 0: //left
-					x = 0;
-					y = rnd.nextInt(maxHeight);
-					break;
-				case 1: //right
-					x = rnd.nextInt(maxWidth);
-					y = maxWidth;
-					rotation = -180;
-					break;
-				case 2: //top
-					x = rnd.nextInt(maxWidth);
-					y = maxHeight;
-					rotation = -90;
-					break;
-				case 3: //bottom
-					x = rnd.nextInt(maxWidth);
-					y = 0;
-					rotation = 90;
-					break;
+			if (spawnLoc.y == maxWidth) {
+				rotation = -180;
+			} else if (spawnLoc.y  == maxHeight) {
+				rotation = -90;
+			} else if (spawnLoc.y == 0) {
+				rotation = 90;
+			} else {
+				rotation = 0;
 			}
 			
-			Asteroid toAdd = new Asteroid(x, y);
+			Asteroid toAdd = new Asteroid(spawnLoc.x, spawnLoc.y);
 			toAdd.rotate(rotation);
 			
 			GameScreen.addEntity(toAdd);
 		}
 		
-	}
-	
-	private void spawnOrb(float delta) {
-		orbSpawnTimer += delta;
-		
-		System.out.println("Orb spawn timer :" + orbSpawnTimer);
-		
-		int x = 0;
-		int y = 0;
-		int maxHeight = (int) GameScreen.getMapHeight();
-		int maxWidth = (int) GameScreen.getMapWidth();
-		
-		//spawn
-		if (orbSpawnTimer >= orbSpawnInterval) {
-			orbSpawnTimer = 0;
-			
-			//pick a side to spawn on
-			switch(rnd.nextInt(4)) {
-				case 0: //left
-					x = 0;
-					y = rnd.nextInt(maxHeight);
-					break;
-				case 1: //right
-					x = rnd.nextInt(maxWidth);
-					y = maxWidth;
-					break;
-				case 2: //top
-					x = rnd.nextInt(maxWidth);
-					y = maxHeight;
-					break;
-				case 3: //bottom
-					x = rnd.nextInt(maxWidth);
-					y = 0;
-					break;
-			}
-			
-			GameScreen.addEntity(new Orb(x, y));
-		}
 	}
 	
 }

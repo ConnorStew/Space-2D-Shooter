@@ -1,6 +1,8 @@
 package enemies;
 
 import entities.Entity;
+import projectiles.Projectile;
+import ui.GameScreen;
 
 /**
  * Generic class for enemies.
@@ -9,10 +11,10 @@ import entities.Entity;
 public abstract class Enemy extends Entity {
 	
 	/** The amount of points killing this enemy rewards. */
-	protected int points;
+	private final int POINTS;
 	
 	/** The amount of damage the enemy does. */
-	private int damage;
+	private final int DAMAGE;
 	
 	/**
 	 * Create an enemy.
@@ -26,18 +28,35 @@ public abstract class Enemy extends Entity {
 	 */
 	Enemy(float x, float y , int points, int speed, int damage, int maxHealth, String imageLocation) {
 		super(imageLocation, maxHealth, speed);
-		this.points = points;
-		this.damage = damage;
+		this.POINTS = points;
+		this.DAMAGE = damage;
 		setSize(2,2);
 		setPosition(x, y);
 		setOriginCenter();
 	}
 	
 	/**
+	 * Handles damage from a projectile to this enemy.
+	 * @param collidedWith the entity this enemy collided with
+	 * @return whether the damage destroyed the enemy
+	 */
+	protected boolean takeProjectileDamage(Entity collidedWith) {
+		if (collidedWith instanceof Projectile) {
+			reduceHealth(((Projectile) collidedWith).getDamage());
+			
+			if (health <= 0) { //remove the enemy if it has no health left
+				GameScreen.addToScore(POINTS); //add this enemies points to the score
+				return true; //destroy this enemy
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * @return the amount of damage the enemy does on collision
 	 */
 	public double getDamage() {
-		return damage;
+		return DAMAGE;
 	}
 	
 }

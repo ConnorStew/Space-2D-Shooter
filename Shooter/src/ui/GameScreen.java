@@ -103,7 +103,7 @@ public class GameScreen implements Screen {
 		batch.setProjectionMatrix(cam.combined);
 		
 		//spawn an enemy
-		spawner.spawnEnemy(delta);
+		spawner.spawnEnemies(delta);
 		
 		//check for collisions
 		cm.checkCollision(delta, em);
@@ -123,8 +123,9 @@ public class GameScreen implements Screen {
 		
 		//draw the players score
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
-		
-		System.out.println(em.getActiveEntities().size());
+
+		//update entities before drawing them
+		em.cycle();
 		
 		//draw 
 		for (Entity entity : em.getActiveEntities())
@@ -149,7 +150,7 @@ public class GameScreen implements Screen {
 		for (Entity entity : em.getActiveEntities())
 			entity.update(delta);
 		
-		em.cycle();
+		
 	}
 
 	/**
