@@ -121,6 +121,8 @@ public class GameScreen implements Screen {
 		//draw background
 		map.draw(batch);
 		
+
+		
 		//draw the players score
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
 
@@ -130,6 +132,12 @@ public class GameScreen implements Screen {
 		//draw 
 		for (Entity entity : em.getActiveEntities())
 			entity.draw(batch);
+		
+		
+		
+		//test.render(delta);
+		
+		//test.draw(batch);
 		
 		//stop drawing sprites
 		batch.end();

@@ -7,7 +7,7 @@ package projectiles;
 public class Ball extends Projectile {
 	
 	/** The amount of damage this projectile does. */
-	private static final int DAMAGE = 1;
+	private static final int DAMAGE = 2;
 	
 	/** The amount of pixels per seconds this laser moves at. */
 	private static final int SPEED = 20;
