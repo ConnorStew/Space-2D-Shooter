@@ -3,13 +3,13 @@ package entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import database.ScoreDAO;
 import enemies.Enemy;
 import projectiles.Beam;
 import projectiles.Missile;
 import projectiles.Projectile;
 import projectiles.ProjectileType;
 import ui.GameScreen;
+import ui.MainGame;
 
 /**
  * Class used to represent that player character.
@@ -97,10 +97,7 @@ public class Player extends Entity {
 
 	@Override
 	public void onDestroy() {
-		new ScoreDAO().uploadeScore("TST", GameScreen.getScore());
-		for (int score : new ScoreDAO().getScores())
-			System.out.println(score);
-		Gdx.app.exit();
+		MainGame.changeScreen(MainGame.SCORE_SCREEN);
 	}
 
 	@Override

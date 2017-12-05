@@ -10,7 +10,7 @@ public class Driver {
 		config.title = "Shooter";
 		config.width = 900;
 		config.height = 700;
-		new LwjglApplication(new MainGame(), config);
+		new LwjglApplication(MainGame.getInstance(), config);
 	}
 
 }
