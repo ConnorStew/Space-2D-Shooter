@@ -23,7 +23,7 @@ class DatabaseConnectionManager {
 	 */
 	private static void connect() {
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/shooter?user=root&password=connor");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/shooter?user=root&password=connor&useSSL=false");
 			System.out.println("Established Database Connection!");
 		} catch (SQLException e) {
 			System.out.println("Error: Server offline.");
