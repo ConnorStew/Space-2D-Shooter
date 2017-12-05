@@ -40,7 +40,7 @@ public class GameScreen implements Screen {
 	private OrthographicCamera cam;
 	
 	/** The players score. */
-	private int score = 0;
+	private static int score = 0;
 	
 	/** The background image. */
 	private InanimateEntity map  = new InanimateEntity("redPlanet.png", 100, 100);;
@@ -176,7 +176,7 @@ public class GameScreen implements Screen {
 	 * @param points the amount of points to add to the score.
 	 */
 	public static void addToScore(int points) {
-		instance.score += points;
+		GameScreen.score += points;
 	}
 	
 	public static Player getPlayer() {
@@ -217,6 +217,10 @@ public class GameScreen implements Screen {
 
 	public static void addEntity(Entity toAdd) {
 		em.addEntity(toAdd);
+	}
+
+	public static int getScore() {
+		return score;
 	}
 
 }
