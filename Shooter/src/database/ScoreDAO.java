@@ -49,4 +49,28 @@ public class ScoreDAO {
 		return scores;
 	}
 
+	public ArrayList<String> getNames() {
+		ArrayList<String> names = new ArrayList<String>();
+		
+		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores;");
+		
+		if (result == null)
+			return null;
+		
+		try {
+			result.next();
+			
+			while(!result.isAfterLast()) {
+				names.add(result.getString(1));
+				result.next();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		DatabaseConnectionManager.disconnect();
+		
+		return names;
+	}
+
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Shooter/src"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-backend-lwjgl-natives.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-backend-lwjgl-sources.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-backend-lwjgl.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-freetype-natives.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-freetype-sources.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-freetype.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-natives.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx-sources.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/gdx.jar"/>
+	<classpathentry kind="lib" path="Shooter/libs/mysql-connector-java-5.1.45-bin.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="Shooter/bin"/>
+</classpath>

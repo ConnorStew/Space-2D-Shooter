@@ -25,7 +25,7 @@ public class GameScreen implements Screen {
 	private static GameScreen instance = new GameScreen();
 	
 	/** The entity manager. */
-	private static EntityManager em = new EntityManager();
+	private static EntityManager em;
 	
 	/** Font used to display score. */
 	private BitmapFont font;
@@ -40,24 +40,31 @@ public class GameScreen implements Screen {
 	private OrthographicCamera cam;
 	
 	/** The players score. */
-	private static int score = 0;
+	private static int score;
 	
 	/** The background image. */
-	private InanimateEntity map  = new InanimateEntity("redPlanet.png", 100, 100);;
+	private InanimateEntity map;
 	
 	/** The player. */
-	private Player player = new Player(map.getCenterX(), map.getCenterY());;
+	private Player player;
 	
 	/** Manages collisions between entities. */
-	private CollisionManager cm = new CollisionManager();
+	private CollisionManager cm;
 	
 	/** Manager spawning enemies. */
-	public static Spawner spawner = new Spawner();
+	public static Spawner spawner;
 	
 	private GameScreen(){};
 	
 	@Override
 	public void show() {
+		map = new InanimateEntity("redPlanet.png", 100, 100);
+		player = new Player(map.getCenterX(), map.getCenterY());
+		score = 0;
+		cm = new CollisionManager();
+		spawner = new Spawner();
+		em = new EntityManager();
+		
 		//shape renderer
 		sr = new ShapeRenderer();
 		sr.setAutoShapeType(true);
