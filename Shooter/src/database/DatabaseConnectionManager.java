@@ -17,7 +17,7 @@ class DatabaseConnectionManager {
 
 	/** Class should be accessed statically. */
 	private DatabaseConnectionManager() {}
-
+	
 	/**
 	 * Connects to the mySQL server.
 	 */

@@ -1,5 +1,7 @@
 package ui;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -11,12 +13,19 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import database.ScoreDAO;
@@ -37,7 +46,7 @@ public class ScoreScreen implements Screen {
 	private Label lblScore;
 	
 	/** Buttons. */
-	private TextButton btnPlay, btnQuit;
+	private TextButton btnOk;
 	
 	/** Used to enter your name for the score board. */
 	private TextField txtName;
@@ -47,8 +56,13 @@ public class ScoreScreen implements Screen {
 
 	@Override
 	public void show() {
+		//make background
+		Image background = new Image(new Texture(Gdx.files.internal("sb2.jpg")));
+		background.setFillParent(true);
+		background.setPosition(0, 0);
+		
 		//font generator
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Vector Waves.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 100; //setting font size
 		
@@ -62,39 +76,71 @@ public class ScoreScreen implements Screen {
 		TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
 		buttonStyle.font = font;
 		
+		//black background
+		Sprite s = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.RGB888)));
+		s.setColor(Color.WHITE);
+		
+		//initialising list style
+		List.ListStyle lstStyle = new List.ListStyle();
+		lstStyle.font = font;
+		lstStyle.selection = new SpriteDrawable(s);
+		lstStyle.background = new SpriteDrawable(s);
+		
+		//initialising score list
+		List<String> lstScores = new List<String>(lstStyle);
+
+		
+		//initialising scroll pane style
+		ScrollPane.ScrollPaneStyle scrStyle = new ScrollPane.ScrollPaneStyle();
+		
+		//initialising the scroll pane
+		ScrollPane pnlScroll = new ScrollPane(lstScores, scrStyle);
+		pnlScroll.setBounds(0, 100, 400, 400);
+
+		ScoreDAO sDAO = new ScoreDAO();
+		
+		ArrayList<Integer> scores = sDAO.getScores();
+		ArrayList<String> names = sDAO.getNames();
+		
+		//scores and names
+		String[] sNames = new String[names.size()];
+		
+		//populate sNames
+		for (int i = 0; i < sNames.length; i++)
+			sNames[i] = names.get(i) + ": " + scores.get(i);
+		
+		lstScores.setItems(sNames);
+		
 		//initialising the buttons
-		btnPlay = new TextButton("Play Again", buttonStyle);
-		btnPlay.setPosition(Gdx.graphics.getWidth() / 2 - btnPlay.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 100);
-		btnQuit = new TextButton("Quit", buttonStyle);
-		btnQuit.setPosition(btnPlay.getX() + btnQuit.getWidth() - 25, btnPlay.getY() - btnPlay.getHeight());
+		btnOk = new TextButton("Ok", buttonStyle);
+		btnOk.setPosition(Gdx.graphics.getWidth() / 2 - btnOk.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 100);
 		
 		//initialising the text field
 		TextField.TextFieldStyle tfs = new TextFieldStyle();
 		tfs.font = font;
 		tfs.fontColor = Color.WHITE;
-		Sprite s = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.RGB888)));
-		s.setColor(Color.WHITE);
 		tfs.background = new SpriteDrawable(s);
 		txtName = new TextField("", tfs);
-		txtName.setBounds(btnPlay.getX(), btnPlay.getY() + 150, 500, 100);
+		txtName.setBounds(btnOk.getX(), btnOk.getY() + 150, 500, 100);
 		txtName.setMaxLength(3);
 		txtName.setAlignment(Align.center);
 		
 		//initialising the stage which will stretch
 		stage = new Stage(new StretchViewport(900, 700));
 		
-		//initialising the lose label
+		//initialising the score label
 		lblScore = new Label("Score:" + GameScreen.getScore(), new Label.LabelStyle(font, Color.WHITE));
-		lblScore.setPosition((Gdx.graphics.getWidth() / 2) - lblScore.getWidth() / 2, Gdx.graphics.getHeight() - 100);
+		lblScore.setPosition((Gdx.graphics.getWidth() / 2) - lblScore.getWidth() / 2, Gdx.graphics.getHeight() - 110);
 		
 		//allowing the stage to receive input events
 		Gdx.input.setInputProcessor(stage);
 		
 		//adding actors to the stage
+		stage.addActor(background);
 		stage.addActor(lblScore);
-		stage.addActor(btnPlay);
-		stage.addActor(btnQuit);
+		stage.addActor(btnOk);
 		stage.addActor(txtName);
+		stage.addActor(pnlScroll);
 	}
 
 	@Override
@@ -106,14 +152,42 @@ public class ScoreScreen implements Screen {
 		stage.draw(); //draw actors
 		
 		//goto the game screen if the play button is pressed
-		if (btnPlay.isPressed())
-			MainGame.changeScreen(MainGame.GAME_SCREEN);
-		
-		if (btnQuit.isPressed()) {
-			ScoreDAO sDAO = new ScoreDAO();
-			sDAO.uploadeScore(txtName.getText(), GameScreen.getScore());
-			Gdx.app.exit();
+		if (btnOk.isPressed()) {
+			if (txtName.getText().length() != 3) {
+				Window.WindowStyle wStyle = new Window.WindowStyle();
+				//font generator
+				FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
+				FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+				parameter.size = 50; //setting font size
+				
+				//creating font object
+				BitmapFont windowFont = generator.generateFont(parameter);
+				
+				wStyle.titleFont = windowFont;
+				
+				Dialog dialog = new Dialog("You must input a three letter name!", wStyle) {
+				    public void result(Object obj) {
+				        System.out.println("result "+obj);
+				    }
+				};
+				
+				dialog.show(stage);
+				dialog.setBounds(100, 500, 800, 60);
+				
+				new Timer().scheduleTask(new Task(){
+					@Override
+					public void run() {
+						dialog.hide();
+					}
+				},2);
+				
+			} else {
+				ScoreDAO sDAO = new ScoreDAO();
+				sDAO.uploadeScore(txtName.getText().toUpperCase(), GameScreen.getScore());
+				MainGame.changeScreen(MainGame.MENU_SCREEN);
+			}
 		}
+
 	}
 
 	@Override

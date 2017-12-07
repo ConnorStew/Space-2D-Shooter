@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -24,9 +26,6 @@ public class MenuScreen implements Screen {
 	/** The stage to display elements. */
 	private Stage stage;
 	
-	/** Used to display lose to the user. */
-	private Label lblTitle;
-	
 	/** Buttons. */
 	private TextButton btnPlay, btnQuit;
 	
@@ -35,15 +34,21 @@ public class MenuScreen implements Screen {
 
 	@Override
 	public void show() {
-		//font generator
+		//make background
+		Image background = new Image(new Texture(Gdx.files.internal("space.png")));
+		background.setFillParent(true);
+		background.setPosition(0, 0);
+		
+		//load the font
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Vector Waves.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 100; //setting font size
 		
-		//creating font object
-		BitmapFont font = generator.generateFont(parameter);
+		FreeTypeFontParameter fontParameter = new FreeTypeFontParameter();
+		fontParameter.size = 100; //setting font size
 		
-		//getting rid of the generator since it will no longer be used
+		//creating the font based on the font parameters
+		BitmapFont font = generator.generateFont(fontParameter);
+		
+		//dispose the generator since its finished being used
 		generator.dispose();
 		
 		//set style for buttons
@@ -60,13 +65,14 @@ public class MenuScreen implements Screen {
 		stage = new Stage(new StretchViewport(900, 700));
 		
 		//initialising the lose label
-		lblTitle = new Label("Space Defence", new Label.LabelStyle(font, Color.WHITE));
+		Label lblTitle = new Label("Space Defence", new Label.LabelStyle(font, Color.WHITE));
 		lblTitle.setPosition((Gdx.graphics.getWidth() / 2) - lblTitle.getWidth() / 2, Gdx.graphics.getHeight() - 100);
 		
 		//allowing the stage to receive input events
 		Gdx.input.setInputProcessor(stage);
 		
 		//adding actors to the stage
+		stage.addActor(background);
 		stage.addActor(lblTitle);
 		stage.addActor(btnPlay);
 		stage.addActor(btnQuit);
