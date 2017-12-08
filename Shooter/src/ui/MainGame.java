@@ -27,7 +27,7 @@ public class MainGame extends Game {
 	@Override
 	public void create() {
 		//default to the menu screen
-		setScreen(GameScreen.getInstance());
+		setScreen(MenuScreen.getInstance());
 	}
 	
 	public void render() {

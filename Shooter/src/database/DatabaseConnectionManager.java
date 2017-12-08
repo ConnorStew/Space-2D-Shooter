@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * This class manages connecting to the highscores database
+ * This class manages connecting to the highscores database.
  * @author Connor Stewart
  */
 class DatabaseConnectionManager {
@@ -15,7 +15,7 @@ class DatabaseConnectionManager {
 	/** The connection to the database. */
 	private static Connection conn;
 
-	/** Class should be accessed statically. */
+	/** This class should be accessed statically. */
 	private DatabaseConnectionManager() {}
 	
 	/**
@@ -35,7 +35,7 @@ class DatabaseConnectionManager {
 	 */
 	static void disconnect() {
 		try {
-			if (databaseOnline()) {
+			if (databaseOnline()) { //only disconnect if the database is online
 				conn.close();
 				System.out.println("Disconnected from Database.");
 			} else {
