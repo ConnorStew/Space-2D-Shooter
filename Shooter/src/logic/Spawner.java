@@ -7,10 +7,11 @@ import enemies.Asteroid;
 import enemies.Dropship;
 import enemies.Laser;
 import enemies.Runner;
+import powerups.Health;
 import ui.GameScreen;
 
 /**
- * Spawns enemies.
+ * Spawns enemies and powerups.
  * @author Connor Stewart
  */
 public class Spawner {
@@ -39,6 +40,12 @@ public class Spawner {
 	/** The time since a laser has spawned. */
 	private float laserSpawnTimer = 0;
 	
+	/** Time in between a powerup spawning. */
+	private final static float POWERUP_SPAWN_INTERVAL = 7;
+	
+	/** The time since a laser has spawned. */
+	private float powerupSpawnTimer = 0;
+	
 	/** Random object to generate spawn points. */
 	private static final Random RND = new Random();
 	
@@ -51,13 +58,14 @@ public class Spawner {
 		spawnAsteroid(delta);
 		spawnDropship(delta);
 		spawnLaser(delta);
+		spawnPowerup(delta);
 	}
-	
+
 	/**
 	 * Generates a point for the enemy to spawn on.
 	 * @return the point for the enemy to spawn on
 	 */
-	private Point getSpawnLocation() {
+	private Point getEnemySpawnLocation() {
 		int x = 0;
 		int y = 0;
 		int maxHeight = (int) GameScreen.getMapHeight();
@@ -86,6 +94,32 @@ public class Spawner {
 		return new Point(x,y);
 	}
 	
+	private Point getPowerupSpawnLocation() {
+		int x = 0;
+		int y = 0;
+		int maxHeight = (int) GameScreen.getMapHeight();
+		int maxWidth = (int) GameScreen.getMapWidth();
+		
+		x = RND.nextInt(maxWidth); //pick spawn x
+		y = RND.nextInt(maxHeight); //pick spawn y
+		
+		return new Point(x,y);
+	}
+	
+	
+	private void spawnPowerup(float delta) {
+		powerupSpawnTimer += delta;
+		
+		if (powerupSpawnTimer >= POWERUP_SPAWN_INTERVAL) {
+			powerupSpawnTimer = 0;
+			
+			Point spawnLoc = getPowerupSpawnLocation();
+			GameScreen.addEntity(new Health(spawnLoc.x, spawnLoc.y));
+		}
+		
+	}
+
+	
 	/**
 	 * Spawn a laser.
 	 * @param delta the time since the last frame was rendered
@@ -96,7 +130,7 @@ public class Spawner {
 		if (laserSpawnTimer >= LASER_SPAWN_INTERVAL) {
 			laserSpawnTimer = 0;
 			
-			Point spawnLoc = getSpawnLocation();
+			Point spawnLoc = getEnemySpawnLocation();
 			GameScreen.addEntity(new Laser(spawnLoc.x, spawnLoc.y));
 		}
 		
@@ -112,7 +146,7 @@ public class Spawner {
 		if (dropshipSpawnTimer >= DROPSHIP_SPAWN_INTERVAL) {
 			dropshipSpawnTimer = 0;
 			
-			Point spawnLoc = getSpawnLocation();
+			Point spawnLoc = getEnemySpawnLocation();
 			GameScreen.addEntity(new Dropship(spawnLoc.x, spawnLoc.y));
 		}
 		
@@ -128,7 +162,7 @@ public class Spawner {
 		if (runnerSpawnTimer >= RUNNER_SPAWN_INTERVAL) {
 			runnerSpawnTimer = 0;
 
-			Point spawnLoc = getSpawnLocation();
+			Point spawnLoc = getEnemySpawnLocation();
 			GameScreen.addEntity(new Runner(spawnLoc.x, spawnLoc.y));
 		}
 	}
@@ -143,7 +177,7 @@ public class Spawner {
 		if (asteroidSpawnTimer >= ASTEROID_SPAWN_INTERVAL) {
 			asteroidSpawnTimer = 0;
 
-			Point spawnLoc = getSpawnLocation();
+			Point spawnLoc = getEnemySpawnLocation();
 			
 			int maxHeight = (int) GameScreen.getMapHeight();
 			int maxWidth = (int) GameScreen.getMapWidth();

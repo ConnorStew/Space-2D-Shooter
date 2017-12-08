@@ -22,6 +22,7 @@ import projectiles.Projectile;
  */
 public class GameScreen implements Screen {
 	
+	/** The singleton instance of this class. */
 	private static GameScreen instance = new GameScreen();
 	
 	/** The entity manager. */
@@ -58,29 +59,33 @@ public class GameScreen implements Screen {
 	
 	@Override
 	public void show() {
+		//instantiate entities
 		map = new InanimateEntity("redPlanet.png", 100, 100);
 		player = new Player(map.getCenterX(), map.getCenterY());
-		score = 0;
+		
+		//instantiate logic entities
 		cm = new CollisionManager();
 		spawner = new Spawner();
 		em = new EntityManager();
 		
-		//shape renderer
+		//instantiate shape renderer
 		sr = new ShapeRenderer();
-		sr.setAutoShapeType(true);
 		
-		//camera
+		//instantiate sprite batch
+		batch = new SpriteBatch();
+		
+		//instantiate font for the score
+		font = new BitmapFont();
+		font.getData().setScale(0.2f);
+		font.setUseIntegerPositions(false);
+		
+		//instanciate camera
 		cam = new OrthographicCamera(30, 30);
 		cam.position.set(player.getX(), player.getY(), 0);
 		cam.zoom = 2;
 		
-		//sprite batch
-		batch = new SpriteBatch();
-		
-		//score font
-		font = new BitmapFont();
-		font.getData().setScale(0.2f);
-		font.setUseIntegerPositions(false);
+		//reset score
+		score = 0;
 		
 		em.addEntity(player);
 	}

@@ -40,7 +40,7 @@ public class MenuScreen implements Screen {
 		background.setPosition(0, 0);
 		
 		//load the font
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Vector Waves.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
 		
 		FreeTypeFontParameter fontParameter = new FreeTypeFontParameter();
 		fontParameter.size = 100; //setting font size

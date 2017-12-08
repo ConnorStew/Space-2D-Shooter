@@ -46,16 +46,24 @@ public class ScoreScreen implements Screen {
 	private Label lblScore;
 	
 	/** Buttons. */
-	private TextButton btnOk;
+	private TextButton btnUpload, btnBack;
 	
 	/** Used to enter your name for the score board. */
 	private TextField txtName;
+	
+	private List<String> lstScores;
+	
+	private ScrollPane pnlScroll;
+	
+	private boolean uploaded;
 	
 	/** {@link #getInstance()} should be used to obtain an instance of this class.  */
 	private ScoreScreen(){};
 
 	@Override
 	public void show() {
+		uploaded = false;
+		
 		//make background
 		Image background = new Image(new Texture(Gdx.files.internal("sb2.jpg")));
 		background.setFillParent(true);
@@ -79,41 +87,37 @@ public class ScoreScreen implements Screen {
 		//black background
 		Sprite s = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.RGB888)));
 		s.setColor(Color.WHITE);
+		s.setAlpha(0.5f);
+		
+		Sprite invisible = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.Alpha)));
+		//s.setColor(Color.alpha(0));
 		
 		//initialising list style
 		List.ListStyle lstStyle = new List.ListStyle();
 		lstStyle.font = font;
-		lstStyle.selection = new SpriteDrawable(s);
+		lstStyle.selection = new SpriteDrawable(invisible);
+		//lstStyle.selection = new SpriteDrawable(s);
 		lstStyle.background = new SpriteDrawable(s);
 		
 		//initialising score list
-		List<String> lstScores = new List<String>(lstStyle);
+		lstScores = new List<String>(lstStyle);
 
-		
 		//initialising scroll pane style
 		ScrollPane.ScrollPaneStyle scrStyle = new ScrollPane.ScrollPaneStyle();
 		
 		//initialising the scroll pane
-		ScrollPane pnlScroll = new ScrollPane(lstScores, scrStyle);
-		pnlScroll.setBounds(0, 100, 400, 400);
+		pnlScroll = new ScrollPane(lstScores, scrStyle);
+		pnlScroll.setBounds(20, 100, 350, 400);
+		//lstScores.setAlignment(Align.center);
 
-		ScoreDAO sDAO = new ScoreDAO();
-		
-		ArrayList<Integer> scores = sDAO.getScores();
-		ArrayList<String> names = sDAO.getNames();
-		
-		//scores and names
-		String[] sNames = new String[names.size()];
-		
-		//populate sNames
-		for (int i = 0; i < sNames.length; i++)
-			sNames[i] = names.get(i) + ": " + scores.get(i);
-		
-		lstScores.setItems(sNames);
+		updateScores();
 		
 		//initialising the buttons
-		btnOk = new TextButton("Ok", buttonStyle);
-		btnOk.setPosition(Gdx.graphics.getWidth() / 2 - btnOk.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 100);
+		btnUpload = new TextButton("Upload", buttonStyle);
+		btnUpload.setPosition(Gdx.graphics.getWidth() / 2 - btnUpload.getWidth() / 2 + 100, Gdx.graphics.getHeight() / 2 - 100);
+		
+		btnBack = new TextButton("Back", buttonStyle);
+		btnBack.setPosition(btnUpload.getX() + 270, btnUpload.getY());
 		
 		//initialising the text field
 		TextField.TextFieldStyle tfs = new TextFieldStyle();
@@ -121,7 +125,7 @@ public class ScoreScreen implements Screen {
 		tfs.fontColor = Color.WHITE;
 		tfs.background = new SpriteDrawable(s);
 		txtName = new TextField("", tfs);
-		txtName.setBounds(btnOk.getX(), btnOk.getY() + 150, 500, 100);
+		txtName.setBounds(btnUpload.getX(), btnUpload.getY() + 150, 420, 100);
 		txtName.setMaxLength(3);
 		txtName.setAlignment(Align.center);
 		
@@ -138,9 +142,28 @@ public class ScoreScreen implements Screen {
 		//adding actors to the stage
 		stage.addActor(background);
 		stage.addActor(lblScore);
-		stage.addActor(btnOk);
+		stage.addActor(btnUpload);
 		stage.addActor(txtName);
 		stage.addActor(pnlScroll);
+		stage.addActor(btnBack);
+	}
+	
+	private void updateScores() {
+		ScoreDAO sDAO = new ScoreDAO();
+		
+		ArrayList<Integer> scores = sDAO.getScores();
+		ArrayList<String> names = sDAO.getNames();
+		
+		//scores and names
+		String[] sNames = new String[names.size()];
+		
+		//populate sNames
+		for (int i = 0; i < sNames.length; i++)
+			sNames[i] = names.get(i) + ": " + scores.get(i);
+		
+		lstScores.clearItems();
+		lstScores.setItems(sNames);
+		
 	}
 
 	@Override
@@ -152,7 +175,7 @@ public class ScoreScreen implements Screen {
 		stage.draw(); //draw actors
 		
 		//goto the game screen if the play button is pressed
-		if (btnOk.isPressed()) {
+		if (btnUpload.isPressed() && uploaded == false) {
 			if (txtName.getText().length() != 3) {
 				Window.WindowStyle wStyle = new Window.WindowStyle();
 				//font generator
@@ -183,9 +206,17 @@ public class ScoreScreen implements Screen {
 				
 			} else {
 				ScoreDAO sDAO = new ScoreDAO();
-				sDAO.uploadeScore(txtName.getText().toUpperCase(), GameScreen.getScore());
-				MainGame.changeScreen(MainGame.MENU_SCREEN);
+				sDAO.uploadScore(txtName.getText().toUpperCase(), GameScreen.getScore());
+				updateScores();
+				txtName.setDisabled(true);
+				txtName.setText("");
+				uploaded = true;
 			}
+			
+		}
+		
+		if (btnBack.isPressed()) {
+			MainGame.changeScreen(MainGame.MENU_SCREEN);
 		}
 
 	}

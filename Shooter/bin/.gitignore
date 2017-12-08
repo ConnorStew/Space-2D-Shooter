@@ -1,9 +1,5 @@
 /ui/
-/entities/
+/logic/
 /database/
-/AstronBoyWonder.ttf
-/Star Trek Enterprise Future.ttf
-/sb.jpg
-/back.gif
-/space.png
-/sb2.jpg
+/powerups/
+/entities/

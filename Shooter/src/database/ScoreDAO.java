@@ -5,31 +5,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
- * Stores functions to access the highscores table in the shooter database.
+ * Stores functions to interact with the highscores database.
  * @author Connor Stewart
  */
 public class ScoreDAO {
 	
 	/**
-	 * Uploads a new score to the server. <br>
-	 * <b>!!</b> Score will <u>NOT</u> be uploaded if the name parameter is above three characters! <b>!!</b> 
+	 * Uploads a new score to the server.
 	 * @param name a three letter name for the score
 	 * @param score the score
 	 */
-	public void uploadeScore(String name, int score) {
-		if (name.length() > 3) {
-			System.out.println("Name too long!");
-			return;
-		}
-		
+	public void uploadScore(String name, int score) {
 		if (DatabaseConnectionManager.exacuteSQLUpdate("INSERT INTO highscores (name, score) VALUES ('" + name + "', " + score + ");"))
 			System.out.println("Score uploaded!");
 	}
 	
+	/**
+	 * Gets all scores from the score column in the database.
+	 * @return the scores
+	 */
 	public ArrayList<Integer> getScores() {
 		ArrayList<Integer> scores = new ArrayList<Integer>();
 		
-		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores;");
+		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores ORDER BY score DESC;");
 		
 		if (result == null)
 			return null;
@@ -49,10 +47,14 @@ public class ScoreDAO {
 		return scores;
 	}
 
+	/**
+	 * Get all names from the name column in the database.
+	 * @return the names
+	 */
 	public ArrayList<String> getNames() {
 		ArrayList<String> names = new ArrayList<String>();
 		
-		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores;");
+		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores ORDER BY score DESC;");
 		
 		if (result == null)
 			return null;

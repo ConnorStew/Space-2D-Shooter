@@ -4,7 +4,7 @@ import entities.Entity;
 import ui.GameScreen;
 
 /**
- * An enemy that keeps a distance away from the player and spawns some {@link Runner}s.
+ * An enemy that keeps a distance away from the player and spawns {@link Runner}s.
  * @author Connor Stewart
  */
 public class Dropship extends Enemy {
