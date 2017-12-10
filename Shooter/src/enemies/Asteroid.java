@@ -11,7 +11,7 @@ import entities.Player;
 public class Asteroid extends Enemy {
 
 	/** An asteroids default pixels per second. */
-	private static final int SPEED = 15;
+	private static final int SPEED = 10;
 	
 	/** Points awarded for killing an asteroid. */
 	private static final int POINTS = 0;
@@ -23,7 +23,7 @@ public class Asteroid extends Enemy {
 	private static final int MAX_HEALTH = 0; //zero because it cannot be damaged
 	
 	/** The size of the sprite. */
-	private static final int SIZE = 2;
+	private static final int SIZE = 4;
 	
 	/**
 	 * Create an asteroid at an x and y location.

@@ -3,11 +3,15 @@ package logic;
 import java.awt.Point;
 import java.util.Random;
 
+import com.badlogic.gdx.math.Rectangle;
+
 import enemies.Asteroid;
 import enemies.Dropship;
 import enemies.Laser;
 import enemies.Runner;
-import powerups.Health;
+import entities.Entity;
+import pickups.Health;
+import pickups.Time;
 import ui.GameScreen;
 
 /**
@@ -32,19 +36,19 @@ public class Spawner {
 	private final static float DROPSHIP_SPAWN_INTERVAL = 30;
 	
 	/** The time since a dropship has spawned. */
-	private float dropshipSpawnTimer = 20; //first spawn 10 seconds after the game starts
+	private float dropshipSpawnTimer = DROPSHIP_SPAWN_INTERVAL - 10; //first spawn 10 seconds after the game starts
 	
 	/** Time in between laser spawning. */
-	private final static float LASER_SPAWN_INTERVAL = 10;
+	private final static float LASER_SPAWN_INTERVAL = 15;
 	
 	/** The time since a laser has spawned. */
 	private float laserSpawnTimer = 0;
 	
-	/** Time in between a powerup spawning. */
-	private final static float POWERUP_SPAWN_INTERVAL = 7;
+	/** Time in between a pickup spawning. */
+	private final static float PICKUP_SPAWN_INTERVAL = 35;
 	
-	/** The time since a laser has spawned. */
-	private float powerupSpawnTimer = 0;
+	/** The time since a pickup has spawned. */
+	private float pickupSpawnTimer = PICKUP_SPAWN_INTERVAL - 5; //a pickup spawns 5 seconds after the game starts
 	
 	/** Random object to generate spawn points. */
 	private static final Random RND = new Random();
@@ -58,7 +62,7 @@ public class Spawner {
 		spawnAsteroid(delta);
 		spawnDropship(delta);
 		spawnLaser(delta);
-		spawnPowerup(delta);
+		spawnPickup(delta);
 	}
 
 	/**
@@ -94,27 +98,74 @@ public class Spawner {
 		return new Point(x,y);
 	}
 	
-	private Point getPowerupSpawnLocation() {
+	/**
+	 * Gets a random location on the map to spawn a pickup.
+	 * @return the point on the map to spawn a pickup on
+	 */
+	private Point getPickupSpawnLocation() {
+		boolean overlapping = false;
+		
 		int x = 0;
 		int y = 0;
+		
 		int maxHeight = (int) GameScreen.getMapHeight();
 		int maxWidth = (int) GameScreen.getMapWidth();
 		
-		x = RND.nextInt(maxWidth); //pick spawn x
-		y = RND.nextInt(maxHeight); //pick spawn y
+		int pickupWidth = 50;
+		int pickupHeight = 50;
+		
+		//loop until the new spawn location does not overlap with other pickups
+		do {
+			x = RND.nextInt(maxWidth); //pick spawn x
+			y = RND.nextInt(maxHeight); //pick spawn y
+			
+			//validate that the pickup is visible on screen
+			if (x < pickupWidth)
+				x = pickupWidth;
+			
+			if (x > maxWidth - pickupWidth)
+				x = maxWidth - pickupWidth;
+			
+			if (y < pickupHeight)
+				x = pickupHeight;
+			
+			if (y > maxHeight - pickupHeight)
+				y = maxHeight - pickupHeight;
+			
+			//make sure the pickup hasen't spawned on another pickup
+			for (Entity entity : GameScreen.getEntities()) {
+				if (entity.getBoundingRectangle().overlaps(new Rectangle(x, y, pickupWidth, pickupHeight))) {
+					overlapping = true;
+				} else {
+					overlapping = false;
+				}
+			}
+		} while ((overlapping == true));
 		
 		return new Point(x,y);
 	}
 	
-	
-	private void spawnPowerup(float delta) {
-		powerupSpawnTimer += delta;
+	/**
+	 * Spawns a pickup if off cooldown.
+	 * @param delta the time since the last update
+	 */
+	private void spawnPickup(float delta) {
+		pickupSpawnTimer += delta;
 		
-		if (powerupSpawnTimer >= POWERUP_SPAWN_INTERVAL) {
-			powerupSpawnTimer = 0;
+		if (pickupSpawnTimer >= PICKUP_SPAWN_INTERVAL) {
+			pickupSpawnTimer = 0;
 			
-			Point spawnLoc = getPowerupSpawnLocation();
-			GameScreen.addEntity(new Health(spawnLoc.x, spawnLoc.y));
+			Point spawnLoc = getPickupSpawnLocation();
+			
+			switch (RND.nextInt(2)) {
+				case 0:
+					GameScreen.addEntity(new Health(spawnLoc.x, spawnLoc.y));
+					return;
+				case 1:
+					GameScreen.addEntity(new Time(spawnLoc.x, spawnLoc.y));
+					return;					
+			}
+			
 		}
 		
 	}

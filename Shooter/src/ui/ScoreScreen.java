@@ -109,8 +109,6 @@ public class ScoreScreen implements Screen {
 		pnlScroll = new ScrollPane(lstScores, scrStyle);
 		pnlScroll.setBounds(20, 100, 350, 400);
 		//lstScores.setAlignment(Align.center);
-
-		updateScores();
 		
 		//initialising the buttons
 		btnUpload = new TextButton("Upload", buttonStyle);
@@ -146,6 +144,8 @@ public class ScoreScreen implements Screen {
 		stage.addActor(txtName);
 		stage.addActor(pnlScroll);
 		stage.addActor(btnBack);
+		
+		updateScores();
 	}
 	
 	private void updateScores() {
@@ -154,16 +154,28 @@ public class ScoreScreen implements Screen {
 		ArrayList<Integer> scores = sDAO.getScores();
 		ArrayList<String> names = sDAO.getNames();
 		
-		//scores and names
-		String[] sNames = new String[names.size()];
+		String[] sNames;
 		
-		//populate sNames
-		for (int i = 0; i < sNames.length; i++)
-			sNames[i] = names.get(i) + ": " + scores.get(i);
+		//scores and names
+		if (names == null) { //if the names are unavailable
+			//change screen settings to display no scores
+			sNames = new String[]{"Scores Unavailible"};
+			txtName.setDisabled(true);
+			txtName.setVisible(false);
+			pnlScroll.setWidth(700);
+			btnUpload.setDisabled(true);
+			btnUpload.setVisible(false);
+			btnBack.setX(btnBack.getX() + 30);
+		} else {
+			 sNames = new String[names.size()];
+			
+			//populate sNames
+			for (int i = 0; i < sNames.length; i++)
+				sNames[i] = names.get(i) + ": " + scores.get(i);
+		}
 		
 		lstScores.clearItems();
 		lstScores.setItems(sNames);
-		
 	}
 
 	@Override

@@ -8,6 +8,9 @@ import ui.GameScreen;
  * @author Connor Stewart
  */
 public class Dropship extends Enemy {
+	
+	/** The default spawning delay */
+	public static final int DEFAULT_DELAY = 2;
 
 	/** The dropship's default pixels per second. */
 	private static final int SPEED = 5;
@@ -25,7 +28,7 @@ public class Dropship extends Enemy {
 	private static final double DISTANCE = 25;
 	
 	/** The seconds in between spawning enemies. */
-	private static final double SPAWN_DELAY = 2;
+	private double spawnDelay = 2;
 	
 	/** The size of the sprite. */
 	private static final int SIZE = 4;
@@ -61,11 +64,41 @@ public class Dropship extends Enemy {
 		if (distanceBetween(GameScreen.getPlayer()) > DISTANCE) {
 			moveTowards(GameScreen.getPlayer(), delta);
 		} else { //can only spawn when not moving
-			if (spawnTimer > SPAWN_DELAY) {
+			if (spawnTimer > spawnDelay) {
 				spawnTimer = 0; //reset spawn timer
 				GameScreen.addEntity(new Runner(getCenterX(), getCenterY()));
 			}
 		}
 	}
+
+	/**
+	 * Sets the time on the timer.
+	 * @param newTime the new time for the timer
+	 */
+	public void setTimer(double newTime) {
+		spawnTimer = newTime;
+	}
 	
+	/**
+	 * @return the current time on the timer
+	 */
+	public double getTimer() {
+		return spawnTimer;
+	}
+	
+	/**
+	 * Sets a new delay for spawning runners.
+	 * @param newDelay the new delay
+	 */
+	public void setDelay(double newDelay) {
+		spawnDelay = newDelay;
+	}
+	
+	/**
+	 * @return the time in between spawning runners
+	 */
+	public double getDelay() {
+		return spawnDelay;
+	}
+ 	
 }

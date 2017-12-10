@@ -1,6 +1,8 @@
 package projectiles;
 
 import com.badlogic.gdx.Gdx;
+
+import enemies.Asteroid;
 import enemies.Enemy;
 import entities.Entity;
 import entities.Player;
@@ -42,11 +44,15 @@ public abstract class Projectile extends Entity {
 	@Override
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Enemy) //destroy the projectile if it collides with an enemy
-			if (getType().equals(ProjectileType.PLAYER)) //if the projectile was fired by the player
+			if (type.equals(ProjectileType.PLAYER)) //if the projectile was fired by the player
 				return true;
 		
 		if (collidedWith instanceof Player) //destroy the projectile if it collides with a player
-			if (getType().equals(ProjectileType.ENEMEY)) //if the projectile was fired by an enemy
+			if (type.equals(ProjectileType.ENEMEY)) //if the projectile was fired by an enemy
+				return true;
+		
+		if (collidedWith instanceof Asteroid)
+			if (type.equals(ProjectileType.ENEMEY))
 				return true;
 		
 		return false;

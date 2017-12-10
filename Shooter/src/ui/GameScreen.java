@@ -1,5 +1,7 @@
 package ui;
 
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -8,10 +10,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
+import effects.Effect;
 import entities.Entity;
 import entities.InanimateEntity;
 import entities.Player;
 import logic.CollisionManager;
+import logic.EffectManager;
 import logic.EntityManager;
 import logic.Spawner;
 import projectiles.Projectile;
@@ -52,6 +56,9 @@ public class GameScreen implements Screen {
 	/** Manages collisions between entities. */
 	private CollisionManager cm;
 	
+	/** Manages collisions between entities. */
+	private static EffectManager efm;
+	
 	/** Manager spawning enemies. */
 	public static Spawner spawner;
 	
@@ -67,6 +74,7 @@ public class GameScreen implements Screen {
 		cm = new CollisionManager();
 		spawner = new Spawner();
 		em = new EntityManager();
+		efm = new EffectManager();
 		
 		//instantiate shape renderer
 		sr = new ShapeRenderer();
@@ -117,6 +125,8 @@ public class GameScreen implements Screen {
 		//spawn an enemy
 		spawner.spawnEnemies(delta);
 		
+		
+		
 		//check for collisions
 		cm.checkCollision(delta, em);
 		
@@ -134,22 +144,17 @@ public class GameScreen implements Screen {
 		map.draw(batch);
 		
 
-		
 		//draw the players score
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
 
 		//update entities before drawing them
 		em.cycle();
 		
+		efm.cycle(delta);
+		
 		//draw 
 		for (Entity entity : em.getActiveEntities())
 			entity.draw(batch);
-		
-		
-		
-		//test.render(delta);
-		
-		//test.draw(batch);
 		
 		//stop drawing sprites
 		batch.end();
@@ -169,7 +174,6 @@ public class GameScreen implements Screen {
 		//move entities
 		for (Entity entity : em.getActiveEntities())
 			entity.update(delta);
-		
 		
 	}
 
@@ -233,6 +237,14 @@ public class GameScreen implements Screen {
 
 	public static int getScore() {
 		return score;
+	}
+
+	public static List<Entity> getEntities() {
+		return em.getActiveEntities();
+	}
+	
+	public static void addEffect(Effect toAdd) {
+		efm.addEffect(toAdd);
 	}
 
 }

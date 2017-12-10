@@ -59,7 +59,7 @@ public class MenuScreen implements Screen {
 		btnPlay = new TextButton("Play", buttonStyle);
 		btnPlay.setPosition(Gdx.graphics.getWidth() / 2 - btnPlay.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 20);
 		btnQuit = new TextButton("Quit", buttonStyle);
-		btnQuit.setPosition(btnPlay.getX() + btnQuit.getWidth() / 8, btnPlay.getY() - btnPlay.getHeight());
+		btnQuit.setPosition((btnPlay.getX() + btnQuit.getWidth() / 8) - 15, btnPlay.getY() - btnPlay.getHeight() + 20);
 		
 		//initialising the stage which will stretch
 		stage = new Stage(new StretchViewport(900, 700));
