@@ -9,7 +9,7 @@ import effects.Slow;
 public class Time extends Pickup {
 
 	public Time(int x, int y) {
-		super("powerups/time.png", new Slow());
+		super("res/powerups/time.png", new Slow());
 		setScale(0.05f);
 		setPosition(x, y);
 	}

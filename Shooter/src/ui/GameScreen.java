@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void show() {
 		//instantiate entities
-		map = new InanimateEntity("redPlanet.png", 100, 100);
+		map = new InanimateEntity("res/redPlanet.png", 100, 100);
 		player = new Player(map.getCenterX(), map.getCenterY());
 		
 		//instantiate logic entities
@@ -87,7 +87,7 @@ public class GameScreen implements Screen {
 		font.getData().setScale(0.2f);
 		font.setUseIntegerPositions(false);
 		
-		//instanciate camera
+		//instantiate camera
 		cam = new OrthographicCamera(30, 30);
 		cam.position.set(player.getX(), player.getY(), 0);
 		cam.zoom = 2;

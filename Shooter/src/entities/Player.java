@@ -9,7 +9,7 @@ import projectiles.Missile;
 import projectiles.Projectile;
 import projectiles.ProjectileType;
 import ui.GameScreen;
-import ui.MainGame;
+import ui.UI;
 
 /**
  * Class used to represent that player character.
@@ -53,7 +53,7 @@ public class Player extends Entity {
 	 * @param y the players starting y coordinate
 	 */
 	public Player(float x, float y) {
-		super("ship.png", MAX_HEALTH, speed);
+		super("res/ship.png", MAX_HEALTH, speed);
 		setSize(3, 3);
 		setPosition(x, y);
 		setOriginCenter();
@@ -114,7 +114,7 @@ public class Player extends Entity {
 
 	@Override
 	public void onDestroy() {
-		MainGame.changeScreen(MainGame.SCORE_SCREEN);
+		UI.changeScreen(UI.SCORE_SCREEN);
 	}
 
 	@Override

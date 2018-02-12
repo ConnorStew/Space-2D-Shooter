@@ -14,7 +14,7 @@ import ui.GameScreen;
 public class Runner extends Enemy {
 	
 	/** The sound plays when this enemy dies. */
-	private static final Sound DEATH_SOUND = Gdx.audio.newSound(Gdx.files.internal("atari_boom.wav"));
+	private static final Sound DEATH_SOUND = Gdx.audio.newSound(Gdx.files.internal("res/atari_boom.wav"));
 	
 	/** The volume to play the orbs death sound at. */
 	private static final float DEATH_SOUND_VOLUME = 0.2f;
@@ -40,7 +40,7 @@ public class Runner extends Enemy {
 	 * @param y the y location to spawn the runner at
 	 */
 	public Runner(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemy.png");
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "res/enemy.png");
 	}
 
 	@Override

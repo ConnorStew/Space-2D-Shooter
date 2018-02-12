@@ -3,14 +3,22 @@ package ui;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
+import server.Server;
+
 public class Driver {
-
+	
 	public static void main(String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.title = "Space Defence";
-		config.width = 900;
-		config.height = 700;
-		new LwjglApplication(MainGame.getInstance(), config);
-	}
 
+		if (args.length > 0 && args[0].equals("server")) {
+			new Server(); //start the server
+		} else { //start the game
+			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+			config.title = "Space Defence";
+			config.width = 900;
+			config.height = 700;
+			new LwjglApplication(UI.getInstance(), config);
+		}
+
+	}
+	
 }
