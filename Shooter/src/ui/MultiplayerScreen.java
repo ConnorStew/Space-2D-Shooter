@@ -1,9 +1,9 @@
 package ui;
 
-import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.TextInputListener;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,13 +14,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
-import client.ClientConnection;
+import networking.client.Client;
 
 /**
  * This screen allows the player to connect to other players and the server for multiplayer.
  * @author Connor Stewart
  */
-public class MultiplayerScreen implements Screen, TextInputListener {
+public class MultiplayerScreen implements Screen {
 	
 	/** Singleton instance of this class. */
 	private static final MultiplayerScreen instance = new MultiplayerScreen();
@@ -43,14 +43,11 @@ public class MultiplayerScreen implements Screen, TextInputListener {
 	/** List to display available rooms. */
 	private List<String> roomList;
 	
-	/** The client connection utilities. */
-	private ClientConnection client;
+	/** The client. */
+	private Client client;
 	
 	/** Scroll panel for viewing rooms. */
 	private ScrollPane pnlScroll;
-
-	/** This clients nickname. */
-	private String nickname;
 	
 	/** {@link #getInstance()} should be used to obtain an instance of this class.  */
 	private MultiplayerScreen() {}
@@ -62,10 +59,9 @@ public class MultiplayerScreen implements Screen, TextInputListener {
 		
 		btnRoom = new TextButton("Create Room", UI.buttonStyle);
 		btnRefresh = new TextButton("Refresh", UI.buttonStyle);
-		nickname = "test";
 		
 		//make background
-		Image background = new Image(new Texture(Gdx.files.internal("res/space.png")));
+		Image background = new Image(new Texture(Gdx.files.internal("space.png")));
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		
@@ -87,8 +83,9 @@ public class MultiplayerScreen implements Screen, TextInputListener {
 		stage.addActor(btnRoom);
 		stage.addActor(btnRefresh);
 		
-		client = new ClientConnection(nickname);
+		String nickname = JOptionPane.showInputDialog(null, "Input your nickname.", "Nickname", JOptionPane.QUESTION_MESSAGE);
 		
+		client = new Client(nickname);
 	}
 
 	@Override
@@ -103,12 +100,21 @@ public class MultiplayerScreen implements Screen, TextInputListener {
 		
 		if (btnRoom.isPressed() && timeSinceButtonPressed > BUTTON_COOLDOWN) {
 			timeSinceButtonPressed = 0;
-			Gdx.input.getTextInput(this, "Room Name", "e.g. connors room", null);
+			
+			String roomName = JOptionPane.showInputDialog(null, "Input your room's name.", "Room Name", JOptionPane.QUESTION_MESSAGE);
+			
+			client.addRoom(roomName);
 		}
 		
 		if (btnRefresh.isPressed() && timeSinceButtonPressed > BUTTON_COOLDOWN) {
 			timeSinceButtonPressed = 0;
 			client.refreshRooms();
+		}
+		
+		//join the game
+		if (Gdx.input.isKeyPressed(Input.Keys.ENTER) && timeSinceButtonPressed > BUTTON_COOLDOWN) {
+			timeSinceButtonPressed = 0;
+			client.joinRoom(roomList.getSelected());
 		}
 		
 	}
@@ -137,22 +143,13 @@ public class MultiplayerScreen implements Screen, TextInputListener {
 		return instance;
 	}
 
-	@Override
-	public void input(String text) {
-		client.addRoom(text);
-	}
-
-	@Override
-	public void canceled() {}
-
 	/**
 	 * Populates the rooms with a new set of rooms.
 	 * @param roomNames the room names to add
 	 */
-	public static void populateRooms(ArrayList<String> roomNames) {
+	public static void populateRooms(String[] roomNames) {
 		MultiplayerScreen.instance.roomList.clearItems();
-		String[] roomNameArray = roomNames.toArray(new String[roomNames.size()]);
-		MultiplayerScreen.instance.roomList.setItems(roomNameArray);
+		MultiplayerScreen.instance.roomList.setItems(roomNames);
 	}
 	
 }
