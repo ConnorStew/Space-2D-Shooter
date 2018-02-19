@@ -14,15 +14,17 @@ public class NetworkUtils {
 	public static String parseCommand(String message) {
 		String command = null;
 		
-		if (message.contains("/")) {
-			//get everything after the first occurrence of "/" and split it into string using the delimiter "/"
-			//the + 1 is to avoid an empty string by having the first substring character being a "/"
-			command = message.substring(0, message.indexOf("/"));
-		} else {
-			//if the message has no arguments the message is the command
-			command = message;
+		if (message != null) {
+			if (message.contains("/")) {
+				//get everything after the first occurrence of "/" and split it into string using the delimiter "/"
+				//the + 1 is to avoid an empty string by having the first substring character being a "/"
+				command = message.substring(0, message.indexOf("/"));
+			} else {
+				//if the message has no arguments the message is the command
+				command = message;
+			}
+			
 		}
-		
 		
 		return command;
 	}

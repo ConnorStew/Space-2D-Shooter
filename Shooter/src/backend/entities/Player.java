@@ -88,6 +88,29 @@ public class Player extends Entity {
 	}
 	
 	/**
+	 * Handles the players firing.
+	 * @param delta the time since the last frame was rendered.
+	 * @param type the type of projectile to fire
+	 * @return null if the validation isn't met or a projectile object to be fired
+	 */
+	public Projectile fire(float delta, String type) {
+		lightTimer += delta;
+		heavyTimer += delta;
+		
+		if (type.equals("Light") && lightTimer >= LGIHT_CD) {
+			lightTimer = 0;
+			return new Beam(getCenterX(), getCenterY(), getRotation());
+		}
+		
+		if (type.equals("Heavy") && heavyTimer >= HEAVY_CD) {
+			heavyTimer = 0;
+			return new Missile(getCenterX(), getCenterY(), getRotation());
+		}
+		
+		return null; //return nothing if the validation is not passed
+	}
+	
+	/**
 	 * Heals the player by an amount.
 	 * @param healAmount the amount to heal the player by
 	 */

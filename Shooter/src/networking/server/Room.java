@@ -43,5 +43,9 @@ public class Room {
 		return clients;
 	}
 
+	public int getRequiredPlayers() {
+		return requiredPlayers;
+	}
+
 	
 }

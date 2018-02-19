@@ -79,5 +79,8 @@ public class MultiplayerPlayer extends Player {
 	public String getPlayerName() {
 		return playerName;
 	}
+	
+	
+
 
 }

@@ -97,10 +97,6 @@ public class UI extends Game {
 		buttonStyle.font = font;
 		buttonStyle.up = b;
 		
-		
-		
-
-		
 		labelStyle = new Label.LabelStyle();
 		labelStyle.font = font;
 		labelStyle.fontColor = Color.WHITE;

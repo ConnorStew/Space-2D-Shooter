@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
@@ -12,11 +13,13 @@ import backend.ClientEngine;
 import backend.entities.Entity;
 import backend.entities.InanimateEntity;
 import backend.entities.MultiplayerPlayer;
-import backend.entities.Player;
 import networking.client.Client;
 
 public class ClientGameScreen implements Screen {
 	
+	/** Font used to display score. */
+	private BitmapFont font;
+
 	/** Used to render the sprites/entities. */
 	private SpriteBatch batch;
 	
@@ -40,8 +43,13 @@ public class ClientGameScreen implements Screen {
 	@Override
 	public void show() {
 		//instantiate map
-		map = new InanimateEntity("res/redPlanet.png", 100, 100);
+		map = new InanimateEntity("redPlanet.png", 100, 100);
 				
+		//instantiate font for the score
+		font = new BitmapFont();
+		font.getData().setScale(0.2f);
+		font.setUseIntegerPositions(false);
+		
 		//instantiate shape renderer
 		sr = new ShapeRenderer();
 		
@@ -61,8 +69,13 @@ public class ClientGameScreen implements Screen {
 		
 		engine.update(delta);
 		
-		Player player = engine.getPlayer();
+		MultiplayerPlayer player = engine.getPlayer();
 		
+		//get the font coordinates according to the current camera position
+		Vector3 fontCord = new Vector3(player.getCenterX(), player.getCenterY(), 0);
+		cam.unproject(fontCord);
+		
+
 		//update camera
 		cam.update();
 		
@@ -83,16 +96,14 @@ public class ClientGameScreen implements Screen {
 		
 		if (player.getCenterX() - cam.viewportWidth > 0 && player.getCenterX() + cam.viewportWidth < map.getWidth())
 			cam.position.x = player.getCenterX();
-
-		//get the font coordinates according to the current camera position
-		Vector3 fontCord = new Vector3(10, 10, 0);
-		cam.unproject(fontCord);
 		
 		//start drawing sprites
 		batch.begin();
 		
 		//draw background
 		map.draw(batch);
+		
+		font.draw(batch, player.getPlayerName(), player.getCenterX(), player.getCenterY());
 
 		//draw 
 		for (Entity entity : engine.getActiveEntities())
@@ -109,6 +120,10 @@ public class ClientGameScreen implements Screen {
 			if (entity.hasHealth())
 				entity.drawHP(sr, cam); //draw health bar
 
+		
+		
+		
+		
 		//stop drawing shapes
 		sr.end();
 	}

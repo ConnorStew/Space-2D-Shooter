@@ -1,10 +1,12 @@
 package networking.server;
 
-import java.io.IOException;
-
 import networking.NetworkUtils;
 import networking.client.Client;
 
+/**
+ * This thread hosts a game once a room of players has been assembled.
+ * @author Connor Stewart
+ */
 public class ServerGameThread extends Thread implements ServerListener {
 	
 	/** The room containing clients playing this game. */
@@ -16,22 +18,16 @@ public class ServerGameThread extends Thread implements ServerListener {
 	
 	@Override
 	public void run() {
-		try {
-			//get events from the server
-			Server.getInstance().addListener(this);
+		//get events from the server
+		Server.getInstance().addListener(this);
 			
+		for (Client client : room.getClients()) {
 			//tell the clients to open their game screens
-			for (Client client : room.getClients()) {
-				client.getOut().writeUTF("START_GAME");
+			client.sendMessage("START_GAME");
 				
-				for (Client client2 : room.getClients()) {
-					//add players for every other player
-					client.getOut().writeUTF("ADDPLAYER/" + client2.getNickname());
-				}
-
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			//tell the clients to add the player characters to the game
+			for (Client client2 : room.getClients())
+				client.sendMessage("ADDPLAYER/" + client2.getNickname());
 		}
 	}
 
@@ -43,55 +39,50 @@ public class ServerGameThread extends Thread implements ServerListener {
 		if (command.equals("W_PRESS")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the 'w' key.");
 			
-			//tell all other clients to move that character
-			for (Client aClient : room.getClients()) {
-				try {
-					aClient.getOut().writeUTF("MOVE/" + client.getNickname() + "/UP");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			//tell all clients to move that character
+			for (Client aClient : room.getClients())
+				aClient.sendMessage("MOVE/" + client.getNickname() + "/UP");
 		}
 		
 		if (command.equals("S_PRESS")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the 's' key.");
 			
-			//tell all other clients to move that character
-			for (Client aClient : room.getClients()) {
-				try {
-					aClient.getOut().writeUTF("MOVE/" + client.getNickname() + "/DOWN");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			//tell all clients to move that character
+			for (Client aClient : room.getClients())
+				aClient.sendMessage("MOVE/" + client.getNickname() + "/DOWN");
 		}
 		
 		if (command.equals("R_PRESS")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the 'r' key.");
 			
-			//tell all other clients to move that character
-			for (Client aClient : room.getClients()) {
-				try {
-					aClient.getOut().writeUTF("MOVE/" + client.getNickname() + "/RIGHT");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			//tell all clients to move that character
+			for (Client aClient : room.getClients()) 
+				aClient.sendMessage("MOVE/" + client.getNickname() + "/RIGHT");
 		}
 		
 		if (command.equals("L_PRESS")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the 'l' key.");
 			
-			//tell all other clients to move that character
-			for (Client aClient : room.getClients()) {
-				try {
-					aClient.getOut().writeUTF("MOVE/" + client.getNickname() + "/LEFT");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			//tell all clients to move that character
+			for (Client aClient : room.getClients())
+				aClient.sendMessage("MOVE/" + client.getNickname() + "/LEFT");
 		}
 		
+		if (command.equals("LMB")) {
+			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the left mouse button.");
+			
+			//tell all clients to let that player shoot
+			for (Client aClient : room.getClients())
+				aClient.sendMessage("SHOOTL/" + client.getNickname());
+		}
+		
+		if (command.equals("RMB")) {
+			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the right mouse button.");
+			
+			//tell all clients to let that player shoot
+			for (Client aClient : room.getClients())
+				aClient.sendMessage("SHOOTR/" + client.getNickname());
+		}
 		
 	}
 

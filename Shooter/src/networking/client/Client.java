@@ -15,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.badlogic.gdx.Gdx;
 
 import backend.ClientEngine;
-import backend.entities.Player;
 import networking.NetworkUtils;
 import networking.server.Server;
 import ui.ClientGameScreen;
@@ -129,7 +128,17 @@ public class Client implements ClientListener {
 		
 		//the server sending the client a list of room names
 		if (command.equals("ROOMS")) {
-			MultiplayerScreen.populateRooms(arguments);
+			int roomNum = arguments.length;
+			String[] roomNames = new String[roomNum / 2];
+			String[] requiredPlayers = new String[roomNum / 2];
+			
+			//parse the arguments
+			for (int i = 0; i < roomNum; i = i + 2) {
+				roomNames[i / 2] = arguments[i];
+				requiredPlayers[i / 2] = arguments[i + 1];
+			}
+			
+			MultiplayerScreen.populateRooms(roomNames, requiredPlayers);
 		}
 		
 	}
@@ -203,9 +212,9 @@ public class Client implements ClientListener {
 	 * Sends a request to the server to add a new room.
 	 * @param roomName the rooms name
 	 */
-	public void addRoom(String roomName) {
+	public void addRoom(String roomName, String roomNum) {
 		try {
-			out.writeUTF("NEWROOM/" + roomName);
+			out.writeUTF("NEWROOM/" + roomName + "/" + roomNum);
 			System.out.println(getClass().getName() + ">>>Sent request to add room.");
 			refreshRooms();
 		} catch (IOException e) {
@@ -244,13 +253,33 @@ public class Client implements ClientListener {
 	public String getNickname() {
 		return nickname;
 	}
-
-	public DataOutputStream getOut() {
-		return out;
+	
+	/**
+	 * Retrieves a message from the server
+	 * @return the String sent by the server
+	 */
+	public String getMessage() {
+		try {
+			return in.readUTF();
+		} catch (IOException e) {
+			System.out.println("Error reading message.");
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
-
-	public DataInputStream getIn() {
-		return in;
+	
+	/**
+	 * Sends a message to the server.
+	 * @param toSend the String to send
+	 */
+	public void sendMessage(String toSend) {
+		try {
+			out.writeUTF(toSend);
+		} catch (IOException e) {
+			System.out.println("Error sending message.");
+			e.printStackTrace();
+		}
 	}
 	
 }

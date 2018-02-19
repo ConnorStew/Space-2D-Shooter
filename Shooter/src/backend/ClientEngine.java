@@ -1,6 +1,5 @@
 package backend;
 
-import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -43,7 +42,10 @@ public class ClientEngine extends Engine implements ClientListener {
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
-					activeEntities.add(new MultiplayerPlayer(50, 50, thisEngine, playerName));
+					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, thisEngine, playerName);
+					activeEntities.add(toAdd);
+					if (toAdd.getPlayerName().equals(thisClient.getNickname()))
+						setPlayer(toAdd);
 				}
 			});
 			
@@ -75,10 +77,34 @@ public class ClientEngine extends Engine implements ClientListener {
 					}
 				}
 			}
-			
-
-			
 		}
+		/*
+		if (command.equals("SHOOTL")) {
+			for (Entity entity : activeEntities) {
+				if (entity instanceof MultiplayerPlayer) {
+					if (((MultiplayerPlayer) entity).getPlayerName().equals(arguments[0])) {
+						MultiplayerPlayer toFire = (MultiplayerPlayer) entity;
+						Projectile projectile = toFire.fire(Gdx.graphics.getDeltaTime(), "Light");
+						if (toFire != null)
+							activeEntities.add(projectile);
+					}	
+				}
+			}
+		}
+		
+		if (command.equals("SHOOTR")) {
+			for (Entity entity : activeEntities) {
+				if (entity instanceof MultiplayerPlayer) {
+					if (((MultiplayerPlayer) entity).getPlayerName().equals(arguments[0])) {
+						MultiplayerPlayer toFire = (MultiplayerPlayer) entity;
+						Projectile projectile = toFire.fire(Gdx.graphics.getDeltaTime(), "Heavy");
+						if (toFire != null)
+							activeEntities.add(projectile);
+					}	
+				}
+			}
+		}
+		*/
 		
 	}
 
@@ -93,34 +119,34 @@ public class ClientEngine extends Engine implements ClientListener {
 	@Override
 	public void update(float delta) {
 		//poll for user input
-		checkInput(delta);
+		checkInput();
 		
 		//move entities
 		for (Entity entity : activeEntities)
 			entity.update(delta);
-		
 	}
 
-	private void checkInput(float delta) {
-		try {
-			if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-				thisClient.getOut().writeUTF("W_PRESS");
-			}
+	/**
+	 * Send player key presses to the server.
+	 */
+	private void checkInput() {
+		if (Gdx.input.isKeyPressed(Input.Keys.W))
+			thisClient.sendMessage("W_PRESS");
 			
-			if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-				thisClient.getOut().writeUTF("S_PRESS");
-			}
+		if (Gdx.input.isKeyPressed(Input.Keys.S))
+			thisClient.sendMessage("S_PRESS");
 			
-			if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-				thisClient.getOut().writeUTF("R_PRESS");
-			}
+		if (Gdx.input.isKeyPressed(Input.Keys.D))
+			thisClient.sendMessage("R_PRESS");
 			
-			if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-				thisClient.getOut().writeUTF("L_PRESS");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (Gdx.input.isKeyPressed(Input.Keys.A)) 
+			thisClient.sendMessage("L_PRESS");
+			
+		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+			thisClient.sendMessage("LMB");
+			
+		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+			thisClient.sendMessage("RMB");
 	}
 
 

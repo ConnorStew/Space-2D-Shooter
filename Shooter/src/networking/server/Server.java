@@ -97,14 +97,11 @@ public class Server implements ServerListener {
 			@Override
 			public void run() {
 				while (true) {
-					try {
-						//wait for message
-						String message = client.getIn().readUTF();
-						for (ServerListener listener : listeners)
-							listener.messageReceived(client, message);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					//wait for message
+					String message = client.getMessage();
+					
+					for (ServerListener listener : listeners)
+						listener.messageReceived(client, message);
 				}
 			}
 		};
@@ -136,21 +133,22 @@ public class Server implements ServerListener {
 		if (command.equals("ROOMS")) {
 			String toSend = "ROOMS";
 			
-			//send all room names
+			//get all room names to send
 			for (Room room : rooms)
-				toSend = toSend + "/" + room.getRoomName();
+				toSend = toSend + "/" + room.getRoomName() + "/" + room.getRequiredPlayers();
 			
-			try {
-				client.getOut().writeUTF(toSend);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			client.sendMessage(toSend);
 		}
 		
+		//add a room to the server
 		if (command.equals("NEWROOM")) {
-			//add the room to the server
-			rooms.add(new Room(arguments[0], 2));
+			try {
+				rooms.add(new Room(arguments[0], Integer.parseInt(arguments[1])));
+			} catch (NumberFormatException e) {
+				System.out.println(getClass().getName() + ">>>Required players isn't an integer skipping room add.");
+			}
 		}
+			
 		
 		if (command.equals("JOIN")) {
 			String roomName = arguments[0];
