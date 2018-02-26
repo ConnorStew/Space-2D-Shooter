@@ -1,9 +1,9 @@
 package backend.pickups;
 
-import backend.Engine;
 import backend.effects.Effect;
 import backend.entities.Entity;
 import backend.entities.Player;
+import ui.SPGame;
 
 /**
  * Generic class for pickups, entities that can be collided with to activate effects.
@@ -16,19 +16,16 @@ public abstract class Pickup extends Entity {
 	
 	/** The effect that is triggered when this pickup is picked up. */
 	private Effect effect;
-	
-	private Engine engine;
 
 	/**
 	 * Creates a pickup.
 	 * @param imageLocation the image to use
 	 * @param effect the effect to activate when collided with
 	 */
-	public Pickup(String imageLocation, Effect effect, Engine engine) {
+	public Pickup(String imageLocation, Effect effect) {
 		//zero max health and zero speed because a powerup dosen't move and dosen't take damage
 		super(imageLocation, 0, 0);
 		this.effect = effect;
-		this.engine = engine;
 	}
 	
 	@Override
@@ -44,7 +41,7 @@ public abstract class Pickup extends Entity {
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Player) {
 			//activate the effect on collision
-			engine.addEffect(effect);
+			SPGame.getInstance().addEffect(effect);
 			return true;
 		}
 			

@@ -5,8 +5,6 @@ import java.util.Random;
 
 import com.badlogic.gdx.math.Rectangle;
 
-import backend.Engine;
-import backend.SinglePlayerEngine;
 import backend.enemies.Asteroid;
 import backend.enemies.Dropship;
 import backend.enemies.Laser;
@@ -14,6 +12,7 @@ import backend.enemies.Runner;
 import backend.entities.Entity;
 import backend.pickups.Health;
 import backend.pickups.Time;
+import ui.SPGame;
 
 /**
  * Spawns enemies and powerups.
@@ -54,12 +53,12 @@ public class Spawner {
 	/** Random object to generate spawn points. */
 	private static final Random RND = new Random();
 	
-	private SinglePlayerEngine engine;
+	private SPGame spGame;
 	
-	public Spawner(SinglePlayerEngine engine) {
-		this.engine = engine;
+	public Spawner(SPGame spGame) {
+		this.spGame = spGame;
 	}
-	
+
 	/**
 	 * Spawns enemies based on spawn timers.
 	 * @param delta the time since the last frame was rendered
@@ -79,8 +78,8 @@ public class Spawner {
 	private Point getEnemySpawnLocation() {
 		int x = 0;
 		int y = 0;
-		int maxHeight = Engine.GAME_HEIGHT;
-		int maxWidth = Engine.GAME_WIDTH;
+		int maxHeight = SPGame.GAME_HEIGHT;
+		int maxWidth = SPGame.GAME_WIDTH;
 
 		//pick a side to spawn on
 		switch(RND.nextInt(4)) {
@@ -115,8 +114,8 @@ public class Spawner {
 		int x = 0;
 		int y = 0;
 		
-		int maxHeight = SinglePlayerEngine.GAME_HEIGHT;
-		int maxWidth = SinglePlayerEngine.GAME_WIDTH;
+		int maxHeight = SPGame.GAME_HEIGHT;
+		int maxWidth = SPGame.GAME_WIDTH;
 		
 		int pickupWidth = 50;
 		int pickupHeight = 50;
@@ -140,7 +139,7 @@ public class Spawner {
 				y = maxHeight - pickupHeight;
 			
 			//make sure the pickup hasen't spawned on another pickup
-			for (Entity entity : engine.getActiveEntities()) {
+			for (Entity entity : spGame.getActiveEntities()) {
 				if (entity.getBoundingRectangle().overlaps(new Rectangle(x, y, pickupWidth, pickupHeight))) {
 					overlapping = true;
 				} else {
@@ -166,10 +165,10 @@ public class Spawner {
 			
 			switch (RND.nextInt(2)) {
 				case 0:
-					 engine.addEntity(new Health(spawnLoc.x, spawnLoc.y, engine));
+					 spGame.addEntity(new Health(spawnLoc.x, spawnLoc.y));
 					return;
 				case 1:
-					 engine.addEntity(new Time(spawnLoc.x, spawnLoc.y, engine));
+					 spGame.addEntity(new Time(spawnLoc.x, spawnLoc.y));
 					return;					
 			}
 			
@@ -189,7 +188,7 @@ public class Spawner {
 			laserSpawnTimer = 0;
 			
 			Point spawnLoc = getEnemySpawnLocation();
-			engine.addEntity(new Laser(spawnLoc.x, spawnLoc.y, engine));
+			spGame.addEntity(new Laser(spawnLoc.x, spawnLoc.y));
 		}
 		
 	}
@@ -205,7 +204,7 @@ public class Spawner {
 			dropshipSpawnTimer = 0;
 			
 			Point spawnLoc = getEnemySpawnLocation();
-			 engine.addEntity(new Dropship(spawnLoc.x, spawnLoc.y, engine));
+			 spGame.addEntity(new Dropship(spawnLoc.x, spawnLoc.y));
 		}
 		
 	}
@@ -221,7 +220,7 @@ public class Spawner {
 			runnerSpawnTimer = 0;
 
 			Point spawnLoc = getEnemySpawnLocation();
-			 engine.addEntity(new Runner(spawnLoc.x, spawnLoc.y, engine));
+			spGame.addEntity(new Runner(spawnLoc.x, spawnLoc.y));
 		}
 	}
 
@@ -237,8 +236,8 @@ public class Spawner {
 
 			Point spawnLoc = getEnemySpawnLocation();
 			
-			int maxHeight = SinglePlayerEngine.GAME_HEIGHT;
-			int maxWidth = SinglePlayerEngine.GAME_WIDTH;
+			int maxHeight = SPGame.GAME_HEIGHT;
+			int maxWidth = SPGame.GAME_WIDTH;
 			float rotation;
 			
 			if (spawnLoc.y == maxWidth) {
@@ -251,10 +250,10 @@ public class Spawner {
 				rotation = 0;
 			}
 			
-			Asteroid toAdd = new Asteroid(spawnLoc.x, spawnLoc.y, engine);
+			Asteroid toAdd = new Asteroid(spawnLoc.x, spawnLoc.y);
 			toAdd.rotate(rotation);
 			
-			 engine.addEntity(toAdd);
+			 spGame.addEntity(toAdd);
 		}
 		
 	}

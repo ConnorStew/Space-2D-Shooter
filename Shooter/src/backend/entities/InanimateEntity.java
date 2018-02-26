@@ -21,18 +21,18 @@ public class InanimateEntity extends Sprite {
 	/**
 	 * Creates an entity with a specific size
 	 * @param imageLocation the path to the image file for this entity
-	 * @param width the width of the entity
-	 * @param height the height of the entity
+	 * @param gameWidth the width of the entity
+	 * @param gameHeight the height of the entity
 	 */
-	public InanimateEntity(String imageLocation, int width, int height) {
+	public InanimateEntity(String imageLocation, float gameWidth, float gameHeight) {
 		this(imageLocation);
-		setSize(width, height);
+		setSize(gameWidth, gameHeight);
 	}
 	
 	/**
 	 * @return the x coordinate of the center of the entity
 	 */
-	public final float getCenterX() {
+	public float getCenterX() {
 		return getX() + (getWidth() / 2);
 	}
 	

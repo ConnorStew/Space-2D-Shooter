@@ -1,6 +1,5 @@
 package backend.enemies;
 
-import backend.SinglePlayerEngine;
 import backend.entities.Entity;
 import backend.entities.Player;
 
@@ -31,8 +30,8 @@ public class Asteroid extends Enemy {
 	 * @param x the x location to spawn the asteroid at
 	 * @param y the y location to spawn the asteroid at
 	 */
-	public Asteroid(float x, float y, SinglePlayerEngine engine) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "asteroid.png", engine);
+	public Asteroid(float x, float y) {
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "asteroid.png");
 	}
 
 	@Override

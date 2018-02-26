@@ -3,12 +3,12 @@ package backend.entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import backend.Engine;
 import backend.enemies.Enemy;
 import backend.projectiles.Beam;
 import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
+import ui.SPGame;
 import ui.ScoreScreen;
 import ui.UI;
 
@@ -37,31 +37,29 @@ public class Player extends Entity {
 	protected static int speed = 20;
 	
 	/** The amount of time since the last light weapon was fired. */
-	private double lightTimer = 0;
+	protected double lightTimer = 0;
 	
 	/** The amount of time since the last heavy weapon was fired. */
-	private double heavyTimer = 0;
+	protected double heavyTimer = 0;
 
 	/** The amount of x pixels the player is moving per second. */
 	protected double xDelta = 0;
 	
 	/** The amount of y pixels the player is moving per second. */
 	protected double yDelta = 0;
-	
-	private Engine engine;
-	
 	/**
 	 * Create a player object.
 	 * @param x the players starting x coordinate
 	 * @param y the players starting y coordinate
 	 */
-	public Player(float x, float y, Engine engine) {
+	public Player(float x, float y) {
 		super("ship.png", MAX_HEALTH, speed);
 		setSize(3, 3);
 		setPosition(x, y);
 		setOriginCenter();
-		this.engine = engine;
 	}
+	
+	//truncate rotation
 	
 	/**
 	 * Handles the players firing.
@@ -69,8 +67,6 @@ public class Player extends Entity {
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
 	public Projectile fire(float delta) {
-		lightTimer += delta;
-		heavyTimer += delta;
 		
 		//if the lmb is pressed and the light weapon is above or equal to the cooldown time
 		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lightTimer >= LGIHT_CD) {
@@ -94,9 +90,6 @@ public class Player extends Entity {
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
 	public Projectile fire(float delta, String type) {
-		lightTimer += delta;
-		heavyTimer += delta;
-		
 		if (type.equals("Light") && lightTimer >= LGIHT_CD) {
 			lightTimer = 0;
 			return new Beam(getCenterX(), getCenterY(), getRotation());
@@ -141,12 +134,11 @@ public class Player extends Entity {
 
 	@Override
 	public void onDestroy() {
-		UI.getInstance().setScreen(new ScoreScreen(engine.getScore()));
+		UI.getInstance().setScreen(new ScoreScreen(SPGame.getInstance().getScore()));
 	}
 
 	@Override
 	public void update(float delta) {
-
 		//increase momentum on button press
 		if (Gdx.input.isKeyPressed(Input.Keys.W) && yDelta < MAX_SPEED)
 			yDelta += (speed * delta);
@@ -173,8 +165,8 @@ public class Player extends Entity {
 		if (yDelta < 0)
 			yDelta += (DRAG * delta);
 		
-		float maxHeight = Engine.GAME_HEIGHT;
-		float maxWidth = Engine.GAME_WIDTH;
+		float maxHeight = SPGame.GAME_HEIGHT;
+		float maxWidth = SPGame.GAME_WIDTH;
 		float minHeight = 0;
 		float minWidth = 0;
 		

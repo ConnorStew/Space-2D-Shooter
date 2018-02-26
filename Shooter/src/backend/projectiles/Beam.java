@@ -34,6 +34,8 @@ public class Beam extends Projectile {
 		super(x, y, r, DAMAGE, SPEED, SIZE, "laser.png", ProjectileType.PLAYER);
 		LASER_SOUND.setVolume(LASER_SOUND.play(), LASER_SOUND_VOLUME);
 	}
+	
+	
 
 	@Override
 	public void onDestroy() {}

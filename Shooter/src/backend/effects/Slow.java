@@ -1,11 +1,11 @@
 package backend.effects;
 
-import backend.SinglePlayerEngine;
 import backend.enemies.Dropship;
 import backend.entities.Entity;
 import backend.entities.Player;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
+import ui.SPGame;
 
 /**
  * This effect slows all enemies.
@@ -18,9 +18,9 @@ public class Slow extends Effect {
 	}
 	
 	@Override
-	public void end(SinglePlayerEngine engine) {
+	public void end() {
 		//reset the speed of all enemies
-		for (Entity e : engine.getActiveEntities()) {
+		for (Entity e : SPGame.getInstance().getActiveEntities()) {
 			if (e.getSpeed() != e.DEFAULT_SPEED) { //only reset if the entities speed is not at default
 				e.resetSpeed();
 				if (e instanceof Dropship) { //double dropship spawn timers
@@ -37,9 +37,9 @@ public class Slow extends Effect {
 
 
 	@Override
-	public void update(SinglePlayerEngine engine) {
+	public void update() {
 		//slow all enemies
-		for (Entity e : engine.getActiveEntities()) {
+		for (Entity e : SPGame.getInstance().getActiveEntities()) {
 			if ((!(e instanceof Player ))) {//doesen't affect the player
 				//dosen't affect player projectiles
 				if (!(e instanceof Projectile && ((Projectile) e).getType().equals(ProjectileType.PLAYER))) {

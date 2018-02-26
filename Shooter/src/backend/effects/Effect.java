@@ -1,7 +1,5 @@
 package backend.effects;
 
-import backend.SinglePlayerEngine;
-
 /**
  * Generic class for things that affect the game.
  * @author Connor Stewart
@@ -27,20 +25,20 @@ public abstract class Effect {
 	 * @param delta the amount of time since the last update
 	 * @return whether this effect should be removed
 	 */
-	public boolean time(float delta, SinglePlayerEngine engine) {
+	public boolean time(float delta) {
 		timer += delta;
 		
 		//activate the effect once if the duration is zero
 		if (DURATION == 0) {
-			end(engine);
-			update(engine);
+			end();
+			update();
 			return true;
 		}
 		
 		if (DURATION > timer) {
-			update(engine);
+			update();
 		} else {
-			end(engine);
+			end();
 			return true;
 		}
 		
@@ -50,11 +48,11 @@ public abstract class Effect {
 	/**
 	 * This methods defines what should happen while this effect is active.
 	 */
-	public abstract void update(SinglePlayerEngine engine);
+	public abstract void update();
 	
 	/**
 	 * This method should define ending the effect, such as resetting the effects of the effect.
 	 */
-	public abstract void end(SinglePlayerEngine engine);
+	public abstract void end();
 
 }

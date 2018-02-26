@@ -1,5 +1,8 @@
 package networking;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * A collection of network utilities used by both the client and the server.
  * @author Connor Stewart
@@ -43,6 +46,20 @@ public class NetworkUtils {
 		}
 		
 		return arguments;
+	}
+	
+	/**
+	 * Sends a message to the server.
+	 * @param toSend the String to send
+	 */
+	public static void sendMessage(String toSend, OutputStream toWrite) {
+		toSend = "<" +  toSend + ">";
+		try {
+			System.out.println(NetworkUtils.class.getName() + ">>> Sending message : " + toSend);
+			toWrite.write(toSend.getBytes("UTF-8"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

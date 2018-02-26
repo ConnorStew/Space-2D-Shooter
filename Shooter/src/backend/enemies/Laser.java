@@ -1,8 +1,8 @@
 package backend.enemies;
 
-import backend.SinglePlayerEngine;
 import backend.entities.Entity;
 import backend.projectiles.Ball;
+import ui.SPGame;
 
 /**
  * An enemy that keeps a distance away from the player and shoots at the player.
@@ -39,8 +39,8 @@ public class Laser extends Enemy {
 	 * @param x the x location to spawn the dropship at
 	 * @param y the y location to spawn the dropship at
 	 */
-	public Laser(float x, float y, SinglePlayerEngine engine) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "laserShip.png", engine);
+	public Laser(float x, float y) {
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "laserShip.png");
 	}
 
 	@Override
@@ -57,14 +57,14 @@ public class Laser extends Enemy {
 	@Override
 	public void update(float delta) {
 		fireTimer += delta;
-		rotateTowards(engine.getPlayer());
+		rotateTowards(SPGame.getInstance().getPlayer());
 		
-		if (distanceBetween(engine.getPlayer()) > DISTANCE) {
+		if (distanceBetween(SPGame.getInstance().getPlayer()) > DISTANCE) {
 			moveForward(SPEED * delta);
 		} else {
 			if (fireTimer > FIRING_DELAY) {
 				fireTimer = 0;
-				engine.addEntity(new Ball(getCenterX(), getCenterY(), getRotation() - 90)); //90 to offset image rotation
+				SPGame.getInstance().addEntity(new Ball(getCenterX(), getCenterY(), getRotation() - 90)); //90 to offset image rotation
 			}
 		}
 	}

@@ -3,9 +3,9 @@ package backend.enemies;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 
-import backend.SinglePlayerEngine;
 import backend.entities.Entity;
 import backend.entities.Player;
+import ui.SPGame;
 
 /**
  * An enemy that flies towards the player and deals damage on contact.
@@ -39,8 +39,8 @@ public class Runner extends Enemy {
 	 * @param x the x location to spawn the runner at
 	 * @param y the y location to spawn the runner at
 	 */
-	public Runner(float x, float y, SinglePlayerEngine engine) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemy.png", engine);
+	public Runner(float x, float y) {
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemy.png");
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class Runner extends Enemy {
 	
 	@Override
 	public void update(float delta) {
-		moveTowards(engine.getPlayer(), delta); //go towards the player
+		moveTowards(SPGame.getInstance().getPlayer(), delta); //go towards the player
 	}
 	
 	@Override

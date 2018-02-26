@@ -1,6 +1,5 @@
 package backend.pickups;
 
-import backend.Engine;
 import backend.effects.Slow;
 
 /**
@@ -9,8 +8,8 @@ import backend.effects.Slow;
  */
 public class Time extends Pickup {
 
-	public Time(int x, int y, Engine engine) {
-		super("powerups/time.png", new Slow(), engine);
+	public Time(int x, int y) {
+		super("powerups/time.png", new Slow());
 		setScale(0.05f);
 		setPosition(x, y);
 	}

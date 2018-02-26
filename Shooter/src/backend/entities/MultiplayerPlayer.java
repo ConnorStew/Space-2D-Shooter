@@ -1,6 +1,6 @@
 package backend.entities;
 
-import backend.Engine;
+import ui.MPGame;
 
 /**
  * A MultiplayerPlayer is a player in a multiplayer game.
@@ -10,14 +10,18 @@ public class MultiplayerPlayer extends Player {
 	
 	/** The players nickname. */
 	private String playerName;
+	public boolean shouldFire;
 
-	public MultiplayerPlayer(float x, float y, Engine engine, String playerName) {
-		super(x, y, engine);
+	public MultiplayerPlayer(float x, float y, String playerName) {
+		super(x, y);
 		this.playerName = playerName;
 	}
 	
 	@Override
 	public void update(float delta) {
+		lightTimer += delta;
+		heavyTimer += delta;
+		
 		//apply drag
 		if (xDelta > 0)
 			xDelta -= (DRAG * delta);
@@ -31,8 +35,8 @@ public class MultiplayerPlayer extends Player {
 		if (yDelta < 0)
 			yDelta += (DRAG * delta);
 		
-		float maxHeight = Engine.GAME_HEIGHT;
-		float maxWidth = Engine.GAME_WIDTH;
+		float maxHeight = MPGame.GAME_HEIGHT;
+		float maxWidth = MPGame.GAME_WIDTH;
 		float minHeight = 0;
 		float minWidth = 0;
 		
@@ -79,8 +83,7 @@ public class MultiplayerPlayer extends Player {
 	public String getPlayerName() {
 		return playerName;
 	}
-	
-	
 
+	
 
 }

@@ -23,25 +23,28 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 		for (Client client : room.getClients()) {
 			//tell the clients to open their game screens
-			client.sendMessage("START_GAME");
-				
-			//tell the clients to add the player characters to the game
-			for (Client client2 : room.getClients())
-				client.sendMessage("ADDPLAYER/" + client2.getNickname());
+			NetworkUtils.sendMessage("START_GAME", client.getOutputStream());
 		}
+		
+		//tell the clients to add the player characters to the game
+		for (Client client : room.getClients())
+			for (Client client2 : room.getClients())
+				NetworkUtils.sendMessage("ADDPLAYER/" + client2.getNickname(), client.getOutputStream());
+		
 	}
 
 	@Override
 	public void messageReceived(Client client, String message) {
+		message = message.trim();
 		String command = NetworkUtils.parseCommand(message);
-		//String[] arguments = NetworkUtils.parseArguements(message);
+		String[] arguments = NetworkUtils.parseArguements(message);
 		
 		if (command.equals("W_PRESS")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the 'w' key.");
 			
 			//tell all clients to move that character
 			for (Client aClient : room.getClients())
-				aClient.sendMessage("MOVE/" + client.getNickname() + "/UP");
+				NetworkUtils.sendMessage("MOVE/" + client.getNickname() + "/UP", aClient.getOutputStream());
 		}
 		
 		if (command.equals("S_PRESS")) {
@@ -49,7 +52,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to move that character
 			for (Client aClient : room.getClients())
-				aClient.sendMessage("MOVE/" + client.getNickname() + "/DOWN");
+				NetworkUtils.sendMessage("MOVE/" + client.getNickname() + "/DOWN", aClient.getOutputStream());
 		}
 		
 		if (command.equals("R_PRESS")) {
@@ -57,7 +60,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to move that character
 			for (Client aClient : room.getClients()) 
-				aClient.sendMessage("MOVE/" + client.getNickname() + "/RIGHT");
+				NetworkUtils.sendMessage("MOVE/" + client.getNickname() + "/RIGHT", aClient.getOutputStream());
 		}
 		
 		if (command.equals("L_PRESS")) {
@@ -65,7 +68,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to move that character
 			for (Client aClient : room.getClients())
-				aClient.sendMessage("MOVE/" + client.getNickname() + "/LEFT");
+				NetworkUtils.sendMessage("MOVE/" + client.getNickname() + "/LEFT", aClient.getOutputStream());
 		}
 		
 		if (command.equals("LMB")) {
@@ -73,7 +76,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				aClient.sendMessage("SHOOTL/" + client.getNickname());
+				NetworkUtils.sendMessage("SHOOTL/" + client.getNickname(), aClient.getOutputStream());
 		}
 		
 		if (command.equals("RMB")) {
@@ -81,7 +84,15 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				aClient.sendMessage("SHOOTR/" + client.getNickname());
+				NetworkUtils.sendMessage("SHOOTR/" + client.getNickname(), aClient.getOutputStream());
+		}
+		
+		if (command.equals("ROTATE")) {
+			//System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has moved their mouse.");
+			
+			//tell all clients to let rotate that player
+			for (Client aClient : room.getClients())
+				NetworkUtils.sendMessage("ROTATE/" + client.getNickname() + "/" + arguments[0], aClient.getOutputStream());
 		}
 		
 	}

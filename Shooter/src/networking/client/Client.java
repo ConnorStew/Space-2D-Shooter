@@ -3,6 +3,8 @@ package networking.client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -14,10 +16,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
 
-import backend.ClientEngine;
+import networking.MessageListener;
 import networking.NetworkUtils;
+import networking.Type;
 import networking.server.Server;
-import ui.ClientGameScreen;
+import ui.MPGame;
 import ui.MultiplayerScreen;
 import ui.UI;
 
@@ -34,10 +37,10 @@ public class Client implements ClientListener {
 	private String nickname;
 	
 	/** The clients output to the server. */
-	private DataOutputStream out;
+	private OutputStream out;
 	
-	/** The clients input from the server. */
-	private DataInputStream in;
+	/** The clients output to the server. */
+	private InputStream in;
 	
 	/** A list of ClientListeners that wish to receive events from this client. */
 	private CopyOnWriteArrayList<ClientListener> listeners = new CopyOnWriteArrayList<ClientListener>();
@@ -48,44 +51,26 @@ public class Client implements ClientListener {
 	 * @param nickname the clients nickname
 	 */
 	public Client(String nickname) {
-		listeners.add(this); //listen for new messages
 		this.nickname = nickname;
+		listeners.add(this);
+
 		try {
 			//connect to the server
 			socket = new Socket(getServerIP(), Server.port);
-			
 			System.out.println(getClass().getName() + ">>>Connected to the server.");
-			out = new DataOutputStream(socket.getOutputStream());
-			in = new DataInputStream(socket.getInputStream());
 			
-			//send nickname through when connected
-			out.writeUTF(nickname);
-			System.out.println(getClass().getName() + ">>>Sent nickname.");
-			
-			//start listening for messages from the server
-			Thread messageListener = new Thread() {
-				public void run() {
-					while(true) {
-						try {
-							String message = in.readUTF();
-							
-							//send the message to all the clients on the list
-							for (ClientListener listener : listeners)
-								listener.messageReceived(message);
-							
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				};
-			};
-			
-			messageListener.setName(nickname + "'s Message Listening Thread");
-			messageListener.setDaemon(true);
-			messageListener.start();
+			out = socket.getOutputStream();
+			in = socket.getInputStream();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//send nickname through when connected
+		NetworkUtils.sendMessage("NICKNAME/" + nickname, out);
+		System.out.println(getClass().getName() + ">>>Sent nickname.");
+		
+		MessageListener ml = new MessageListener(this, Type.Client);
+		ml.start();
 	}
 	
 	/**
@@ -111,17 +96,16 @@ public class Client implements ClientListener {
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
 		
-		System.out.println(getClass().getName() + ">>>Recived command from server: " + command);
+		System.out.println(getClass().getName() + ">>>Recived message from server: " + message);
 		
 		//server letting the client know that the game is ready to begin
 		if (command.equals("START_GAME")) {
 			Client client = this;
-			ClientEngine engine = new ClientEngine(client);
-			
+			MPGame toStart = new MPGame(client);
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
-					UI.getInstance().setScreen(new ClientGameScreen(client, engine));
+					UI.getInstance().setScreen(toStart);
 				}
 			});
 		}
@@ -200,12 +184,8 @@ public class Client implements ClientListener {
 	 * Sends a request to the server for a list of rooms.
 	 */
 	public void refreshRooms() {
-		try {
-			out.writeUTF("ROOMS");
-			System.out.println(getClass().getName() + ">>>Sent request to refresh rooms.");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}	
+		NetworkUtils.sendMessage("ROOMS", out);
+		System.out.println(getClass().getName() + ">>>Sent request to refresh rooms.");	
 	}
 	
 	/**
@@ -213,13 +193,9 @@ public class Client implements ClientListener {
 	 * @param roomName the rooms name
 	 */
 	public void addRoom(String roomName, String roomNum) {
-		try {
-			out.writeUTF("NEWROOM/" + roomName + "/" + roomNum);
-			System.out.println(getClass().getName() + ">>>Sent request to add room.");
-			refreshRooms();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		NetworkUtils.sendMessage("NEWROOM/" + roomName + "/" + roomNum, out);
+		System.out.println(getClass().getName() + ">>>Sent request to add room.");
+		refreshRooms();
 	}
 
 	/**
@@ -227,24 +203,10 @@ public class Client implements ClientListener {
 	 * @param roomName the rooms name
 	 */
 	public void joinRoom(String roomName) {
-		try {
-			out.writeUTF("JOIN/" + roomName);
-			System.out.println(getClass().getName() + ">>>Sent request to join room.");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		NetworkUtils.sendMessage("JOIN/" + roomName, out);
+		System.out.println(getClass().getName() + ">>>Sent request to join room.");
 	}
 
-	/**
-	 * Adds a ClientListener to the list that receives events.
-	 * @param toAdd the ClientListener to add.
-	 */
-	public void addListener(ClientListener toAdd) {
-		listeners.add(toAdd);
-	}
-	
-
-	
 	
 	public Socket getSocket() {
 		return socket;
@@ -253,33 +215,25 @@ public class Client implements ClientListener {
 	public String getNickname() {
 		return nickname;
 	}
-	
-	/**
-	 * Retrieves a message from the server
-	 * @return the String sent by the server
-	 */
-	public String getMessage() {
-		try {
-			return in.readUTF();
-		} catch (IOException e) {
-			System.out.println("Error reading message.");
-			e.printStackTrace();
-		}
-		
-		return null;
+
+	public InputStream getInputStream() {
+		return in;
+	}
+
+	public OutputStream getOutputStream() {
+		return out;
 	}
 	
-	/**
-	 * Sends a message to the server.
-	 * @param toSend the String to send
-	 */
-	public void sendMessage(String toSend) {
-		try {
-			out.writeUTF(toSend);
-		} catch (IOException e) {
-			System.out.println("Error sending message.");
-			e.printStackTrace();
-		}
+	public CopyOnWriteArrayList<ClientListener> getListeners() {
+		return listeners;
+	}
+
+	public void addListner(ClientListener listener) {
+		listeners.add(listener);
+	}
+
+	public void setNickname(String newNickname) {
+		nickname = newNickname;
 	}
 	
 }

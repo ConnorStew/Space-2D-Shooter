@@ -1,6 +1,5 @@
 package networking.server;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -9,7 +8,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import networking.MessageListener;
 import networking.NetworkUtils;
+import networking.Type;
 import networking.client.Client;
 
 /**
@@ -27,18 +28,18 @@ public class Server implements ServerListener {
 	/** The singleton instance of the server. */
 	private final static Server instance = new Server();
 	
-	/** Listeners who want to recive events from this server. */
-	private ArrayList<ServerListener> listeners = new ArrayList<ServerListener>();
-	
 	/** The port the server runs on. */
 	public final static int port = 3854;
 	
 	/** The server that accepts connections from sockets. */
 	static ServerSocket server;
+	
+	/** Listeners who want to recive events from this server. */
+	private ArrayList<ServerListener> sListeners = new ArrayList<ServerListener>();
 
 	private Server() {
 		try {
-			listeners.add(this);
+			sListeners.add(this);
 			
 			server = new ServerSocket(port, 0, InetAddress.getLocalHost());
 			
@@ -57,14 +58,7 @@ public class Server implements ServerListener {
 				            Socket socket = server.accept();
 					        System.out.println(getClass().getName() + ">>>Client connected on " +  socket.getInetAddress().getHostName());
 					            
-					        DataInputStream in = new DataInputStream(socket.getInputStream());
-					            
-					        //when the client connects, it will send its nickname through
-					        String nickname = in.readUTF();
-							
-					        System.out.println(getClass().getName() + ">>>Client nickname recived from " + socket.getInetAddress().getHostName() + ": " + nickname);
-				               
-						    clientConncted(new Client(socket, nickname));
+						    clientConncted(new Client(socket, "default"));
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -84,31 +78,11 @@ public class Server implements ServerListener {
 		}
 		
 	}
-	
-	public void addListener(ServerListener toAdd) {
-		listeners.add(toAdd);
-	}
 
 	private void clientConncted(Client client) {
 		clients.add(client);
-		
-		//start a thread to listen for messages from that client
-		Thread messageListenerThread = new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					//wait for message
-					String message = client.getMessage();
-					
-					for (ServerListener listener : listeners)
-						listener.messageReceived(client, message);
-				}
-			}
-		};
-		
-		messageListenerThread.setName(client.getNickname() + " Message Listener Thread");
-		messageListenerThread.setDaemon(true);
-		messageListenerThread.start();
+		MessageListener ml = new MessageListener(client,Type.Server);
+		ml.start();
 	}
 
 	/**
@@ -137,7 +111,7 @@ public class Server implements ServerListener {
 			for (Room room : rooms)
 				toSend = toSend + "/" + room.getRoomName() + "/" + room.getRequiredPlayers();
 			
-			client.sendMessage(toSend);
+			NetworkUtils.sendMessage(toSend, client.getOutputStream());
 		}
 		
 		//add a room to the server
@@ -149,7 +123,6 @@ public class Server implements ServerListener {
 			}
 		}
 			
-		
 		if (command.equals("JOIN")) {
 			String roomName = arguments[0];
 			
@@ -157,7 +130,20 @@ public class Server implements ServerListener {
 				if (room.getRoomName().equals(roomName))
 					room.addClient(client);
 		}
+        
+        if (command.equals("NICKNAME")) {
+        	client.setNickname(arguments[0]);
+            System.out.println(getClass().getName() + ">>>Client nickname recived from " + client.getSocket().getInetAddress().getHostName() + ": " + client.getNickname());
+        }
 		
+	}
+
+	public void addListener(ServerListener sl) {
+		sListeners.add(sl);
+	}
+
+	public ArrayList<ServerListener> getListeners() {
+		return sListeners;
 	}
 
 }

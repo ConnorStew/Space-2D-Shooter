@@ -1,6 +1,5 @@
 package backend.pickups;
 
-import backend.Engine;
 import backend.effects.Heal;
 
 /**
@@ -9,8 +8,8 @@ import backend.effects.Heal;
  */
 public class Health extends Pickup {
 
-	public Health(int x, int y, Engine engine) {
-		super("powerups/health.png", new Heal(), engine);
+	public Health(int x, int y) {
+		super("powerups/health.png", new Heal());
 		setScale(0.05f);
 		setPosition(x, y);
 	}

@@ -1,6 +1,6 @@
 package backend.effects;
 
-import backend.SinglePlayerEngine;
+import ui.SPGame;
 
 /**
  * This effect heals the player.
@@ -16,11 +16,11 @@ public class Heal extends Effect {
 	}
 
 	@Override
-	public void update(SinglePlayerEngine engine) {
-		engine.getPlayer().heal(HEAL_AMOUNT);
+	public void update() {
+		SPGame.getInstance().getPlayer().heal(HEAL_AMOUNT);
 	}
 
 	@Override
-	public void end(SinglePlayerEngine engine) {}
+	public void end() {}
 
 }

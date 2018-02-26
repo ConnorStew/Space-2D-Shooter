@@ -10,8 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
-import backend.SinglePlayerEngine;
-
 /**
  * This class is used to define the main menu layout.
  * @author Connor Stewart
@@ -72,7 +70,7 @@ public class MenuScreen implements Screen {
 		
 		//goto the game screen if the play button is pressed
 		if (btnPlay.isPressed())
-			UI.getInstance().setScreen(new SinglePlayerGameScreen(new SinglePlayerEngine()));
+			UI.getInstance().setScreen(new SPGame());
 		
 		//goto the multiplayer screen if the multiplayer button is pressed
 		if (btnMultiplayer.isPressed()) 

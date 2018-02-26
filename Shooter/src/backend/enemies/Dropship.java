@@ -1,7 +1,7 @@
 package backend.enemies;
 
-import backend.SinglePlayerEngine;
 import backend.entities.Entity;
+import ui.SPGame;
 
 /**
  * An enemy that keeps a distance away from the player and spawns {@link Runner}s.
@@ -41,8 +41,8 @@ public class Dropship extends Enemy {
 	 * @param x the x location to spawn the dropship at
 	 * @param y the y location to spawn the dropship at
 	 */
-	public Dropship(float x, float y, SinglePlayerEngine engine) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "dropship.png", engine);
+	public Dropship(float x, float y) {
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "dropship.png");
 	}
 
 	@Override
@@ -61,12 +61,12 @@ public class Dropship extends Enemy {
 		spawnTimer += delta; //update spawn timer every update
 		
 		//move towards the player, but keep distance
-		if (distanceBetween(engine.getPlayer()) > DISTANCE) {
-			moveTowards(engine.getPlayer(), delta);
+		if (distanceBetween(SPGame.getInstance().getPlayer()) > DISTANCE) {
+			moveTowards(SPGame.getInstance().getPlayer(), delta);
 		} else { //can only spawn when not moving
 			if (spawnTimer > spawnDelay) {
 				spawnTimer = 0; //reset spawn timer
-				engine.addEntity(new Runner(getCenterX(), getCenterY(), engine));
+				SPGame.getInstance().addEntity(new Runner(getCenterX(), getCenterY()));
 			}
 		}
 	}
