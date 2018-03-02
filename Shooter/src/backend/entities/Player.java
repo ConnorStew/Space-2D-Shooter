@@ -8,6 +8,7 @@ import backend.projectiles.Beam;
 import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
+import ui.MenuScreen;
 import ui.SPGame;
 import ui.ScoreScreen;
 import ui.UI;
@@ -19,10 +20,10 @@ import ui.UI;
 public class Player extends Entity {
 	
 	/** The cooldown in seconds of the light weapon. */
-	private final double LGIHT_CD = 0.3;
+	protected final double LGIHT_CD = 0.3;
 	
 	/** The cooldown in seconds of the light weapon. */
-	private final double HEAVY_CD = 1.5;
+	protected final double HEAVY_CD = 1.5;
 	
 	/** The amount of speed (pixels per second) to lose each second. */
 	protected final double DRAG = 5;
@@ -61,6 +62,13 @@ public class Player extends Entity {
 	
 	//truncate rotation
 	
+	public Player(int x, int y, int id) {
+		super("ship.png", MAX_HEALTH, speed, id);
+		setSize(3, 3);
+		setPosition(x, y);
+		setOriginCenter();
+	}
+
 	/**
 	 * Handles the players firing.
 	 * @param delta the time since the last frame was rendered.
@@ -76,26 +84,6 @@ public class Player extends Entity {
 		
 		//if the rmb is pressed and the heavy weapon is above or equal to the cooldown time
 		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && heavyTimer >= HEAVY_CD) {
-			heavyTimer = 0;
-			return new Missile(getCenterX(), getCenterY(), getRotation());
-		}
-		
-		return null; //return nothing if the validation is not passed
-	}
-	
-	/**
-	 * Handles the players firing.
-	 * @param delta the time since the last frame was rendered.
-	 * @param type the type of projectile to fire
-	 * @return null if the validation isn't met or a projectile object to be fired
-	 */
-	public Projectile fire(float delta, String type) {
-		if (type.equals("Light") && lightTimer >= LGIHT_CD) {
-			lightTimer = 0;
-			return new Beam(getCenterX(), getCenterY(), getRotation());
-		}
-		
-		if (type.equals("Heavy") && heavyTimer >= HEAVY_CD) {
 			heavyTimer = 0;
 			return new Missile(getCenterX(), getCenterY(), getRotation());
 		}

@@ -25,6 +25,8 @@ public abstract class Entity extends InanimateEntity {
 	
 	/** The base speed of this entity. */
 	public final double DEFAULT_SPEED;
+	
+	private int multiplayerID;
 
 	/**
 	 * Creates a new instance of entity. <br>
@@ -42,6 +44,25 @@ public abstract class Entity extends InanimateEntity {
 			this.maxHealth = maxHealth;
 		else
 			hasHealth = false;
+	}
+	
+	/**
+	 * Creates a new instance of entity for use in multiplayer. <br>
+	 * If this maxHealth parameter is set to zero this entity will have no health system.
+	 * @param imageLocation the path to the image file for this entity
+	 * @param maxHealth the maximum health of this entity
+	 * @param the speed of this entity (pixels per second)
+	 */
+	public Entity(String imageLocation, double maxHealth, double speed, int id) { 
+		super(imageLocation);
+		DEFAULT_SPEED = speed;
+		health = maxHealth;
+		this.speed = speed;
+		if (maxHealth != 0)
+			this.maxHealth = maxHealth;
+		else
+			hasHealth = false;
+		multiplayerID = id;
 	}
 	
 	/**
@@ -202,6 +223,10 @@ public abstract class Entity extends InanimateEntity {
 
 	public double getSpeed() {
 		return speed;
+	}
+	
+	public int getMultiplayerID() {
+		return multiplayerID;
 	}
 	
 }

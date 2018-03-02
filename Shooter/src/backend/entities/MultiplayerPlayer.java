@@ -1,5 +1,9 @@
 package backend.entities;
 
+import backend.projectiles.Ball;
+import backend.projectiles.Missile;
+import backend.projectiles.Projectile;
+import backend.projectiles.ProjectileType;
 import ui.MPGame;
 
 /**
@@ -11,12 +15,18 @@ public class MultiplayerPlayer extends Player {
 	/** The players nickname. */
 	private String playerName;
 	public boolean shouldFire;
+	public int fireID;
 
 	public MultiplayerPlayer(float x, float y, String playerName) {
 		super(x, y);
 		this.playerName = playerName;
 	}
 	
+	public MultiplayerPlayer(int x, int y, String playerName, int id) {
+		super(x, y, id);
+		this.playerName = playerName;
+	}
+
 	@Override
 	public void update(float delta) {
 		lightTimer += delta;
@@ -58,6 +68,31 @@ public class MultiplayerPlayer extends Player {
 			xDelta = 0;
 			setX(tempX);
 		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		System.out.println("im dead");
+	}
+	
+	/**
+	 * Handles the players firing in multiplayer.
+	 * @param delta the time since the last frame was rendered.
+	 * @param type the type of projectile to fire
+	 * @return null if the validation isn't met or a projectile object to be fired
+	 */
+	public Projectile fire(float delta, String type, ProjectileType pType) {
+		if (type.equals("Light") && lightTimer >= LGIHT_CD) {
+			lightTimer = 0;
+			return new Ball(getCenterX(), getCenterY(), getRotation(), fireID, pType);
+		}
+		
+		if (type.equals("Heavy") && heavyTimer >= HEAVY_CD) {
+			heavyTimer = 0;
+			return new Missile(getCenterX(), getCenterY(), getRotation(), fireID, pType);
+		}
+		
+		return null; //return nothing if the validation is not passed
 	}
 	
 	public void moveUp(float delta) {

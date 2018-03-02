@@ -4,10 +4,8 @@
 /Vector Waves.ttf
 /asteroid.png
 /atari_boom.wav
-/backend/
 /bullets.png
 /bullets.txt
-/database/
 /dropship.png
 /dropship.txt
 /ecpxlosion.txt
@@ -20,9 +18,11 @@
 /laserShip.png
 /laserfire01.ogg
 /missile.png
-/networking/
 /powerups/
 /redPlanet.png
+/backend/
+/database/
+/networking/
 /redPlanet.txt
 /rumble.txt
 /sb2.jpg

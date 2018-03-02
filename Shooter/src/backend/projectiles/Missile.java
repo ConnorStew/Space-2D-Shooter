@@ -35,6 +35,16 @@ public class Missile extends Projectile {
 		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
 	}
 
+	public Missile(float x, float y, float r, int id) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", ProjectileType.PLAYER, id);
+		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
+	}
+
+	public Missile(float x, float y, float r, int id, ProjectileType pType) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", pType, id);
+		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
+	}
+
 	@Override
 	public void onDestroy() {}
 

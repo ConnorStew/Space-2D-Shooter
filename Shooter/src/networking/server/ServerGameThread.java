@@ -12,6 +12,8 @@ public class ServerGameThread extends Thread implements ServerListener {
 	/** The room containing clients playing this game. */
 	private Room room;
 	
+	private int lastIDAssigned = 0;
+	
 	public ServerGameThread(Room toHost) {
 		room = toHost;
 	}
@@ -29,7 +31,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 		//tell the clients to add the player characters to the game
 		for (Client client : room.getClients())
 			for (Client client2 : room.getClients())
-				NetworkUtils.sendMessage("ADDPLAYER/" + client2.getNickname(), client.getOutputStream());
+				NetworkUtils.sendMessage("ADDPLAYER/" + client2.getNickname() +  "/" + (++lastIDAssigned), client.getOutputStream());
 		
 	}
 
@@ -76,7 +78,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				NetworkUtils.sendMessage("SHOOTL/" + client.getNickname(), aClient.getOutputStream());
+				NetworkUtils.sendMessage("SHOOTL/" + client.getNickname() +  "/" + (++lastIDAssigned), aClient.getOutputStream());
 		}
 		
 		if (command.equals("RMB")) {
@@ -84,7 +86,7 @@ public class ServerGameThread extends Thread implements ServerListener {
 			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				NetworkUtils.sendMessage("SHOOTR/" + client.getNickname(), aClient.getOutputStream());
+				NetworkUtils.sendMessage("SHOOTR/" + client.getNickname() +  "/" + (++lastIDAssigned), aClient.getOutputStream());
 		}
 		
 		if (command.equals("ROTATE")) {
@@ -93,6 +95,15 @@ public class ServerGameThread extends Thread implements ServerListener {
 			//tell all clients to let rotate that player
 			for (Client aClient : room.getClients())
 				NetworkUtils.sendMessage("ROTATE/" + client.getNickname() + "/" + arguments[0], aClient.getOutputStream());
+		}
+		
+		if (command.equals("REMOVE")) {
+			String id = arguments[0];
+			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has requested an entity be deleted at id " + id);
+			
+			//tell all clients to let rotate that player
+			for (Client aClient : room.getClients())
+				NetworkUtils.sendMessage("DELETE/" + id, aClient.getOutputStream());
 		}
 		
 	}

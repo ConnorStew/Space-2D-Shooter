@@ -19,6 +19,14 @@ public class Ball extends Projectile {
 		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY);
 	}
 
+	public Ball(float x, float y, float r, int id) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY, id);
+	}
+
+	public Ball(float x, float y, float r, int id, ProjectileType pType) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", pType, id);
+	}
+
 	@Override
 	public void onDestroy() {}
 

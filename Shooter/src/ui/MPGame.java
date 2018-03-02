@@ -16,6 +16,7 @@ import backend.entities.Entity;
 import backend.entities.InanimateEntity;
 import backend.entities.MultiplayerPlayer;
 import backend.projectiles.Projectile;
+import backend.projectiles.ProjectileType;
 import networking.NetworkUtils;
 import networking.client.Client;
 import networking.client.ClientListener;
@@ -50,8 +51,6 @@ public class MPGame implements Screen, ClientListener {
 	private MultiplayerPlayer player;
 	
 	private Vector3 oldPos;
-	
-	private CopyOnWriteArrayList<Projectile> myProjectiles  = new CopyOnWriteArrayList<Projectile>();
 	
 	public MPGame(Client client) {
 		this.client = client;
@@ -139,15 +138,44 @@ public class MPGame implements Screen, ClientListener {
 				font.draw(batch, toDraw.getPlayerName(), toDraw.getCenterX(), toDraw.getCenterY());
 				
 				if (toDraw.shouldFire == true) {
-					Projectile toFire = toDraw.fire(Gdx.graphics.getDeltaTime(), "Light");
+					Projectile toFire;
+					if (toDraw.getPlayerName().equals(client.getNickname())) {
+						toFire = toDraw.fire(Gdx.graphics.getDeltaTime(), "Light", ProjectileType.PLAYER);
+					} else {
+						toFire = toDraw.fire(Gdx.graphics.getDeltaTime(), "Light", ProjectileType.ENEMEY);
+					}
+					
+					
+					
 					if (toFire != null) {
-						activeEntities.add(toFire);
+						activeEntities.add(toFire);	
 						toDraw.shouldFire = false;
 					}
 				}
 			}
 		}
 
+		//check for collisions between entities and this clients projectiles
+		for (Entity e1 : activeEntities) {
+			for (Entity e2 : activeEntities) {
+				if (!e1.equals(e2)) {
+					if (e1.getBoundingRectangle().overlaps(e2.getBoundingRectangle())) {
+						if (e1 instanceof Projectile)
+							activeEntities.remove(e1);
+						
+						if (e2 instanceof Projectile)
+							activeEntities.remove(e2);
+						
+						if (e1.onCollision(e2)) {
+							NetworkUtils.sendMessage("REMOVE/" + e1.getMultiplayerID() , client.getOutputStream());
+						}
+						if (e2.onCollision(e1)) {
+							NetworkUtils.sendMessage("REMOVE/" + e2.getMultiplayerID() , client.getOutputStream());
+						}
+					}//end checking for collisions
+				}
+			}//end e2 loop
+		}//end e1 loop
 
 		//draw 
 		for (Entity entity : activeEntities)
@@ -199,7 +227,7 @@ public class MPGame implements Screen, ClientListener {
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
-					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName);
+					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName, Integer.parseInt(arguments[1]));
 					activeEntities.add(toAdd);
 					if (toAdd.getPlayerName().equals(client.getNickname()))
 						player = toAdd;
@@ -242,9 +270,21 @@ public class MPGame implements Screen, ClientListener {
 				if (isEntityPlayer(entity, arguments[0])) {
 					MultiplayerPlayer mp = (MultiplayerPlayer) entity;
 					mp.shouldFire = true;
-
+					mp.fireID = Integer.parseInt(arguments[1]);
 				}
 			}
+		}
+		
+		if (command.equals("DELETE")) {
+			int id = Integer.parseInt(arguments[0]);
+			
+			for (Entity entity : activeEntities) {
+				if (entity.getMultiplayerID() == id) {
+					entity.onDestroy();
+					activeEntities.remove(entity);
+				}
+			}
+
 		}
 		
 	}
