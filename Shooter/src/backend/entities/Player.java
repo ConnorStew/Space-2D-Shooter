@@ -8,7 +8,6 @@ import backend.projectiles.Beam;
 import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
-import ui.MenuScreen;
 import ui.SPGame;
 import ui.ScoreScreen;
 import ui.UI;
@@ -32,7 +31,7 @@ public class Player extends Entity {
 	protected final double MAX_SPEED = 15;
 	
 	/** The maximum amount of health the player can have. */
-	private final static int MAX_HEALTH= 20;
+	protected final static int MAX_HEALTH= 20;
 	
 	/** The players current speed. */
 	protected static int speed = 20;
@@ -108,8 +107,8 @@ public class Player extends Entity {
 			reduceHealth(((Enemy) collidedWith).getDamage());
 		
 		if (collidedWith instanceof Projectile) {
-			//if colliding with an enemy projectile
-			if (((Projectile) collidedWith).getType().equals(ProjectileType.ENEMEY)) {
+			//if colliding with a projectile thats not the players
+			if (!((Projectile) collidedWith).getType().equals(ProjectileType.PLAYER)) {
 				reduceHealth(((Projectile) collidedWith).getDamage());
 			}
 		}

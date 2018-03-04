@@ -14,8 +14,9 @@ public class MultiplayerPlayer extends Player {
 	
 	/** The players nickname. */
 	private String playerName;
-	public boolean shouldFire;
-	public int fireID;
+	
+	/** Whether this player should fire. */
+	private boolean shouldFire;
 
 	public MultiplayerPlayer(float x, float y, String playerName) {
 		super(x, y);
@@ -70,26 +71,22 @@ public class MultiplayerPlayer extends Player {
 		}
 	}
 	
-	@Override
-	public void onDestroy() {
-		System.out.println("im dead");
-	}
-	
 	/**
 	 * Handles the players firing in multiplayer.
 	 * @param delta the time since the last frame was rendered.
 	 * @param type the type of projectile to fire
+	 * @param id 
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
-	public Projectile fire(float delta, String type, ProjectileType pType) {
-		if (type.equals("Light") && lightTimer >= LGIHT_CD) {
+	public Projectile fire(float delta, String type, ProjectileType pType, int id) {
+		if (type.equals("Light")) {
 			lightTimer = 0;
-			return new Ball(getCenterX(), getCenterY(), getRotation(), fireID, pType);
+			return new Ball(getCenterX(), getCenterY(), getRotation(), id, pType, this);
 		}
 		
-		if (type.equals("Heavy") && heavyTimer >= HEAVY_CD) {
+		if (type.equals("Heavy")) {
 			heavyTimer = 0;
-			return new Missile(getCenterX(), getCenterY(), getRotation(), fireID, pType);
+			return new Missile(getCenterX(), getCenterY(), getRotation(), id, pType, this);
 		}
 		
 		return null; //return nothing if the validation is not passed
@@ -119,6 +116,24 @@ public class MultiplayerPlayer extends Player {
 		return playerName;
 	}
 
+	public boolean shouldFire() {
+		return shouldFire;
+	}
+
+	public void setShouldFire(boolean shouldFire) {
+		this.shouldFire = shouldFire;
+	}
+
+	public boolean canFireLight() {
+		return lightTimer >= LGIHT_CD;
+	}
 	
+	public boolean canFireHeavy() {
+		return heavyTimer >= HEAVY_CD;
+	}
+
+	public void resetHealth() {
+		health = MAX_HEALTH;
+	}
 
 }

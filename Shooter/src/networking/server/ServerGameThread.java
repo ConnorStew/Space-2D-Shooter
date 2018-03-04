@@ -12,10 +12,12 @@ public class ServerGameThread extends Thread implements ServerListener {
 	/** The room containing clients playing this game. */
 	private Room room;
 	
-	private int lastIDAssigned = 0;
-	
+	/** The last multiplayer ID assigned to an entity. */
+	private int lastIDAssigned;
+		
 	public ServerGameThread(Room toHost) {
 		room = toHost;
+		lastIDAssigned = 0;
 	}
 	
 	@Override
@@ -29,10 +31,14 @@ public class ServerGameThread extends Thread implements ServerListener {
 		}
 		
 		//tell the clients to add the player characters to the game
-		for (Client client : room.getClients())
-			for (Client client2 : room.getClients())
-				NetworkUtils.sendMessage("ADDPLAYER/" + client2.getNickname() +  "/" + (++lastIDAssigned), client.getOutputStream());
+		for (Client client : room.getClients()) {
+			for (Client client2 : room.getClients()) {
+				NetworkUtils.sendMessage("ADDPLAYER/" + client2.getNickname() + "/" + (++lastIDAssigned), client.getOutputStream());
+			}
+			lastIDAssigned = 0;
+		}
 		
+		lastIDAssigned = room.getClients().size();
 	}
 
 	@Override
@@ -76,17 +82,21 @@ public class ServerGameThread extends Thread implements ServerListener {
 		if (command.equals("LMB")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the left mouse button.");
 			
+			lastIDAssigned++;
+			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				NetworkUtils.sendMessage("SHOOTL/" + client.getNickname() +  "/" + (++lastIDAssigned), aClient.getOutputStream());
+				NetworkUtils.sendMessage("SHOOTL/" + client.getNickname() + "/" + lastIDAssigned, aClient.getOutputStream());
 		}
 		
 		if (command.equals("RMB")) {
 			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has pressed the right mouse button.");
 			
+			lastIDAssigned++;
+			
 			//tell all clients to let that player shoot
 			for (Client aClient : room.getClients())
-				NetworkUtils.sendMessage("SHOOTR/" + client.getNickname() +  "/" + (++lastIDAssigned), aClient.getOutputStream());
+				NetworkUtils.sendMessage("SHOOTR/" + client.getNickname() + "/" + lastIDAssigned, aClient.getOutputStream());
 		}
 		
 		if (command.equals("ROTATE")) {
@@ -97,13 +107,14 @@ public class ServerGameThread extends Thread implements ServerListener {
 				NetworkUtils.sendMessage("ROTATE/" + client.getNickname() + "/" + arguments[0], aClient.getOutputStream());
 		}
 		
-		if (command.equals("REMOVE")) {
-			String id = arguments[0];
-			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has requested an entity be deleted at id " + id);
+		if (command.equals("HIT")) {
+			String playerID = arguments[0]; //id of the player
+			String projectileID = arguments[1]; //id of the projectile
+			System.out.println(getClass().getName() + ">>>" + client.getNickname() + " has reported a collision between id " + playerID + " and id " + projectileID);
 			
-			//tell all clients to let rotate that player
+			//tell all clients to react to the collision
 			for (Client aClient : room.getClients())
-				NetworkUtils.sendMessage("DELETE/" + id, aClient.getOutputStream());
+				NetworkUtils.sendMessage("RESOLVE_COLLISION/" + playerID + "/" + projectileID, aClient.getOutputStream());
 		}
 		
 	}

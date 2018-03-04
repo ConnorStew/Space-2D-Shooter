@@ -11,6 +11,9 @@ public enum ProjectileType {
 	PLAYER(), 
 	
 	/** A projectile that was fired by an enemy. */
-	ENEMEY();
+	ENEMEY(),
+	
+	/** A projectile filed by a player in multiplayer. */
+	PVP();
 	
 }

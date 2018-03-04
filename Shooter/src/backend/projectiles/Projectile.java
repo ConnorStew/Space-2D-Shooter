@@ -19,6 +19,9 @@ public abstract class Projectile extends Entity {
 	
 	/** The type of projectile. */
 	private final ProjectileType type;
+
+	/** The entity that fired this projectile. */
+	private MultiplayerPlayer firedBy;
 	
 	/**
 	 * Creates a bullet at an x/y location.
@@ -42,11 +45,24 @@ public abstract class Projectile extends Entity {
 		moveForward(2.5); //move the bullet in front of the ship
 	}
 	
-	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type, int id) {
+	/**
+	 * Multiplayer projectile.
+	 * @param x
+	 * @param y
+	 * @param rotation
+	 * @param damage
+	 * @param speed
+	 * @param size
+	 * @param imageLocation
+	 * @param type
+	 * @param id
+	 */
+	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type, int id, MultiplayerPlayer firedBy) {
 		super(imageLocation, 0, speed, id); //zero because projectiles do not have health
 
 		this.type = type;
 		this.damage = damage;
+		this.firedBy = firedBy;
 			
 		setSize(size, size);
 		setPosition(x - (getWidth() / 2), y - (getHeight() / 2)); //center the bullet in the middle of the ship
@@ -89,6 +105,10 @@ public abstract class Projectile extends Entity {
 	 */
 	public ProjectileType getType() {
 		return type;
+	}
+	
+	public MultiplayerPlayer getFiredBy() {
+		return firedBy;
 	}
 	
 }

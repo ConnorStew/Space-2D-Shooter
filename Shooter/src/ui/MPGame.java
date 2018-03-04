@@ -29,8 +29,11 @@ public class MPGame implements Screen, ClientListener {
 
 	private Client client;
 	
-	/** Entities that are currently active in the game. */
-	private CopyOnWriteArrayList<Entity> activeEntities  = new CopyOnWriteArrayList<Entity>();
+	/** Players that are currently active in the game. */
+	private CopyOnWriteArrayList<MultiplayerPlayer> players  = new CopyOnWriteArrayList<MultiplayerPlayer>();
+	
+	/** Projectiles that are currently active in the game. */
+	private CopyOnWriteArrayList<Projectile> projectiles  = new CopyOnWriteArrayList<Projectile>();
 	
 	/** Font used to display score. */
 	private BitmapFont font;
@@ -50,7 +53,11 @@ public class MPGame implements Screen, ClientListener {
 	/** This clients player. */
 	private MultiplayerPlayer player;
 	
-	private Vector3 oldPos;
+	/** The last rotation that was sent to the server. */
+	private float oldRotation;
+
+	/** The last multiplayer ID assigned to an entity. */
+	private int lastIDAssigned;
 	
 	public MPGame(Client client) {
 		this.client = client;
@@ -61,6 +68,7 @@ public class MPGame implements Screen, ClientListener {
 	public void show() {
 		System.out.println(getClass().getName() + ">>>Multiplayer game started!");
 		
+		lastIDAssigned = 0;
 		
 		//instantiate map
 		map = new InanimateEntity("redPlanet.png", MPGame.GAME_WIDTH, MPGame.GAME_HEIGHT);
@@ -102,15 +110,15 @@ public class MPGame implements Screen, ClientListener {
 		Vector3 mousePos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
 		cam.unproject(mousePos);
 
-		if (mousePos != oldPos) {
-			//rotate the player towards the mouse
-			player.rotateTowards(mousePos.x, mousePos.y);
-			player.setRotation(player.getRotation() - 90); //-90 due to how the player sprite is drawn
+		//rotate the player towards the mouse
+		player.rotateTowards(mousePos.x, mousePos.y);
+		player.setRotation(player.getRotation() - 90); //-90 due to how the player sprite is drawn
 			
-			oldPos = mousePos;
+		if (Math.floor(player.getRotation()) != oldRotation) {
+			oldRotation = (float) Math.floor(player.getRotation());
 			NetworkUtils.sendMessage("ROTATE/" + Math.floor(player.getRotation()), client.getOutputStream());
 		}
-
+		
 		//set the camera as the view
 		batch.setProjectionMatrix(cam.combined);
 
@@ -121,65 +129,49 @@ public class MPGame implements Screen, ClientListener {
 		if (player.getCenterX() - cam.viewportWidth > 0 && player.getCenterX() + cam.viewportWidth < map.getWidth())
 			cam.position.x = player.getCenterX();
 		
-		//update entities
-		for (Entity entity : activeEntities)
-			entity.update(delta);
+		//update players
+		for (MultiplayerPlayer player : players)
+			player.update(delta);
+		
+		//update projectile
+		for (Projectile projectile : projectiles)
+			projectile.update(delta);
+
+		//check for collisions between players and projectiles
+		for (MultiplayerPlayer player : players) {
+			for (Projectile projectile : projectiles) {
+				if (projectile.getBoundingRectangle().overlaps(player.getBoundingRectangle())) {
+					//a projectile has collided with the player
+					
+					//skip this projectile if it collides with the player that fired it
+					if (projectile.getFiredBy().equals(player))
+						continue;
+					
+					//if this projectile was fired by this client notify the server
+					if (projectile.getFiredBy().getPlayerName().equals(client.getNickname()))
+						NetworkUtils.sendMessage("HIT/" + player.getMultiplayerID() + "/" + projectile.getMultiplayerID(), client.getOutputStream());
+				}
+			}
+		}
 		
 		//start drawing sprites
-		batch.begin();
+		batch.begin(); 
 		
 		//draw background
 		map.draw(batch);
 		
-		
-		for (Entity entity : activeEntities) {
-			if (entity instanceof MultiplayerPlayer) {
-				MultiplayerPlayer toDraw = (MultiplayerPlayer) entity;
-				font.draw(batch, toDraw.getPlayerName(), toDraw.getCenterX(), toDraw.getCenterY());
-				
-				if (toDraw.shouldFire == true) {
-					Projectile toFire;
-					if (toDraw.getPlayerName().equals(client.getNickname())) {
-						toFire = toDraw.fire(Gdx.graphics.getDeltaTime(), "Light", ProjectileType.PLAYER);
-					} else {
-						toFire = toDraw.fire(Gdx.graphics.getDeltaTime(), "Light", ProjectileType.ENEMEY);
-					}
-					
-					
-					
-					if (toFire != null) {
-						activeEntities.add(toFire);	
-						toDraw.shouldFire = false;
-					}
-				}
-			}
+		for (MultiplayerPlayer player : players) {
+			//draw the players name
+			font.draw(batch, player.getPlayerName(), player.getCenterX(), player.getCenterY());
 		}
 
-		//check for collisions between entities and this clients projectiles
-		for (Entity e1 : activeEntities) {
-			for (Entity e2 : activeEntities) {
-				if (!e1.equals(e2)) {
-					if (e1.getBoundingRectangle().overlaps(e2.getBoundingRectangle())) {
-						if (e1 instanceof Projectile)
-							activeEntities.remove(e1);
-						
-						if (e2 instanceof Projectile)
-							activeEntities.remove(e2);
-						
-						if (e1.onCollision(e2)) {
-							NetworkUtils.sendMessage("REMOVE/" + e1.getMultiplayerID() , client.getOutputStream());
-						}
-						if (e2.onCollision(e1)) {
-							NetworkUtils.sendMessage("REMOVE/" + e2.getMultiplayerID() , client.getOutputStream());
-						}
-					}//end checking for collisions
-				}
-			}//end e2 loop
-		}//end e1 loop
-
-		//draw 
-		for (Entity entity : activeEntities)
-			entity.draw(batch);
+		//draw players
+		for (MultiplayerPlayer player : players)
+			player.draw(batch);
+		
+		//draw projectiles
+		for (Projectile projectile : projectiles)
+			projectile.draw(batch);
 		
 		//stop drawing sprites
 		batch.end();
@@ -188,12 +180,10 @@ public class MPGame implements Screen, ClientListener {
 		sr.begin(ShapeRenderer.ShapeType.Filled);
 		
 		//draw health bars
-		for (Entity entity : activeEntities)
+		for (Entity entity : players)
 			if (entity.hasHealth())
-				entity.drawHP(sr, cam); //draw health bar
+				entity.drawHP(sr, cam);
 
-		
-		
 		//stop drawing shapes
 		sr.end();
 	}
@@ -227,8 +217,8 @@ public class MPGame implements Screen, ClientListener {
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
-					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName, Integer.parseInt(arguments[1]));
-					activeEntities.add(toAdd);
+					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName, (++lastIDAssigned));
+					players.add(toAdd);
 					if (toAdd.getPlayerName().equals(client.getNickname()))
 						player = toAdd;
 				}
@@ -238,7 +228,8 @@ public class MPGame implements Screen, ClientListener {
 		
 		if (command.equals("MOVE")) {
 			MultiplayerPlayer toMove = null;
-			for (Entity entity : activeEntities) {
+			
+			for (Entity entity : players) {
 				if (isEntityPlayer(entity, arguments[0])) {
 					toMove = (MultiplayerPlayer) entity;
 					
@@ -261,34 +252,73 @@ public class MPGame implements Screen, ClientListener {
 		}
 		
 		if (command.equals("ROTATE"))
-			for (Entity entity : activeEntities)
+			for (Entity entity : players)
 				if (isEntityPlayer(entity, arguments[0]))
 					((MultiplayerPlayer) entity).setRotation(Float.parseFloat(arguments[1]));
 		
 		if (command.equals("SHOOTL")) {
-			for (Entity entity : activeEntities) {
-				if (isEntityPlayer(entity, arguments[0])) {
-					MultiplayerPlayer mp = (MultiplayerPlayer) entity;
-					mp.shouldFire = true;
-					mp.fireID = Integer.parseInt(arguments[1]);
+			String playerNickname = arguments[0];
+			String fireID = arguments[1];
+			for (MultiplayerPlayer player : players) {
+				if (player.getPlayerName().equals(playerNickname)) {
+					
+					Gdx.app.postRunnable(new Runnable(){
+						@Override
+						public void run() {
+							Projectile toFire = player.fire(Gdx.graphics.getDeltaTime(), "Light", ProjectileType.PVP, Integer.parseInt(fireID));
+							projectiles.add(toFire);	
+						}
+					});
+					
 				}
 			}
 		}
 		
-		if (command.equals("DELETE")) {
-			int id = Integer.parseInt(arguments[0]);
+		if (command.equals("RESOLVE_COLLISION")) {
+			int playerID = Integer.parseInt(arguments[0]);
+			int projectileID = Integer.parseInt(arguments[1]);
+			Projectile collidedWith = getProjectileByID(projectileID);
+			MultiplayerPlayer player = getPlayerByID(playerID);
 			
-			for (Entity entity : activeEntities) {
-				if (entity.getMultiplayerID() == id) {
-					entity.onDestroy();
-					activeEntities.remove(entity);
+			try {
+				player.reduceHealth(collidedWith.getDamage());
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				System.out.println("Cannot find projectile with id " + projectileID);
+				for (Projectile projectile : projectiles) {
+					System.out.println("id: " + projectile.getMultiplayerID());
 				}
 			}
+			
+			
+			if (player.getHealth() <= 0) {
+				player.resetHealth();
+				player.setPosition(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+			}
+			
+			//remove the projectile from the game
+			projectiles.remove(collidedWith);
 
 		}
 		
 	}
 	
+	private Projectile getProjectileByID(int projectileID) {
+		for (Projectile projectile : projectiles)
+			if (projectile.getMultiplayerID() == projectileID)
+				return projectile;
+		
+		return null;
+	}
+	
+	private MultiplayerPlayer getPlayerByID(int playerID) {
+		for (MultiplayerPlayer player : players)
+			if (player.getMultiplayerID() == playerID)
+				return player;
+		
+		return null;
+	}
+
 	/**
 	 * Checks if an entity is a multiplayer player with the correct nickname
 	 * @param toCheck the entity to check
@@ -319,10 +349,10 @@ public class MPGame implements Screen, ClientListener {
 		if (Gdx.input.isKeyPressed(Input.Keys.A)) 
 			NetworkUtils.sendMessage("L_PRESS", client.getOutputStream());
 			
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && player.canFireLight())
 			NetworkUtils.sendMessage("LMB", client.getOutputStream());
 			
-		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && player.canFireHeavy())
 			NetworkUtils.sendMessage("RMB", client.getOutputStream());
 	}
 

@@ -3,6 +3,8 @@ package backend.projectiles;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 
+import backend.entities.MultiplayerPlayer;
+
 /**
  * A slow moving high damage projectile.
  * @author Connor Stewart
@@ -35,13 +37,13 @@ public class Missile extends Projectile {
 		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
 	}
 
-	public Missile(float x, float y, float r, int id) {
-		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", ProjectileType.PLAYER, id);
+	public Missile(float x, float y, float r, int id, MultiplayerPlayer firedBy) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", ProjectileType.PLAYER, id, firedBy);
 		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
 	}
 
-	public Missile(float x, float y, float r, int id, ProjectileType pType) {
-		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", pType, id);
+	public Missile(float x, float y, float r, int id, ProjectileType pType, MultiplayerPlayer firedBy) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "missile.png", pType, id, firedBy);
 		missileSound.setVolume(missileSound.play(), MISSILE_SOUND_VOLUME);
 	}
 
