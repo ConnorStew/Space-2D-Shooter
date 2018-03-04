@@ -31,7 +31,7 @@ public class MenuScreen implements Screen {
 	@Override
 	public void show() {
 		//make background
-		Image background = new Image(new Texture(Gdx.files.internal("res/space.png")));
+		Image background = new Image(new Texture(Gdx.files.internal("space.png")));
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		
@@ -70,11 +70,11 @@ public class MenuScreen implements Screen {
 		
 		//goto the game screen if the play button is pressed
 		if (btnPlay.isPressed())
-			UI.changeScreen(UI.GAME_SCREEN);
+			UI.getInstance().setScreen(new SPGame());
 		
 		//goto the multiplayer screen if the multiplayer button is pressed
 		if (btnMultiplayer.isPressed()) 
-			UI.changeScreen(UI.MULTIPLAYER_SCREEN);
+			UI.getInstance().setScreen(MultiplayerScreen.getInstance());
 			
 		//quit when the quit button is pressed
 		if (btnQuit.isPressed())

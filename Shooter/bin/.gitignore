@@ -1,3 +1,13 @@
+/AstronBoyWonder.ttf
+/Explosion.png
+/Star Trek Enterprise Future.ttf
+/Vector Waves.ttf
+/asteroid.png
+/atari_boom.wav
+/bullets.png
+/bullets.txt
+/dropship.png
+/dropship.txt
 /ecpxlosion.txt
 /enemy.png
 /explosion.txt
@@ -10,20 +20,14 @@
 /missile.png
 /powerups/
 /redPlanet.png
+/backend/
+/database/
+/networking/
 /redPlanet.txt
 /rumble.txt
 /sb2.jpg
 /ship.png
 /space.png
-/client/
-/database/
-/effects/
-/enemies/
-/entities/
-/logic/
-/pickups/
-/projectiles/
-/server/
 /spaceship - Copy.png
 /spaceship.png
 /spaceship.txt

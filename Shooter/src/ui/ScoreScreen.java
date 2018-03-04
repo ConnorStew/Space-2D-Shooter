@@ -31,9 +31,6 @@ import database.ScoreDAO;
  */
 public class ScoreScreen implements Screen {
 	
-	/** The singleton instance of this class. */
-	private final static ScoreScreen instance = new ScoreScreen();
-	
 	/** The stage to display elements. */
 	private Stage stage;
 	
@@ -52,8 +49,11 @@ public class ScoreScreen implements Screen {
 	
 	private boolean uploaded;
 	
-	/** {@link #getInstance()} should be used to obtain an instance of this class.  */
-	private ScoreScreen(){};
+	private int score;
+	
+	public ScoreScreen(int score){
+		this.score = score;
+	};
 
 	@Override
 	public void show() {
@@ -87,7 +87,7 @@ public class ScoreScreen implements Screen {
 		stage = new Stage(new StretchViewport(900, 700));
 		
 		//initialising the score label
-		lblScore = new Label("Score:" + GameScreen.getScore(), UI.labelStyle);
+		lblScore = new Label("Score:" + score, UI.labelStyle);
 		lblScore.setPosition((Gdx.graphics.getWidth() / 2) - lblScore.getWidth() / 2, Gdx.graphics.getHeight() - 110);
 		
 		//allowing the stage to receive input events
@@ -174,7 +174,7 @@ public class ScoreScreen implements Screen {
 				
 			} else {
 				ScoreDAO sDAO = new ScoreDAO();
-				sDAO.uploadScore(txtName.getText().toUpperCase(), GameScreen.getScore());
+				sDAO.uploadScore(txtName.getText().toUpperCase(), score);
 				updateScores();
 				txtName.setDisabled(true);
 				txtName.setText("");
@@ -184,7 +184,7 @@ public class ScoreScreen implements Screen {
 		}
 		
 		if (btnBack.isPressed()) {
-			UI.changeScreen(UI.MENU_SCREEN);
+			UI.getInstance().setScreen(MenuScreen.getInstance());
 		}
 
 	}
@@ -206,13 +206,6 @@ public class ScoreScreen implements Screen {
 	@Override
 	public void dispose() {
 		stage.dispose();
-	}
-
-	/**
-	 * @return singleton instance of this class
-	 */
-	public static Screen getInstance() {
-		return instance;
 	}
 
 }

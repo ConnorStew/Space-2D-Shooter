@@ -1,6 +1,5 @@
 package ui;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
@@ -23,19 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
  * @author Connor Stewart
  */
 public class UI extends Game {
-	
-	/** Screen code for the game screen. */
-	public static final int GAME_SCREEN = 0;
-	
-	/** Screen code for the menu screen. */
-	public static final int MENU_SCREEN = 1;
-	
-	/** Screen code for the score screen. */
-	public static final int SCORE_SCREEN = 2;
-	
-	/** Screen code for the multiplayer screen. */
-	public static final int MULTIPLAYER_SCREEN = 3;
-	
+
 	/** Singleton instance of the main game. */
 	private static final UI instance = new UI();
 	
@@ -64,7 +50,7 @@ public class UI extends Game {
 	public void create() {
 		loadFont();
 		initialiseStyles();
-
+		
 		//default to the menu screen
 		setScreen(MenuScreen.getInstance());
 	}
@@ -78,33 +64,11 @@ public class UI extends Game {
 	}
 	
 	/**
-	 * Changes the screen currently being displayed by the game.
-	 * @param screenCode a screen code
-	 */
-	public static void changeScreen(int screenCode) {
-		switch (screenCode) {
-			case 0:
-				instance.setScreen(GameScreen.getInstance());
-				break;
-			case 1:
-				instance.setScreen(MenuScreen.getInstance());
-				break;
-			case 2:
-				instance.setScreen(ScoreScreen.getInstance());
-				break;
-			case 3:
-				instance.setScreen(MultiplayerScreen.getInstance());
-				break;
-		}
-	}
-	
-	
-	/**
 	 * Loads the font.
 	 */
 	private void loadFont() {
 		//load the font
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("res/Star Trek Enterprise Future.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
 		
 		//setting font size
 		FreeTypeFontParameter fontParameter = new FreeTypeFontParameter();
@@ -132,10 +96,6 @@ public class UI extends Game {
 		buttonStyle = new TextButton.TextButtonStyle();
 		buttonStyle.font = font;
 		buttonStyle.up = b;
-		
-		
-		
-
 		
 		labelStyle = new Label.LabelStyle();
 		labelStyle.font = font;
@@ -167,7 +127,7 @@ public class UI extends Game {
 	/**
 	 * @return the singleton instance of this class
 	 */
-	public static ApplicationListener getInstance() {
+	public static Game getInstance() {
 		return instance;
 	}
 
