@@ -42,7 +42,7 @@ public class Dropship extends Enemy {
 	 * @param y the y location to spawn the dropship at
 	 */
 	public Dropship(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "dropship.png");
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "res/dropship.png");
 	}
 
 	@Override

@@ -31,7 +31,7 @@ public class Asteroid extends Enemy {
 	 * @param y the y location to spawn the asteroid at
 	 */
 	public Asteroid(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "asteroid.png");
+		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "res/asteroid.png");
 	}
 
 	@Override

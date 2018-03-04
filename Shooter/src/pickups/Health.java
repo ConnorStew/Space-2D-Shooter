@@ -9,7 +9,7 @@ import effects.Heal;
 public class Health extends Pickup {
 
 	public Health(int x, int y) {
-		super("powerups/health.png", new Heal());
+		super("res/powerups/health.png", new Heal());
 		setScale(0.05f);
 		setPosition(x, y);
 	}

@@ -2,12 +2,8 @@ package ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -25,9 +21,9 @@ public class MenuScreen implements Screen {
 	
 	/** The stage to display elements. */
 	private Stage stage;
-	
+		
 	/** Buttons. */
-	private TextButton btnPlay, btnQuit;
+	private TextButton btnPlay, btnQuit, btnMultiplayer;
 	
 	/** {@link #getInstance()} should be used to obtain an instance of this class.  */
 	private MenuScreen(){};
@@ -35,37 +31,22 @@ public class MenuScreen implements Screen {
 	@Override
 	public void show() {
 		//make background
-		Image background = new Image(new Texture(Gdx.files.internal("space.png")));
+		Image background = new Image(new Texture(Gdx.files.internal("res/space.png")));
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		
-		//load the font
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
-		
-		FreeTypeFontParameter fontParameter = new FreeTypeFontParameter();
-		fontParameter.size = 100; //setting font size
-		
-		//creating the font based on the font parameters
-		BitmapFont font = generator.generateFont(fontParameter);
-		
-		//dispose the generator since its finished being used
-		generator.dispose();
-		
-		//set style for buttons
-		TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-		buttonStyle.font = font;
-		
 		//initialising the buttons
-		btnPlay = new TextButton("Play", buttonStyle);
+		btnPlay = new TextButton("Play", UI.buttonStyle);
 		btnPlay.setPosition(Gdx.graphics.getWidth() / 2 - btnPlay.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 20);
-		btnQuit = new TextButton("Quit", buttonStyle);
-		btnQuit.setPosition((btnPlay.getX() + btnQuit.getWidth() / 8) - 15, btnPlay.getY() - btnPlay.getHeight() + 20);
+		btnQuit = new TextButton("Quit", UI.buttonStyle);
+		btnQuit.setPosition((btnPlay.getX() + btnQuit.getWidth() / 8) - 10, btnPlay.getY() - btnPlay.getHeight() - 20);
+		btnMultiplayer = new TextButton("Multiplayer", UI.buttonStyle);
 		
 		//initialising the stage which will stretch
 		stage = new Stage(new StretchViewport(900, 700));
 		
 		//initialising the lose label
-		Label lblTitle = new Label("Space Defence", new Label.LabelStyle(font, Color.WHITE));
+		Label lblTitle = new Label("Space Defence", UI.labelStyle);
 		lblTitle.setPosition((Gdx.graphics.getWidth() / 2) - lblTitle.getWidth() / 2, Gdx.graphics.getHeight() - 100);
 		
 		//allowing the stage to receive input events
@@ -76,6 +57,7 @@ public class MenuScreen implements Screen {
 		stage.addActor(lblTitle);
 		stage.addActor(btnPlay);
 		stage.addActor(btnQuit);
+		stage.addActor(btnMultiplayer);
 	}
 
 	@Override
@@ -88,8 +70,13 @@ public class MenuScreen implements Screen {
 		
 		//goto the game screen if the play button is pressed
 		if (btnPlay.isPressed())
-			MainGame.changeScreen(MainGame.GAME_SCREEN);
+			UI.changeScreen(UI.GAME_SCREEN);
 		
+		//goto the multiplayer screen if the multiplayer button is pressed
+		if (btnMultiplayer.isPressed()) 
+			UI.changeScreen(UI.MULTIPLAYER_SCREEN);
+			
+		//quit when the quit button is pressed
 		if (btnQuit.isPressed())
 			Gdx.app.exit();
 	}

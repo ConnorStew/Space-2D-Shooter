@@ -16,7 +16,7 @@ public class Ball extends Projectile {
 	private static final int SIZE = 1;
 	
 	public Ball(float x, float y, float r) {
-		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY);
+		super(x, y, r, DAMAGE, SPEED, SIZE, "res/laserBeam.png", ProjectileType.ENEMEY);
 	}
 
 	@Override

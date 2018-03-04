@@ -4,12 +4,9 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,8 +18,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -69,60 +64,21 @@ public class ScoreScreen implements Screen {
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		
-		//font generator
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 100; //setting font size
-		
-		//creating font object
-		BitmapFont font = generator.generateFont(parameter);
-		
-		//getting rid of the generator since it will no longer be used
-		generator.dispose();
-		
-		//set style for buttons
-		TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-		buttonStyle.font = font;
-		
-		//black background
-		Sprite s = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.RGB888)));
-		s.setColor(Color.WHITE);
-		s.setAlpha(0.5f);
-		
-		Sprite invisible = new Sprite(new Texture(new Pixmap(2000, 50, Pixmap.Format.Alpha)));
-		//s.setColor(Color.alpha(0));
-		
-		//initialising list style
-		List.ListStyle lstStyle = new List.ListStyle();
-		lstStyle.font = font;
-		lstStyle.selection = new SpriteDrawable(invisible);
-		//lstStyle.selection = new SpriteDrawable(s);
-		lstStyle.background = new SpriteDrawable(s);
-		
 		//initialising score list
-		lstScores = new List<String>(lstStyle);
+		lstScores = new List<String>(UI.lstStyle);
 
-		//initialising scroll pane style
-		ScrollPane.ScrollPaneStyle scrStyle = new ScrollPane.ScrollPaneStyle();
-		
 		//initialising the scroll pane
-		pnlScroll = new ScrollPane(lstScores, scrStyle);
+		pnlScroll = new ScrollPane(lstScores, UI.scrStyle);
 		pnlScroll.setBounds(20, 100, 350, 400);
-		//lstScores.setAlignment(Align.center);
 		
 		//initialising the buttons
-		btnUpload = new TextButton("Upload", buttonStyle);
+		btnUpload = new TextButton("Upload", UI.buttonStyle);
 		btnUpload.setPosition(Gdx.graphics.getWidth() / 2 - btnUpload.getWidth() / 2 + 100, Gdx.graphics.getHeight() / 2 - 100);
 		
-		btnBack = new TextButton("Back", buttonStyle);
+		btnBack = new TextButton("Back", UI.buttonStyle);
 		btnBack.setPosition(btnUpload.getX() + 270, btnUpload.getY());
 		
-		//initialising the text field
-		TextField.TextFieldStyle tfs = new TextFieldStyle();
-		tfs.font = font;
-		tfs.fontColor = Color.WHITE;
-		tfs.background = new SpriteDrawable(s);
-		txtName = new TextField("", tfs);
+		txtName = new TextField("", UI.tfs);
 		txtName.setBounds(btnUpload.getX(), btnUpload.getY() + 150, 420, 100);
 		txtName.setMaxLength(3);
 		txtName.setAlignment(Align.center);
@@ -131,7 +87,7 @@ public class ScoreScreen implements Screen {
 		stage = new Stage(new StretchViewport(900, 700));
 		
 		//initialising the score label
-		lblScore = new Label("Score:" + GameScreen.getScore(), new Label.LabelStyle(font, Color.WHITE));
+		lblScore = new Label("Score:" + GameScreen.getScore(), UI.labelStyle);
 		lblScore.setPosition((Gdx.graphics.getWidth() / 2) - lblScore.getWidth() / 2, Gdx.graphics.getHeight() - 110);
 		
 		//allowing the stage to receive input events
@@ -228,7 +184,7 @@ public class ScoreScreen implements Screen {
 		}
 		
 		if (btnBack.isPressed()) {
-			MainGame.changeScreen(MainGame.MENU_SCREEN);
+			UI.changeScreen(UI.MENU_SCREEN);
 		}
 
 	}
