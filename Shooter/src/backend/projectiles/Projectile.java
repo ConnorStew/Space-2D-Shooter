@@ -20,8 +20,17 @@ public abstract class Projectile extends Entity {
 	/** The type of projectile. */
 	private final ProjectileType type;
 
-	/** The entity that fired this projectile. */
-	private MultiplayerPlayer firedBy;
+	/** The id of the entity that fired this projectile. */
+	private int playerID;
+	
+	/** The time since this projectile was last validated. */
+	private float timeSinceLastValidation = 0;
+	
+	/** The last validated x coordinate. */
+	private float oldx;
+	
+	/** The last validated y coordinate. */
+	private float oldy;
 	
 	/**
 	 * Creates a bullet at an x/y location.
@@ -57,12 +66,12 @@ public abstract class Projectile extends Entity {
 	 * @param type
 	 * @param id
 	 */
-	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type, int id, MultiplayerPlayer firedBy) {
+	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type, int id, int firedByID) {
 		super(imageLocation, 0, speed, id); //zero because projectiles do not have health
 
 		this.type = type;
 		this.damage = damage;
-		this.firedBy = firedBy;
+		this.playerID = firedByID;
 			
 		setSize(size, size);
 		setPosition(x - (getWidth() / 2), y - (getHeight() / 2)); //center the bullet in the middle of the ship
@@ -78,7 +87,7 @@ public abstract class Projectile extends Entity {
 				return true;
 		
 		if (collidedWith instanceof Player || collidedWith instanceof MultiplayerPlayer) //destroy the projectile if it collides with a player
-			if (type.equals(ProjectileType.ENEMEY)) //if the projectile was fired by an enemy
+			if (type.equals(ProjectileType.ENEMEY) || type.equals(ProjectileType.PVP)) //if the projectile was fired by an enemy
 				return true;
 		
 		if (collidedWith instanceof Asteroid)
@@ -91,6 +100,29 @@ public abstract class Projectile extends Entity {
 	@Override
 	public void update(float delta) {
 		moveForward(Gdx.graphics.getDeltaTime() * speed);
+	}
+	
+	/**
+	 * Checks if this projective has moved since the last update.
+	 * @param delta time since last frame was rendered
+	 * @return whether this projective should be destroyed
+	 */
+	public boolean isDead(float delta) {
+		timeSinceLastValidation = timeSinceLastValidation + delta;
+
+		if (timeSinceLastValidation > 0.05f) {
+
+			timeSinceLastValidation = 0;
+			if (getY() == oldy && getX() == oldx) {
+				return true;
+			}else {
+				oldx = getX();
+				oldy = getY();
+			}
+				
+		}
+		
+		return false;
 	}
 
 	/**
@@ -107,8 +139,16 @@ public abstract class Projectile extends Entity {
 		return type;
 	}
 	
-	public MultiplayerPlayer getFiredBy() {
-		return firedBy;
+	public int getFiredByID() {
+		return playerID;
+	}
+
+	public float getTimeSinceLastValidation() {
+		return timeSinceLastValidation;
+	}
+
+	public void setTimeSinceLastValidation(float timeSinceLastValidation) {
+		this.timeSinceLastValidation = timeSinceLastValidation;
 	}
 	
 }

@@ -5,13 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.ArrayList;
 import networking.client.Client;
-import networking.client.ClientListener;
-import networking.server.Server;
-import networking.server.ServerListener;
 
 public class MessageListener extends Thread {
-	
-
 	
 	private boolean startedCommand = false;
 	
@@ -19,25 +14,21 @@ public class MessageListener extends Thread {
 	
 	private Socket toListen;
 	
-	private Client client;
-	
-
-	
 	private boolean isServer;
 	
 	public MessageListener(Client toListen, Type type) {
-		this.toListen = toListen.getSocket();
-		this.client = toListen;
+		//this.toListen = toListen.getSocket();
 		
 		if (type.equals(Type.Client)) {
 			isServer = false;
-			setName(toListen.getNickname() + " Message listening Thread");
+			//setName(toListen.getNickname() + " Message listening Thread");
 		} else {
 			isServer = true;
 			setName("Server Message Listening Thread");
 		}
 		
 		setDaemon(true);
+		start();
 	}
 	
 	public void run() {
@@ -94,11 +85,11 @@ public class MessageListener extends Thread {
 					commandBuffer.clear();
 						
 					if (isServer) {
-						for (ServerListener listener : Server.getInstance().getListeners())
-							listener.messageReceived(client, toSend);
+						//for (ServerListener listener : Server.getInstance().getListeners())
+							//listener.messageReceived(client, toSend);
 					} else {
-						for (ClientListener listener : client.getListeners())
-							listener.messageReceived(toSend);
+						//for (ClientListener listener : client.getListeners())
+						//	listener.messageReceived(toSend);
 					}
 
 				}

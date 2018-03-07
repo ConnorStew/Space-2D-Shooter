@@ -61,7 +61,7 @@ public class Player extends Entity {
 	
 	//truncate rotation
 	
-	public Player(int x, int y, int id) {
+	public Player(float x, float y, int id) {
 		super("ship.png", MAX_HEALTH, speed, id);
 		setSize(3, 3);
 		setPosition(x, y);
@@ -126,6 +126,8 @@ public class Player extends Entity {
 
 	@Override
 	public void update(float delta) {
+		//lightTimer = lightTimer
+		
 		//increase momentum on button press
 		if (Gdx.input.isKeyPressed(Input.Keys.W) && yDelta < MAX_SPEED)
 			yDelta += (speed * delta);

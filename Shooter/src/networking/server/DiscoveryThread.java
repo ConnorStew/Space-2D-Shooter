@@ -18,7 +18,7 @@ public class DiscoveryThread extends Thread {
 		DatagramSocket socket = null;
 		
 		try {
-			socket = new DatagramSocket(Server.port, InetAddress.getLocalHost());
+			socket = new DatagramSocket(Server.SINGLE_PORT, InetAddress.getByName("0.0.0.0"));
 			socket.setBroadcast(true);
 			
 			while (true) {
@@ -36,13 +36,13 @@ public class DiscoveryThread extends Thread {
 				String message = new String(packet.getData()).trim();
 				if (message.equals("DISCOVERY_REQUEST")) {
 					//send the servers IP to the client
-					byte[] sendData = Server.server.getInetAddress().getHostAddress().getBytes();
+					//byte[] sendData = Server.server.getInetAddress().getHostAddress().getBytes();
 					
 					//send the data to the client
-					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-					socket.send(sendPacket);
+					//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
+					//socket.send(sendPacket);
 					
-					System.out.println(getClass().getName() + ">>>Sent packet to: " + packet.getAddress().getHostAddress());
+					//System.out.println(getClass().getName() + ">>>Sent packet to: " + packet.getAddress().getHostAddress());
 				}
 				
 				

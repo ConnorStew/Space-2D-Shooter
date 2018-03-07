@@ -16,6 +16,7 @@ public class Driver {
 			config.title = "Space Defence";
 			config.width = 900;
 			config.height = 700;
+			//config.fullscreen = true;
 			new LwjglApplication(UI.getInstance(), config);
 		}
 

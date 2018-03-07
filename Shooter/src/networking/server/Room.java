@@ -2,8 +2,6 @@ package networking.server;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import networking.client.Client;
-
 /**
  * This class represents a room that is being hosted on the server.
  * @author Connor Stewart
@@ -17,20 +15,16 @@ public class Room {
 	private int requiredPlayers;
 	
 	/** Clients in the room. */
-	private CopyOnWriteArrayList<Client> clients = new CopyOnWriteArrayList<Client>();
+	private CopyOnWriteArrayList<ClientInfo> clients = new CopyOnWriteArrayList<ClientInfo>();
 
 	public Room(String name, int requiredPlayers) {
 		this.name = name;
 		this.requiredPlayers = requiredPlayers;
 	}
 
-	public String getRoomName() {
-		return name;
-	}
-
-	public void addClient(Client client) {
-		System.out.println(getClass().getName() + ">>>" + client.getNickname() + " joined room '" + name + "'");
-		clients.add(client);
+	public void addClient(ClientInfo info) {
+		System.out.println(getClass().getSimpleName() + ">>>" + info.getNickname() + " joined room '" + name + ".");
+		clients.add(info);
 		
 		//game should start for all clients
 		if (clients.size() == requiredPlayers) {
@@ -38,14 +32,17 @@ public class Room {
 			Server.getInstance().startGame(this);
 		}
 	}
+	
+	public String getRoomName() {
+		return name;
+	}
 
-	public CopyOnWriteArrayList<Client> getClients() {
+	public CopyOnWriteArrayList<ClientInfo> getClients() {
 		return clients;
 	}
 
 	public int getRequiredPlayers() {
 		return requiredPlayers;
 	}
-
 	
 }

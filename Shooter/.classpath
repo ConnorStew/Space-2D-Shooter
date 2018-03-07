@@ -30,5 +30,10 @@
 			<attribute name="javadoc_location" value="https://libgdx.badlogicgames.com/nightlies/docs/api/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/byte-buddy-1.7.9.jar"/>
+	<classpathentry kind="lib" path="libs/byte-buddy-agent-1.7.9.jar"/>
+	<classpathentry kind="lib" path="libs/gdx-backend-headless.jar"/>
+	<classpathentry kind="lib" path="libs/mockito-core-2.15.5.jar"/>
+	<classpathentry kind="lib" path="libs/objenesis-2.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

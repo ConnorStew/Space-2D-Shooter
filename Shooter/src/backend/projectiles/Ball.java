@@ -1,7 +1,5 @@
 package backend.projectiles;
 
-import backend.entities.MultiplayerPlayer;
-
 /**
  * A fast moving low damage projectile.
  * @author Connor Stewart
@@ -21,12 +19,12 @@ public class Ball extends Projectile {
 		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY);
 	}
 
-	public Ball(float x, float y, float r, int id, MultiplayerPlayer firedBy) {
-		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY, id, firedBy);
+	public Ball(float x, float y, float r, int id, int firedByID) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", ProjectileType.ENEMEY, id, firedByID);
 	}
 
-	public Ball(float x, float y, float r, int id, ProjectileType pType, MultiplayerPlayer firedBy) {
-		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", pType, id, firedBy);
+	public Ball(float x, float y, float r, int id, ProjectileType pType, int firedByID) {
+		super(x, y, r, DAMAGE, SPEED, SIZE, "laserBeam.png", pType, id, firedByID);
 	}
 
 	@Override

@@ -18,13 +18,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import networking.NetworkUtils;
 import networking.client.Client;
+import networking.client.ClientListener;
 
 /**
  * This screen allows the player to connect to other players and the server for multiplayer.
  * @author Connor Stewart
  */
-public class MultiplayerScreen implements Screen {
+public class MultiplayerScreen implements Screen, ClientListener {
 	
 	/** Singleton instance of this class. */
 	private static final MultiplayerScreen instance = new MultiplayerScreen();
@@ -95,7 +97,7 @@ public class MultiplayerScreen implements Screen {
 			}
 		});
 		
-		//cant select with the players list
+		//can't select with the players list
 		playersList.setTouchable(Touchable.disabled);
 		
 		//initialising the scroll pane
@@ -107,8 +109,6 @@ public class MultiplayerScreen implements Screen {
 		
 		Gdx.input.setInputProcessor(stage);
 		
-		
-		
 		stage.addActor(background);
 		stage.addActor(pnlScroll);
 		stage.addActor(btnRoom);
@@ -117,6 +117,7 @@ public class MultiplayerScreen implements Screen {
 		String nickname = JOptionPane.showInputDialog(null, "Input your nickname.", "Nickname", JOptionPane.QUESTION_MESSAGE);
 		
 		client = new Client(nickname);
+		client.addListener(this);
 	}
 
 	@Override
@@ -185,6 +186,32 @@ public class MultiplayerScreen implements Screen {
 		
 		MultiplayerScreen.instance.roomList.setItems(roomNames);
 		MultiplayerScreen.instance.playersList.setItems(requiredPlayers);
+	}
+
+	@Override
+	public void messageReceived(String message) {
+		String command = NetworkUtils.parseCommand(message);
+		String[] arguments = NetworkUtils.parseArguements(message);
+		
+		//the server has sent a room update
+		if (command.equals("RU")) {
+			int roomNum = arguments.length;
+			String[] roomNames = new String[roomNum / 2];
+			String[] requiredPlayers = new String[roomNum / 2];
+			
+			//parse the arguments
+			for (int i = 0; i < roomNum; i = i + 2) {
+				roomNames[i / 2] = arguments[i];
+				requiredPlayers[i / 2] = arguments[i + 1];
+			}
+			
+			roomList.clearItems();
+			roomList.setItems(roomNames);
+			
+			playersList.clearItems();
+			playersList.setItems(requiredPlayers);
+		}
+		
 	}
 	
 }

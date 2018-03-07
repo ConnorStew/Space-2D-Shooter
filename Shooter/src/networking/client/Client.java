@@ -1,27 +1,23 @@
 package networking.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
+import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
 
-import networking.MessageListener;
 import networking.NetworkUtils;
-import networking.Type;
 import networking.server.Server;
 import ui.MPGame;
-import ui.MultiplayerScreen;
 import ui.UI;
 
 /**
@@ -30,20 +26,29 @@ import ui.UI;
  */
 public class Client implements ClientListener {
 	
-	/** The socket that connects this client to the server. */
-	private Socket socket;
+	/** The socket that listens for UDP messages from the server. */
+	private MulticastSocket udpSocket;
 	
-	/** The players nickname. */
+	/** The socket that receives and sends TCP messages to the server. */
+	private Socket tcpSocket;
+	
+	/** The servers IP. */
+	private InetAddress serverIP;
+	
+	/** The clients nickname. */
 	private String nickname;
-	
-	/** The clients output to the server. */
-	private OutputStream out;
-	
-	/** The clients output to the server. */
-	private InputStream in;
 	
 	/** A list of ClientListeners that wish to receive events from this client. */
 	private CopyOnWriteArrayList<ClientListener> listeners = new CopyOnWriteArrayList<ClientListener>();
+	
+	/** The multicast address to receive updates about game rooms. */
+	private InetAddress roomGroup;
+	
+	/** Whether this client wants to receive packets from the server. */
+	private boolean running = true;
+	
+	/** If the server has received this clients nickname. */
+	private boolean nicknameReceived = false;
 
 	/**
 	 * This constructor should be used to create a new client and connect to the server.<br>
@@ -51,44 +56,64 @@ public class Client implements ClientListener {
 	 * @param nickname the clients nickname
 	 */
 	public Client(String nickname) {
-		this.nickname = nickname;
 		listeners.add(this);
+		
+		try {
+			udpSocket = new MulticastSocket(Server.MULTI_PORT);
+			tcpSocket = new Socket();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//thread to listen for messages from the server
+		Thread singleServerListeningThread = new Thread() {
+			@Override
+			public void run() { 
+				while (running) {
+					byte[] buffer = new byte[256];
+					DatagramPacket dp = new DatagramPacket(buffer, buffer.length);
+					
+					try {
+						udpSocket.receive(dp);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					for (ClientListener listener : listeners)
+						listener.messageReceived(new String(dp.getData()));
+				}
+			}
+		};
+		
+		//thread to listen for messages from the server
+		Thread multipleServerListeningThread = new Thread() {
+			@Override
+			public void run() { 
+				while (running) {
 
-		try {
-			//connect to the server
-			socket = new Socket(getServerIP(), Server.port);
-			System.out.println(getClass().getName() + ">>>Connected to the server.");
-			
-			out = socket.getOutputStream();
-			in = socket.getInputStream();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+					
+					for (ClientListener listener : listeners)
+						listener.messageReceived(new String(dp.getData()));
+				}
+			}
+		};
 		
-		//send nickname through when connected
-		NetworkUtils.sendMessage("NICKNAME/" + nickname, out);
-		System.out.println(getClass().getName() + ">>>Sent nickname.");
+		singleServerListeningThread.setName(nickname + "'s Multicast UDP Listening Thread");
+		singleServerListeningThread.start();
 		
-		MessageListener ml = new MessageListener(this, Type.Client);
-		ml.start();
-	}
-	
-	/**
-	 * This constructor should be used to store a client that has already connected.
-	 * <u>This should be used on the server side.</u>
-	 * @param socket the socket the client is connected on
-	 * @param nickname the clients nickname
-	 */
-	public Client(Socket socket, String nickname) {
-		this.nickname = nickname;
-		this.socket = socket;
+		multipleServerListeningThread.setName(nickname + "'s UDP Listening Thread");
+		multipleServerListeningThread.start();
 		
-		try {
-			out = new DataOutputStream(socket.getOutputStream());
-			in = new DataInputStream(socket.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//ping network interfaces to find the game server
+		while (serverIP == null)
+			pingServerForConnection();
+		
+		//send nickname to the server
+		while (nicknameReceived == false)
+			sendMessage("<NN/" + nickname + ">");
+		
+		//request the room group multicast address
+		sendMessage("<RG>");
 	}
 	
 	@Override
@@ -96,10 +121,43 @@ public class Client implements ClientListener {
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
 		
-		System.out.println(getClass().getName() + ">>>Recived message from server: " + message);
+		System.out.println(getClass().getName() + ">>> Received message: " + message);
 		
-		//server letting the client know that the game is ready to begin
-		if (command.equals("START_GAME")) {
+		//the server has sent its IP
+		if (command.equals("IP")) {
+			try {
+				serverIP = InetAddress.getByName(arguments[0]);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		//the server has sent the room group IP
+		if (command.equals("RGIP")) {
+			try {
+				roomGroup = InetAddress.getByName(arguments[0]);
+				udpSocket.joinGroup(roomGroup);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		//the server has requested that this client joins a group
+		if (command.equals("JG")) {
+			try {
+				InetAddress groupIP = InetAddress.getByName(arguments[0]);
+				udpSocket.joinGroup(groupIP);
+				System.out.println(getClass().getName() + ">>> Joined group on IP " + groupIP);
+				
+				//let the server know you have joined the group
+				sendMessage("<JGC>");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		//the server has requested that this client joins a group
+		if (command.equals("SG")) {
 			Client client = this;
 			MPGame toStart = new MPGame(client);
 			Gdx.app.postRunnable(new Runnable(){
@@ -110,34 +168,16 @@ public class Client implements ClientListener {
 			});
 		}
 		
-		//the server sending the client a list of room names
-		if (command.equals("ROOMS")) {
-			int roomNum = arguments.length;
-			String[] roomNames = new String[roomNum / 2];
-			String[] requiredPlayers = new String[roomNum / 2];
-			
-			//parse the arguments
-			for (int i = 0; i < roomNum; i = i + 2) {
-				roomNames[i / 2] = arguments[i];
-				requiredPlayers[i / 2] = arguments[i + 1];
-			}
-			
-			MultiplayerScreen.populateRooms(roomNames, requiredPlayers);
-		}
-		
+		//the server has received the nickname
+		if (command.equals("NNR"))
+			nicknameReceived = true;
 	}
 	
 	/**
-	 * Gets the IP of the server using UDP.
-	 * @return the servers IP
+	 * Pings all available broadcast addresses to find the server and request to connect.
 	 */
-	private String getServerIP() {
+	private void pingServerForConnection() {
 		try {
-			DatagramSocket socket = new DatagramSocket();
-			socket.setBroadcast(true);
-			
-			byte[] sendData = "DISCOVERY_REQUEST".getBytes();
-			
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
@@ -154,38 +194,87 @@ public class Client implements ClientListener {
 					if (broadcast == null)
 						continue;
 					
-					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, Server.port);
-					socket.send(sendPacket);
+					//send a request to this broadcast address to connect
+					sendMessage("<RC>", broadcast);
 					
-					System.out.println(getClass().getName() + ">>>Request packet sent to " + broadcast.getHostAddress() + ", Interface: "
-							+ networkInterface.getDisplayName());
+					System.out.println(getClass().getSimpleName() + " >>> Request packet sent to " + broadcast.getHostAddress() + ", Interface: "
+							+ networkInterface.getDisplayName() + ".");
 				}
 				
 			}
-			
-			System.out.println(getClass().getName() + ">>>Done looping over all network interfaces. Waiting for response from server.");
-			
-			byte[] buffer = new byte[15000];
-			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-			socket.receive(packet);
-			
-			System.out.println(getClass().getName() + ">>>Broadcast response from server: " + packet.getAddress().getHostAddress());
-
-			socket.close();
-			return new String(packet.getData());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return "localhost";
 	}
-
+	
+	
 	/**
-	 * Sends a request to the server for a list of rooms.
+	 * Prints debug info to check how large a message is that is being sent.
+	 * @param stringToSend the string that is going to be sent to the server
 	 */
-	public void refreshRooms() {
-		NetworkUtils.sendMessage("ROOMS", out);
-		System.out.println(getClass().getName() + ">>>Sent request to refresh rooms.");	
+	@SuppressWarnings("unused")
+	private void printMessageDebugInfo(String stringToSend) {
+		try {
+			String bytesAsString = new String("");
+			byte[] bytesToSend;
+			
+			bytesToSend = stringToSend.getBytes("UTF-8");
+			
+			for (byte data : bytesToSend)
+				bytesAsString += data;
+			
+			for (int i = 0; i < stringToSend.length(); i++) {
+				String currentCharacter = stringToSend.substring(i, i + 1);
+				
+				byte characterAsByte = currentCharacter.getBytes()[0];
+				
+				String bitsInByte = Integer.toBinaryString(characterAsByte);
+				
+				if (bitsInByte.length() < 8)
+					bitsInByte = ("00000000" + bitsInByte).substring(bitsInByte.length());
+					
+				System.out.println(currentCharacter + " in bits (binary): " + bitsInByte);
+				System.out.println(currentCharacter + " in bytes: " + characterAsByte);
+			}
+			
+			System.out.println("Total bytes: " + bytesAsString);
+			System.out.println("Whole string: " + new String(bytesToSend, "UTF-8"));
+			System.out.println("Size of byte array: " + bytesToSend.length);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Send a message to the server's single socket via UDP.
+	 * @param message the message
+	 */
+	public void sendMessage(String message) {
+		byte[] buffer = message.getBytes();
+		
+		DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, serverIP, Server.SINGLE_PORT);
+		
+		try {
+			tcpSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Send a message to an InetAddress via UDP.
+	 * @param message the message
+	 */
+	public void sendMessage(String message, InetAddress toSend) {
+		byte[] buffer = message.getBytes();
+		
+		DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, toSend, Server.SINGLE_PORT);
+		
+		try {
+			tcpSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -193,47 +282,36 @@ public class Client implements ClientListener {
 	 * @param roomName the rooms name
 	 */
 	public void addRoom(String roomName, String roomNum) {
-		NetworkUtils.sendMessage("NEWROOM/" + roomName + "/" + roomNum, out);
-		System.out.println(getClass().getName() + ">>>Sent request to add room.");
+		sendMessage("<NR/" + roomName + "/" + roomNum + ">");
+		System.out.println(getClass().getSimpleName() + " >>> Sent request to add room.");
 		refreshRooms();
 	}
-
+	
+	/**
+	 * Sends a request to the server for a list of rooms.
+	 */
+	public void refreshRooms() {
+		sendMessage("<RR>");
+		System.out.println(getClass().getSimpleName() + " >>> Sent request to refresh rooms.");	
+	}
+	
 	/**
 	 * Sends a request to the server to join a room.
 	 * @param roomName the rooms name
 	 */
 	public void joinRoom(String roomName) {
-		NetworkUtils.sendMessage("JOIN/" + roomName, out);
-		System.out.println(getClass().getName() + ">>>Sent request to join room.");
+		sendMessage("<JR/" + roomName + ">");
+		System.out.println(getClass().getSimpleName() + " >>> Sent request to join room.");
 	}
 
+	public void addListener(ClientListener toAdd) {
+		listeners.add(toAdd);
+	}
 	
-	public Socket getSocket() {
-		return socket;
-	}
-
+	/**
+	 * @return the players nickname
+	 */
 	public String getNickname() {
 		return nickname;
 	}
-
-	public InputStream getInputStream() {
-		return in;
-	}
-
-	public OutputStream getOutputStream() {
-		return out;
-	}
-	
-	public CopyOnWriteArrayList<ClientListener> getListeners() {
-		return listeners;
-	}
-
-	public void addListner(ClientListener listener) {
-		listeners.add(listener);
-	}
-
-	public void setNickname(String newNickname) {
-		nickname = newNickname;
-	}
-	
 }

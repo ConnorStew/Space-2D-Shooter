@@ -4,7 +4,7 @@ import backend.projectiles.Ball;
 import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
-import ui.MPGame;
+import networking.server.ServerGame;
 
 /**
  * A MultiplayerPlayer is a player in a multiplayer game.
@@ -17,13 +17,16 @@ public class MultiplayerPlayer extends Player {
 	
 	/** Whether this player should fire. */
 	private boolean shouldFire;
+	
+	/** How many players this player has killed. */
+	private int kills;
 
 	public MultiplayerPlayer(float x, float y, String playerName) {
 		super(x, y);
 		this.playerName = playerName;
 	}
 	
-	public MultiplayerPlayer(int x, int y, String playerName, int id) {
+	public MultiplayerPlayer(float x, float y, String playerName, int id) {
 		super(x, y, id);
 		this.playerName = playerName;
 	}
@@ -46,8 +49,8 @@ public class MultiplayerPlayer extends Player {
 		if (yDelta < 0)
 			yDelta += (DRAG * delta);
 		
-		float maxHeight = MPGame.GAME_HEIGHT;
-		float maxWidth = MPGame.GAME_WIDTH;
+		float maxHeight = ServerGame.GAME_HEIGHT;
+		float maxWidth = ServerGame.GAME_WIDTH;
 		float minHeight = 0;
 		float minWidth = 0;
 		
@@ -81,12 +84,12 @@ public class MultiplayerPlayer extends Player {
 	public Projectile fire(float delta, String type, ProjectileType pType, int id) {
 		if (type.equals("Light")) {
 			lightTimer = 0;
-			return new Ball(getCenterX(), getCenterY(), getRotation(), id, pType, this);
+			return new Ball(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
 		}
 		
 		if (type.equals("Heavy")) {
 			heavyTimer = 0;
-			return new Missile(getCenterX(), getCenterY(), getRotation(), id, pType, this);
+			return new Missile(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
 		}
 		
 		return null; //return nothing if the validation is not passed
@@ -134,6 +137,18 @@ public class MultiplayerPlayer extends Player {
 
 	public void resetHealth() {
 		health = MAX_HEALTH;
+	}
+
+	public int getKills() {
+		return kills;
+	}
+
+	public void incrementKills() {
+		kills++;
+	}
+
+	public void setKills(int kills) {
+		this.kills = kills;
 	}
 
 }
