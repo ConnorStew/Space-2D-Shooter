@@ -62,7 +62,7 @@ public class MPGame implements Screen, ClientListener {
 
 	@Override
 	public void show() {
-		System.out.println(getClass().getName() + ">>>Multiplayer game started!");
+		System.out.println(getClass().getSimpleName() + " >>> Multiplayer game started!");
 		
 		//instantiate map
 		map = new InanimateEntity("redPlanet.png", ServerGame.GAME_WIDTH, ServerGame.GAME_HEIGHT);
@@ -111,7 +111,7 @@ public class MPGame implements Screen, ClientListener {
 		//tell the server that you have moved your mouse
 		if (mousePos != oldPos) {
 			oldPos = mousePos;
-			client.sendMessage("<MM/" + mousePos.x + "/" + mousePos.y + ">");
+			client.sendMessageToGame("<MM/" + mousePos.x + "/" + mousePos.y + ">");
 		}
 		
 		//set the camera as the view
@@ -151,7 +151,7 @@ public class MPGame implements Screen, ClientListener {
 			if (player.getKills() >= 10) {
 				UI.getInstance().setScreen(MenuScreen.getInstance());
 				JOptionPane.showMessageDialog(null, player.getPlayerName() + " has won!", "Winner", JOptionPane.INFORMATION_MESSAGE);
-				client.sendMessage("<DC>");
+				client.sendMessageToServer("<DC>");
 			}
 		}
 			
@@ -198,15 +198,18 @@ public class MPGame implements Screen, ClientListener {
 		if (command.equals("ADDPLAYER")) {
 			String playerName = arguments[0];
 			int multiplayerID = Integer.parseInt(arguments[1]);
-			System.out.println(getClass().getName() + ">>>Request to add player " + playerName + ".");
+			System.out.println(getClass().getSimpleName() + ">>>Request to add player " + playerName + ".");
 			
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
 					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName, multiplayerID);
 					players.add(toAdd);
+					System.out.println(client.getNickname());
+					
 					if (toAdd.getPlayerName().equals(client.getNickname()))
 						player = toAdd;
+					
 				}
 			});
 		}
@@ -297,21 +300,21 @@ public class MPGame implements Screen, ClientListener {
 	 */
 	private void checkInput() {
 		if (Gdx.input.isKeyPressed(Input.Keys.W))
-			client.sendMessage("<W_PRESS>");
+			client.sendMessageToGame("<W_PRESS>");
 			
 		if (Gdx.input.isKeyPressed(Input.Keys.S))
-			client.sendMessage("<S_PRESS>");
+			client.sendMessageToGame("<S_PRESS>");
 			
 		if (Gdx.input.isKeyPressed(Input.Keys.D))
-			client.sendMessage("<R_PRESS>");
+			client.sendMessageToGame("<R_PRESS>");
 			
 		if (Gdx.input.isKeyPressed(Input.Keys.A)) 
-			client.sendMessage("<L_PRESS>");
+			client.sendMessageToGame("<L_PRESS>");
 			
 		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-			client.sendMessage("<LMB>");
+			client.sendMessageToGame("<LMB>");
 			
 		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
-			client.sendMessage("<RMB>");
+			client.sendMessageToGame("<RMB>");
 	}
 }

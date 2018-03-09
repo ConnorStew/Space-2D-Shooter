@@ -1,10 +1,10 @@
 package networking.server;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -16,10 +16,10 @@ import networking.NetworkUtils;
  */
 public class Server implements ServerListener {
 	
-	/** An ArrayList of rooms that can be modified concurrently. */
+	/** A list of rooms that can be joined by clients. */
 	private CopyOnWriteArrayList<Room> rooms = new CopyOnWriteArrayList<Room>();
 	
-	/** Clients connected to the server. */
+	/** Information about clients connected to the server. */
 	private CopyOnWriteArrayList<ClientInfo> clients = new CopyOnWriteArrayList<ClientInfo>();
 	
 	/** Listeners who want to receive events from this server. */
@@ -28,26 +28,20 @@ public class Server implements ServerListener {
 	/** The singleton instance of the server. */
 	private final static Server instance = new Server();
 	
-	/** The port the DatagramSocket runs on. */
-	public static final int SINGLE_PORT = 4521;
+	/** The port the server accepts TCP messages on. */
+	public static final int TCP_PORT = 4521;
 	
-	/** The port the MulticastSocket runs on. */
-	public static final int MULTI_PORT = 4522;
+	/** The port the server sends UDP messages on. */
+	public static final int UDP_PORT = 4522;
 	
 	/** Whether the server is online and ready to receive packets. */
 	private boolean running;
 	
-	/** The socket that sends messages to a single client. */
-	private DatagramSocket singleSocket;
-	
-	/** The IP address this server is running on. */
-	private InetAddress serverIPAddress;
+	/** The TCP socket that this client receives/sends messages on. */
+	private ServerSocket tcpServer;
 	
 	/** The last ip address assigned to a multicast group. */
 	private int[] lastGroupAssgined = {225, 10, 10, 10};
-	
-	/** The multicast address to send information about rooms to. */
-	private InetAddress roomGroup;
 
 	/**
 	 * Starts the server and some threads to manage server activities.
@@ -56,9 +50,8 @@ public class Server implements ServerListener {
 		listeners.add(this);
 		
 		try {
-			serverIPAddress = InetAddress.getLocalHost();
-			roomGroup = InetAddress.getByName("224.80.30.34");
-			singleSocket = new DatagramSocket(new InetSocketAddress(serverIPAddress, Server.SINGLE_PORT));
+			tcpServer = new ServerSocket();
+			tcpServer.bind(new InetSocketAddress(InetAddress.getLocalHost(), Server.TCP_PORT));
 			running = true;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -68,53 +61,30 @@ public class Server implements ServerListener {
 			System.out.println(Server.class.getSimpleName() + " >>> Server already running.");
 		}
 		
-		//start listening for messages sent to this servers DatagamSocket
-		Thread serverSingleMessageListener = new Thread(){
+		System.out.println(Server.class.getSimpleName() + " >>> Started server on " + tcpServer.getInetAddress() + ".");
+		
+		new DiscoveryThread().start();
+		
+		Thread clientConnectionThread = new Thread() {
 			@Override
-			public void run() { 
+			public void run() {
 				while (running) {
-					byte[] buffer = new byte[256];
-					DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-						
 					try {
-						singleSocket.receive(packet);
+						Socket newConnection = tcpServer.accept();
+						ClientInfo newClient = new ClientInfo(newConnection);
+						
+						System.out.println(Server.class.getSimpleName() + " >>> New client has connection on IP:"
+						+ newClient.getIpAddress().getHostAddress() + " ,port:" + newClient.getPort());
+						
+						new ServerTCPMessageListener(newClient).start();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-						
-					System.out.println(Server.class.getSimpleName() + " >>> Received packet: " + new String(buffer));
-					
-					for (ServerListener listener : listeners)
-						listener.messageReceived(new ClientInfo(packet.getAddress(), packet.getPort()), new String(packet.getData()));
-				}
-			}
-		};
-	
-		//thread to time clients out if they don't send a message for too long
-		Thread clientValidation = new Thread() {
-			
-			/** Delay before a client is considered timed out in milliseconds. Currently 10 minutes.*/
-			private final long delay = 100000;
-			
-			@Override
-			public void run() { 
-				while (running) {
-					long time = System.currentTimeMillis();
-					
-					for (ClientInfo info : clients)
-						if ((time - info.getRecivedMessageTime()) > delay)
-							clientDisconnected(info);
 				}
 			}
 		};
 		
-
-		clientValidation.setName("Client Validation Thread");
-		clientValidation.setDaemon(true);
-		clientValidation.start();
-		
-		serverSingleMessageListener.setName("Server Message Listener Thread");
-		serverSingleMessageListener.start();
+		clientConnectionThread.start();
 	}
 
 	@Override
@@ -131,8 +101,28 @@ public class Server implements ServerListener {
 		//update the last time the server received a message from this client
 		info.recivedMessage();
 		
-		//describe the client that sent the message
-		System.out.println(getClass().getSimpleName() + ">>>Recived command from " + info.getNickname() +  ": " + command);
+		//debug info
+		System.out.println(getClass().getSimpleName() + " >>> Recived command from client '" + info.getNickname() + "'.");
+		System.out.println(getClass().getSimpleName() + " >>> Command: '" + command + "'.");
+		
+		if (arguments.length == 0) {
+			System.out.print(getClass().getSimpleName() + " >>> No arguments.");
+		} else {
+			if (arguments.length > 1) {
+				System.out.print(getClass().getSimpleName() + " >>> Argument: ");
+			} else {
+				System.out.print(getClass().getSimpleName() + " >>> Arguments: ");
+			}
+			
+			for (int i = 0; i < arguments.length; i++) {
+				if (i != 0)
+					System.out.print(" ," + "'" + arguments[i] + "'");
+				else
+					System.out.print("'" + arguments[i] + "'");
+			}
+		}
+		
+		System.out.println();
 
 		//validation against a command that coulden't be parsed
 		if (command == null)
@@ -141,25 +131,14 @@ public class Server implements ServerListener {
 		//a client has sent a request to update their nickname
 		if (command.equals("NN")) {
 			info.setNickname(arguments[0]);
-			sendMessageToSingleClient("<NNR>", info);
+			sendMessageToSingleClient("<CID/" + info.getClientID() + ">", info);
 		}
-		
-		//a client is requesting a connection to the server
-        if (command.equals("RC")) {
-        	//send the client the servers IP address
-        	sendMessageToSingleClient("<IP/" + serverIPAddress.getHostAddress() +  ">", info);
-        }
-        
-		//a client is requesting the room groups IP address
-        if (command.equals("RG")) {
-        	//no "/" after RGIP because the room group will start with an "/"
-        	sendMessageToSingleClient("<RGIP" + roomGroup +  ">", info);
-        }
         
 		//a client wishes to add a new room to the server
 		if (command.equals("NR")) {
 			try {
 				rooms.add(new Room(arguments[0], Integer.parseInt(arguments[1])));
+				System.out.println(getClass().getSimpleName() + " >>> Added new room '" + arguments[0] +"'.");
 			} catch (NumberFormatException e) {
 				System.out.println(getClass().getSimpleName() + " >>> Required players isn't an integer skipping room add.");
 			}
@@ -168,9 +147,8 @@ public class Server implements ServerListener {
 		//a client wants a list of rooms on the server
 		if (command.equals("RR")) {
 			String toSend = "";
-			for (Room room : rooms) {
+			for (Room room : rooms)
 				toSend = toSend + "/" + room.getRoomName() + "/" + room.getRequiredPlayers();
-			}
 			sendMessageToSingleClient("<RU" + toSend + ">", info);
 		}
 		
@@ -181,6 +159,10 @@ public class Server implements ServerListener {
 			for (Room room : rooms)
 				if (room.getRoomName().equals(roomName))
 					room.addClient(info);
+		}
+		
+		if (command.equals("JGC")) {
+			info.setHasJoinedUDPGroup(true);
 		}
         
 	}
@@ -221,11 +203,9 @@ public class Server implements ServerListener {
 	 * @param client the client to send the message to
 	 */
 	void sendMessageToSingleClient(String message, ClientInfo client) {
-		byte[] buffer = message.getBytes();
-		
     	try {
     		//send the message to the client
-			singleSocket.send(new DatagramPacket(buffer, buffer.length, client.getIpAddress(), client.getPort()));
+			client.getSocket().getOutputStream().write(message.getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -237,7 +217,7 @@ public class Server implements ServerListener {
 	 * @param room the room that wishes to start their game
 	 */
 	public void startGame(Room room) {
-		new ServerGame(room, getMulticastAddress());
+		new ServerGame(room, getMulticastAddress(), getMulticastAddress());
 		rooms.remove(room); //remove the room from join able rooms as it has started
 	}
 	
@@ -257,7 +237,23 @@ public class Server implements ServerListener {
 	}
 	
 	public static InetAddress getServerIP() {
-		return instance.serverIPAddress;
+		return instance.tcpServer.getInetAddress();
+	}
+
+	public CopyOnWriteArrayList<ServerListener> getListeners() {
+		return listeners;
+	}
+
+	public static boolean isRunning() {
+		return getInstance().running;
+	}
+
+	public static CopyOnWriteArrayList<ClientInfo> getClients() {
+		return instance.clients;
+	}
+	
+	static ServerSocket getTCPSocket() {
+		return instance.tcpServer;
 	}
 
 }

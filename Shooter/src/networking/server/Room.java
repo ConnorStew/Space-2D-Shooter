@@ -23,12 +23,12 @@ public class Room {
 	}
 
 	public void addClient(ClientInfo info) {
-		System.out.println(getClass().getSimpleName() + ">>>" + info.getNickname() + " joined room '" + name + ".");
+		System.out.println(getClass().getSimpleName() + " >>> " + info.getNickname() + " joined room '" + name + "'.");
 		clients.add(info);
 		
 		//game should start for all clients
 		if (clients.size() == requiredPlayers) {
-			System.out.println(getClass().getName() + ">>> game ready to start.");
+			System.out.println(getClass().getSimpleName() + " >>> game ready to start.");
 			Server.getInstance().startGame(this);
 		}
 	}

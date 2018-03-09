@@ -1,6 +1,7 @@
 package networking.server;
 
 import java.net.InetAddress;
+import java.net.Socket;
 
 /**
  * This class represents the information that the server has about a particular client that has connected.
@@ -20,14 +21,32 @@ public class ClientInfo {
 	/** The clients nickname. */
 	private String nickname;
 	
-	private boolean confirmedGroupJoin = false;
+	/** This clients TCP socket. */
+	private Socket clientSocket;
 	
-	public ClientInfo(InetAddress inetAddress, int port) {
-		this.ipAddress = inetAddress;
-		this.port = port;
+	/** Whether this client has joined the most recent UDP group request. */
+	private boolean joinedUDPGroup = false;
+	
+	/** The ID assigned to this client. */
+	private int clientID;
+	
+	private static int lastClientIDAssigned = 0;
+	
+	public ClientInfo(Socket clientSocket) {
+		this.clientID = ++lastClientIDAssigned;
+		this.clientSocket = clientSocket;
+		this.ipAddress = clientSocket.getInetAddress();
+		this.port = clientSocket.getPort();
 		this.nickname = "Unknown Client"; //default nickname
 	}
 	
+	public ClientInfo(InetAddress ipAddress, int port) {
+		this.clientID = ++lastClientIDAssigned;
+		this.ipAddress = ipAddress;
+		this.port = port;
+		this.nickname = "Unknown Client"; //default nickname
+	}
+
 	/**
 	 * Should be called when the server receives a message from this client. <br>
 	 * This updates the time since this client received a message for the purpose of timing out clients.
@@ -72,6 +91,18 @@ public class ClientInfo {
 		return recivedMessageTime;
 	}
 	
+	public Socket getSocket() {
+		return clientSocket;
+	}
+	
+	public boolean hasJoinedUDPGroup() {
+		return joinedUDPGroup;
+	}
+	
+	public void setHasJoinedUDPGroup(boolean toSet) {
+		joinedUDPGroup = toSet;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ClientInfo) {
@@ -83,12 +114,8 @@ public class ClientInfo {
 		return false;
 	}
 
-	public boolean isConfirmedGroupJoin() {
-		return confirmedGroupJoin;
-	}
-
-	public void setConfirmedGroupJoin(boolean confirmedGroupJoin) {
-		this.confirmedGroupJoin = confirmedGroupJoin;
+	public int getClientID() {
+		return clientID;
 	}
 
 }

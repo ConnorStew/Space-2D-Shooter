@@ -18,31 +18,32 @@ public class DiscoveryThread extends Thread {
 		DatagramSocket socket = null;
 		
 		try {
-			socket = new DatagramSocket(Server.SINGLE_PORT, InetAddress.getByName("0.0.0.0"));
+			socket = new DatagramSocket(Server.UDP_PORT, InetAddress.getLocalHost());
 			socket.setBroadcast(true);
 			
+			System.out.println(getClass().getSimpleName() + " >>> Ready to receive broadcast packets!");
+			
 			while (true) {
-				System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
-				byte[] buffer = new byte[15000];
+				byte[] buffer = new byte[256];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				//wait to receive a packet
 				socket.receive(packet);
 				
 				//a packet has been received
-				System.out.println(getClass().getName() + ">>>Recived packet from: " + packet.getAddress().getHostAddress());
+				System.out.println(getClass().getSimpleName() + " >>> Recived '" + new String(buffer).trim() + "' from: " + packet.getAddress().getHostAddress().trim());
 				
 				//check that the packet is looking to join the server
 				String message = new String(packet.getData()).trim();
-				if (message.equals("DISCOVERY_REQUEST")) {
+				if (message.equals("DR")) {
 					//send the servers IP to the client
-					//byte[] sendData = Server.server.getInetAddress().getHostAddress().getBytes();
+					byte[] sendData = Server.getTCPSocket().getInetAddress().getHostAddress().getBytes();
 					
 					//send the data to the client
-					//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-					//socket.send(sendPacket);
+					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
+					socket.send(sendPacket);
 					
-					//System.out.println(getClass().getName() + ">>>Sent packet to: " + packet.getAddress().getHostAddress());
+					System.out.println(getClass().getSimpleName() + " >>> Sent '" + new String(sendData) + "' to: " + packet.getAddress().getHostAddress());
 				}
 				
 				
