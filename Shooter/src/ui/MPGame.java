@@ -56,8 +56,8 @@ public class MPGame implements Screen, ClientListener {
 	private Vector3 oldPos;
 	
 	public MPGame(Client client) {
-		this.client = client;
 		client.addListener(this);
+		this.client = client;
 	}
 
 	@Override
@@ -198,14 +198,13 @@ public class MPGame implements Screen, ClientListener {
 		if (command.equals("ADDPLAYER")) {
 			String playerName = arguments[0];
 			int multiplayerID = Integer.parseInt(arguments[1]);
-			System.out.println(getClass().getSimpleName() + ">>>Request to add player " + playerName + ".");
+			System.out.println(getClass().getSimpleName() + " >>> Request to add player " + playerName + ".");
 			
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
 					MultiplayerPlayer toAdd = new MultiplayerPlayer(50, 50, playerName, multiplayerID);
 					players.add(toAdd);
-					System.out.println(client.getNickname());
 					
 					if (toAdd.getPlayerName().equals(client.getNickname()))
 						player = toAdd;

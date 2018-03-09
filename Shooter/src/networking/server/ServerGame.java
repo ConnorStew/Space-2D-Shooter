@@ -55,6 +55,8 @@ public class ServerGame implements ApplicationListener, ServerListener {
 
 	/** Whether all clients have joined the UDP multicast group. */
 	private boolean allClientsJoinedUDP = false;
+	
+	public static final int GAME_UDP_PORT = 4356;
 		
 	public ServerGame(Room toHost, InetAddress multicastGroup, InetAddress commandGroup) {
 		Server.getInstance().addListener(this);
@@ -66,7 +68,7 @@ public class ServerGame implements ApplicationListener, ServerListener {
 		
 		try {
 			multiSocket = new MulticastSocket();
-			receptionSocket = new DatagramSocket(3813, InetAddress.getByName("localhost"));
+			receptionSocket = new DatagramSocket(ServerGame.GAME_UDP_PORT, InetAddress.getLocalHost());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -92,7 +94,7 @@ public class ServerGame implements ApplicationListener, ServerListener {
 					
 					message = new String(dp.getData());
 					
-					System.out.println(Client.class.getSimpleName() + " >>> Recieved UDP message '" + message + "' from client: " + dp.getAddress() + ".");
+					//System.out.println(ServerGame.class.getSimpleName() + " >>> Recieved UDP message " + message.trim() + " from client: " + dp.getAddress());
 					
 					String[] arguments = message.split("#");
 					
@@ -111,7 +113,7 @@ public class ServerGame implements ApplicationListener, ServerListener {
 		udpMessageListener.setName(toHost.getRoomName() + "'s UDP Message Listener");
 		udpMessageListener.start();
 		
-		System.out.println(getClass().getSimpleName() + " >>> Game started on " + multiSocket.getLocalAddress() + ", port:" + multiSocket.getLocalPort());
+		System.out.println(getClass().getSimpleName() + " >>> Listening for UDP packets on " + receptionSocket.getLocalAddress() + ", port:" + receptionSocket.getLocalPort());
 	}
 	
 	@Override
@@ -339,7 +341,7 @@ public class ServerGame implements ApplicationListener, ServerListener {
 		byte[] buffer = message.getBytes();
 		
     	try {
-			multiSocket.send(new DatagramPacket(buffer, buffer.length, multicastGroup, Client.CLIENT_UDP_PORT));
+			multiSocket.send(new DatagramPacket(buffer, buffer.length, multicastGroup, Client.UDP_PORT));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

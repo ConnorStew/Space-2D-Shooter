@@ -19,7 +19,7 @@ import ui.UI;
 public class Player extends Entity {
 	
 	/** The cooldown in seconds of the light weapon. */
-	protected final double LGIHT_CD = 0.3;
+	protected final double LIGHT_CD = 0.3;
 	
 	/** The cooldown in seconds of the light weapon. */
 	protected final double HEAVY_CD = 1.5;
@@ -74,9 +74,11 @@ public class Player extends Entity {
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
 	public Projectile fire(float delta) {
+		lightTimer = lightTimer + delta;
+		heavyTimer = heavyTimer + delta;
 		
 		//if the lmb is pressed and the light weapon is above or equal to the cooldown time
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lightTimer >= LGIHT_CD) {
+		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lightTimer >= LIGHT_CD) {
 			lightTimer = 0;
 			return new Beam(getCenterX(), getCenterY(), getRotation());
 		}

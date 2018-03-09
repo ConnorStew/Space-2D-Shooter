@@ -53,11 +53,11 @@ public class Client implements ClientListener {
 	/** A list of ClientListeners that wish to receive events from this client. */
 	private CopyOnWriteArrayList<ClientListener> listeners = new CopyOnWriteArrayList<ClientListener>();
 	
-	/** Client port. */
-	public static final int CLIENT_UDP_PORT = 2845;
-	
 	/** This clients id. */
 	private int clientID;
+	
+	/** The port this client listens for UDP messages on. */
+	public static int UDP_PORT = 5425;
 	
 	/**
 	 * This constructor should be used to create a new client and connect to the server.<br>
@@ -70,7 +70,7 @@ public class Client implements ClientListener {
 		
 		try {
 			serverIP = InetAddress.getByName(pingServerForConnection());
-			gameReceptionSocket = new MulticastSocket(2845);
+			gameReceptionSocket = new MulticastSocket(UDP_PORT);
 			gameMessageSocket = new DatagramSocket();
 			tcpSocket = new Socket(serverIP, Server.TCP_PORT);
 		} catch (IOException e) {
@@ -117,7 +117,7 @@ public class Client implements ClientListener {
 					
 					message = new String(dp.getData());
 					
-					System.out.println(Client.class.getSimpleName() + " >>> Recieved UDP message '" + message + "' from server: " + serverIP + ".");
+					//System.out.println(Client.class.getSimpleName() + " >>> Recieved UDP message '" + message + "' from server: " + serverIP + ".");
 					
 					for (ClientListener l : listeners)
 						l.messageReceived(message);
@@ -138,6 +138,9 @@ public class Client implements ClientListener {
 	public void messageReceived(String message) {
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
+		
+		if (command == null)
+			return;
 		
 		//the server has requested that this client joins a multicast group
 		if (command.equals("JG")) {
@@ -266,7 +269,8 @@ public class Client implements ClientListener {
 	 */
 	public void sendMessageToServer(String toSend) {
 		try {
-			System.out.println(getClass().getSimpleName() + " >>> Sending message to server : " + toSend);
+			//error here
+			//System.out.println(getClass().getSimpleName() + " >>> Sending message to server : " + toSend);
 			tcpSocket.getOutputStream().write(toSend.getBytes("UTF-8"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -280,7 +284,7 @@ public class Client implements ClientListener {
 	public void sendMessageToGame(String toSend) {
 		try {
 			byte[] buffer = (clientID + "#" + toSend).getBytes();
-			System.out.println(getClass().getSimpleName() + " >>> Sending message to game : " + toSend);
+			//System.out.println(getClass().getSimpleName() + " >>> Sending message to game : " + toSend);
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length, gameIP, gamePort);
 			gameMessageSocket.send(packet);
 		} catch (IOException e) {

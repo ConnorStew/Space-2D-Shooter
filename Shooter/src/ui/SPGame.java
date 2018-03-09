@@ -96,6 +96,8 @@ public class SPGame implements Screen {
 
 	@Override
 	public void render(float delta) {
+		checkInput(delta);
+		
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
@@ -248,10 +250,7 @@ public class SPGame implements Screen {
 	}
 
 	public Player getPlayer() {
-		// TODO Auto-generated method stub
 		return player;
 	}
 	
-
-
 }

@@ -128,7 +128,7 @@ public class MultiplayerPlayer extends Player {
 	}
 
 	public boolean canFireLight() {
-		return lightTimer >= LGIHT_CD;
+		return lightTimer >= LIGHT_CD;
 	}
 	
 	public boolean canFireHeavy() {
