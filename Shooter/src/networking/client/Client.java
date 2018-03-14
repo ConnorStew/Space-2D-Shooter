@@ -9,6 +9,7 @@ import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,11 +27,8 @@ import ui.UI;
  */
 public class Client implements ClientListener {
 	
-	/** The socket that listens for UDP messages from the game. */
-	private MulticastSocket gameReceptionSocket;
-	
-	/** The socket that sends messages to the game. */
-	private DatagramSocket gameMessageSocket;
+	/** The socket that sends/receives messages to the game. */
+	private MulticastSocket udpSocket;
 	
 	/** The socket that receives and sends TCP messages to the server. */
 	private Socket tcpSocket;
@@ -52,7 +50,7 @@ public class Client implements ClientListener {
 
 	/** A list of ClientListeners that wish to receive events from this client. */
 	private CopyOnWriteArrayList<ClientListener> listeners = new CopyOnWriteArrayList<ClientListener>();
-	
+
 	/** This clients id. */
 	private int clientID;
 	
@@ -63,15 +61,15 @@ public class Client implements ClientListener {
 	 * This constructor should be used to create a new client and connect to the server.<br>
 	 * <u>This should be used on the client side.</u>
 	 * @param nickname the clients nickname
+	 * @throws SocketException 
 	 */
-	public Client(String nickname) {
+	public Client(String nickname) throws SocketException {
 		this.nickname = nickname;
 		listeners.add(this);
 		
 		try {
 			serverIP = InetAddress.getByName(pingServerForConnection());
-			gameReceptionSocket = new MulticastSocket(UDP_PORT);
-			gameMessageSocket = new DatagramSocket();
+			udpSocket = new MulticastSocket(Client.UDP_PORT);
 			tcpSocket = new Socket(serverIP, Server.TCP_PORT);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -86,73 +84,66 @@ public class Client implements ClientListener {
 					try {
 						tcpSocket.getInputStream().read(buffer);
 					} catch (IOException e) {
-						e.printStackTrace();
+						if (e instanceof SocketException)
+							System.out.println(getClass().getName() + " >>> Lost connection to the server.");
+						else
+							e.printStackTrace();
 					}
 					
 					String message = new String(buffer).trim();
 					
-					System.out.println(Client.class.getSimpleName() + " >>> Recieved TCP message '" + message + "' from server: " + serverIP + ".");
+					System.out.println(Client.class.getSimpleName() + " >>> Recieved TCP message '" + message + "' from server: " + serverIP.getHostAddress().trim() + ".");
 						
 					for (ClientListener l : listeners)
-						l.messageReceived(message);
+						l.messageReceived(message, tcpSocket.getInetAddress());
 
 				}
 			}
 		};
 		
+		
 		Thread clientUDPMessageListener = new Thread() {
 			@Override
 			public void run() {
 				while (running) {
-					byte[] buffer = new byte[1000];
+
+					byte[] buffer = new byte[256];
 					
 					DatagramPacket dp = new DatagramPacket(buffer, buffer.length);
 					String message = null;
 					
 					try {
-						gameReceptionSocket.receive(dp);
+						udpSocket.receive(dp);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					
 					message = new String(dp.getData());
 					
-					//System.out.println(Client.class.getSimpleName() + " >>> Recieved UDP message '" + message + "' from server: " + serverIP + ".");
+					//System.out.println(Client.class.getSimpleName() + " >>> Recieved UDP message '" + message.trim() + "' on port " + Client.UDP_PORT);
 					
 					for (ClientListener l : listeners)
-						l.messageReceived(message);
+						l.messageReceived(message, udpSocket.getInetAddress());
 				}
 			}
 		};
 		
-		clientTCPMessageListener.setName("Client TCP Message Listener");
-		clientTCPMessageListener.start();
-		
 		clientUDPMessageListener.setName("Client UDP Message Listener");
 		clientUDPMessageListener.start();
+		
+		clientTCPMessageListener.setName("Client TCP Message Listener");
+		clientTCPMessageListener.start();
 		
 		sendMessageToServer("<NN/" + nickname + ">");
 	}
 	
 	@Override
-	public void messageReceived(String message) {
+	public void messageReceived(String message, InetAddress address) {
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
 		
 		if (command == null)
 			return;
-		
-		//the server has requested that this client joins a multicast group
-		if (command.equals("JG")) {
-			try {
-				InetAddress groupIP = InetAddress.getByName(arguments[0]);
-				gameReceptionSocket.joinGroup(groupIP);
-				System.out.println(getClass().getSimpleName() + " >>> Joined group on IP " + groupIP);
-				sendMessageToServer("<JGC>");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 		//the server has requested that this starts their game
 		if (command.equals("SG")) {
@@ -162,7 +153,7 @@ public class Client implements ClientListener {
 				e.printStackTrace();
 			}
 			gamePort = Integer.parseInt(arguments[1]);
-			
+						
 			MPGame toStart = new MPGame(this);
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
@@ -284,9 +275,9 @@ public class Client implements ClientListener {
 	public void sendMessageToGame(String toSend) {
 		try {
 			byte[] buffer = (clientID + "#" + toSend).getBytes();
-			//System.out.println(getClass().getSimpleName() + " >>> Sending message to game : " + toSend);
+			System.out.println(getClass().getSimpleName() + " >>> Sending message to game : " + toSend);
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length, gameIP, gamePort);
-			gameMessageSocket.send(packet);
+			udpSocket.send(packet);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -333,5 +324,13 @@ public class Client implements ClientListener {
 	 */
 	public String getNickname() {
 		return nickname;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public CopyOnWriteArrayList<ClientListener> getListeners() {
+		return listeners;
 	}
 }

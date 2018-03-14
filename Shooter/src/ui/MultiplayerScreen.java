@@ -1,5 +1,8 @@
 package ui;
 
+import java.net.InetAddress;
+import java.net.SocketException;
+
 import javax.swing.JOptionPane;
 
 import com.badlogic.gdx.Gdx;
@@ -116,7 +119,11 @@ public class MultiplayerScreen implements Screen, ClientListener {
 		
 		String nickname = JOptionPane.showInputDialog(null, "Input your nickname.", "Nickname", JOptionPane.QUESTION_MESSAGE);
 		
-		client = new Client(nickname);
+		try {
+			client = new Client(nickname);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 		client.addListener(this);
 	}
 
@@ -189,7 +196,7 @@ public class MultiplayerScreen implements Screen, ClientListener {
 	}
 
 	@Override
-	public void messageReceived(String message) {
+	public void messageReceived(String message, InetAddress address) {
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
 		

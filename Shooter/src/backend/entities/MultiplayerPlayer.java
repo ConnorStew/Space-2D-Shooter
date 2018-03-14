@@ -82,12 +82,12 @@ public class MultiplayerPlayer extends Player {
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
 	public Projectile fire(float delta, String type, ProjectileType pType, int id) {
-		if (type.equals("Light")) {
+		if (type.equals("Light") && canFireLight()) {
 			lightTimer = 0;
 			return new Ball(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
 		}
 		
-		if (type.equals("Heavy")) {
+		if (type.equals("Heavy") && canFireHeavy()) {
 			heavyTimer = 0;
 			return new Missile(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
 		}

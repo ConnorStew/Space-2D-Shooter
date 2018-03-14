@@ -41,7 +41,7 @@ public class Server implements ServerListener {
 	private ServerSocket tcpServer;
 	
 	/** The last ip address assigned to a multicast group. */
-	private int[] lastGroupAssgined = {225, 10, 10, 10};
+	private int[] lastGroupAssgined = {225, 255, 255, 233};
 
 	/**
 	 * Starts the server and some threads to manage server activities.
@@ -232,7 +232,7 @@ public class Server implements ServerListener {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		
+
 		return toReturn;
 	}
 	

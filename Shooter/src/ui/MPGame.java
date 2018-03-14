@@ -1,5 +1,6 @@
 package ui;
 
+import java.net.InetAddress;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JOptionPane;
@@ -56,8 +57,8 @@ public class MPGame implements Screen, ClientListener {
 	private Vector3 oldPos;
 	
 	public MPGame(Client client) {
-		client.addListener(this);
 		this.client = client;
+		client.addListener(this);
 	}
 
 	@Override
@@ -88,6 +89,8 @@ public class MPGame implements Screen, ClientListener {
 	@Override
 	public void render(float delta) {
 		checkInput();
+		
+		player.update(delta);
 		
 		//clear the last frame that was rendered
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
@@ -191,7 +194,8 @@ public class MPGame implements Screen, ClientListener {
 	public void dispose() {}
 
 	@Override
-	public void messageReceived(String message) {
+	public void messageReceived(String message, InetAddress address) {
+		
 		String command = NetworkUtils.parseCommand(message);
 		String[] arguments = NetworkUtils.parseArguements(message);
 		
@@ -221,7 +225,9 @@ public class MPGame implements Screen, ClientListener {
 			Gdx.app.postRunnable(new Runnable(){
 				@Override
 				public void run() {
-					projectiles.add(getPlayerByID(playerID).fire(Gdx.graphics.getDeltaTime(), projectileType, ProjectileType.PVP, projectileID));
+					Projectile toAdd = getPlayerByID(playerID).fire(Gdx.graphics.getDeltaTime(), projectileType, ProjectileType.PVP, projectileID);
+					if (toAdd != null)
+						projectiles.add(toAdd);
 				}
 			});
 			

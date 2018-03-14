@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.mockito.Mockito;
@@ -44,31 +43,20 @@ public class ServerGame implements ApplicationListener, ServerListener {
 	/** Projectiles that are currently active in the game. */
 	private CopyOnWriteArrayList<Projectile> projectiles  = new CopyOnWriteArrayList<Projectile>();
 	
-	/** The socket that sends messages to multiple clients. */
-	private MulticastSocket multiSocket;
-	
 	/** The socket that receives messages from the clients. */
-	private DatagramSocket receptionSocket;
+	private DatagramSocket udpSocket;
 	
-	/** The group to send multicast packets to. */
-	private InetAddress multicastGroup;
+	private final int udpPort = 8645;
 
-	/** Whether all clients have joined the UDP multicast group. */
-	private boolean allClientsJoinedUDP = false;
-	
-	public static final int GAME_UDP_PORT = 4356;
 		
 	public ServerGame(Room toHost, InetAddress multicastGroup, InetAddress commandGroup) {
 		Server.getInstance().addListener(this);
-		
-		this.multicastGroup = multicastGroup;
 		
 		room = toHost;
 		lastIDAssigned = 0;
 		
 		try {
-			multiSocket = new MulticastSocket();
-			receptionSocket = new DatagramSocket(ServerGame.GAME_UDP_PORT, InetAddress.getLocalHost());
+			udpSocket = new DatagramSocket(udpPort, InetAddress.getLocalHost());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -81,20 +69,20 @@ public class ServerGame implements ApplicationListener, ServerListener {
 			@Override
 			public void run() {
 				while (Server.isRunning()) {
-					byte[] buffer = new byte[1000];
+					byte[] buffer = new byte[256];
 					
 					DatagramPacket dp = new DatagramPacket(buffer, buffer.length);
 					String message = null;
 					
 					try {
-						receptionSocket.receive(dp);
+						udpSocket.receive(dp);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					
 					message = new String(dp.getData());
 					
-					//System.out.println(ServerGame.class.getSimpleName() + " >>> Recieved UDP message " + message.trim() + " from client: " + dp.getAddress());
+					System.out.println(ServerGame.class.getSimpleName() + " >>> Recieved UDP message " + message.trim() + " from client: " + dp.getAddress().getHostAddress().trim() + " on port " + dp.getPort());
 					
 					String[] arguments = message.split("#");
 					
@@ -113,32 +101,24 @@ public class ServerGame implements ApplicationListener, ServerListener {
 		udpMessageListener.setName(toHost.getRoomName() + "'s UDP Message Listener");
 		udpMessageListener.start();
 		
-		System.out.println(getClass().getSimpleName() + " >>> Listening for UDP packets on " + receptionSocket.getLocalAddress() + ", port:" + receptionSocket.getLocalPort());
+		System.out.println(getClass().getSimpleName() + " >>> Listening for UDP packets on " + udpSocket.getLocalAddress() + ", port:" + udpSocket.getLocalPort());
 	}
 	
 	@Override
 	public void create() {
-		//tell the clients to join the multicast group
-		for (ClientInfo client : room.getClients())
-			Server.getInstance().sendMessageToSingleClient("<JG/" + multicastGroup.getHostAddress() + ">", client);
-		
-		//validate that all clients have joined the group
-		while (allClientsJoinedUDP  == false) {
-			allClientsJoinedUDP = true;
-			for (ClientInfo client : room.getClients()) {
-				if (!client.hasJoinedUDPGroup()) {
-					allClientsJoinedUDP = false;
-				}
-			}
-		}
-		
 		//tell the clients to open their game screens
-		sendMessageToGroup("<SG/" + receptionSocket.getLocalAddress().getHostAddress() + "/" + receptionSocket.getLocalPort() +  ">");
+		for (ClientInfo client : room.getClients())
+			Server.getInstance().sendMessageToSingleClient("<SG/" + udpSocket.getLocalAddress().getHostAddress() + "/" + udpPort +  ">", client);
 
 		//tell the clients to add the player characters to the game
 		for (ClientInfo client : room.getClients()) {
 			lastIDAssigned++;
-			sendMessageToGroup("<ADDPLAYER/" + client.getNickname() + "/" + lastIDAssigned + ">");
+			
+			//tell all players to add this clients character
+			for (int i = 0; i < room.getClients().size(); i++) {
+				Server.getInstance().sendMessageToSingleClient("<ADDPLAYER/" + client.getNickname() + "/" + lastIDAssigned + ">", room.getClients().get(i));
+			}
+			
 			players.add(new MultiplayerPlayer(GAME_HEIGHT / 2, GAME_HEIGHT / 2, client.getNickname(), lastIDAssigned));
 		}
 
@@ -340,10 +320,15 @@ public class ServerGame implements ApplicationListener, ServerListener {
 	private void sendMessageToGroup(String message) {
 		byte[] buffer = message.getBytes();
 		
-    	try {
-			multiSocket.send(new DatagramPacket(buffer, buffer.length, multicastGroup, Client.UDP_PORT));
-		} catch (IOException e) {
-			e.printStackTrace();
+		
+
+		for (ClientInfo client : room.getClients()) {
+			try {
+				System.out.println(getClass().getSimpleName() + " >>> Sending " + message + " to client with ip "+ client.getIpAddress() + " on port " + Client.UDP_PORT);
+				udpSocket.send(new DatagramPacket(buffer, buffer.length, client.getIpAddress(), Client.UDP_PORT));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
