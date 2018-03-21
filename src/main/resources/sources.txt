@@ -1,0 +1,63 @@
+** Backgrounds **
+
+redPlanet.png
+https://opengameart.org/content/red-planet by Bart K.
+
+hubble.jpg
+https://opengameart.org/content/space-background by Cuzco.
+
+** Enemies **
+
+asteroid.png
+https://opengameart.org/content/432-isometrics-rocks-and-asteroids by Varkalandar.
+
+dropship.png
+https://opengameart.org/content/spaceship-tutorial-0 by Skorpio.
+
+runner.png, laserShip.png 
+https://opengameart.org/content/i-are-spaceship-16x16-space-sprites by bart.
+
+** Fonts **
+
+fonts from daFonts.com.
+
+** Misc **
+
+Explosion.png
+https://opengameart.org/content/pixel-explosion-12-frames by J-Robot.
+
+ship.png
+https://opengameart.org/content/pack-spaceships-and-building by MillionthVector.
+
+** Powerups **
+
+autoAim.png, health.png, time.png by me.
+
+** Projectiles **
+
+autoAim.png, laser.png, missile.png
+https://opengameart.org/content/bullet-collection-1-m484 by Master484.
+
+** Sounds **
+
+atari_boom.wav
+https://opengameart.org/content/atari-booms by dklon.
+
+explosion.wav 
+https://opengameart.org/content/explosion-0 by TinyWorlds.
+
+laserfire01.ogg
+https://opengameart.org/content/sci-fi-laser-fire-sfx by Triki Minut
+
+
+
+
+
+
+
+
+
+
+
+
+

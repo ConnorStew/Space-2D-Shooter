@@ -53,32 +53,6 @@ public abstract class Projectile extends Entity {
 		setRotation(rotation + 90); //add the 90 because of the way the sprite is drawn
 		moveForward(2.5); //move the bullet in front of the ship
 	}
-	
-	/**
-	 * Multiplayer projectile.
-	 * @param x
-	 * @param y
-	 * @param rotation
-	 * @param damage
-	 * @param speed
-	 * @param size
-	 * @param imageLocation
-	 * @param type
-	 * @param id
-	 */
-	Projectile(float x, float y, float rotation, double damage, int speed, int size, String imageLocation, ProjectileType type, int id, int firedByID) {
-		super(imageLocation, 0, speed, id); //zero because projectiles do not have health
-
-		this.type = type;
-		this.damage = damage;
-		this.playerID = firedByID;
-			
-		setSize(size, size);
-		setPosition(x - (getWidth() / 2), y - (getHeight() / 2)); //center the bullet in the middle of the ship
-		setOriginCenter(); //set the origin for rotation
-		setRotation(rotation + 90); //add the 90 because of the way the sprite is drawn
-		moveForward(2.5); //move the bullet in front of the ship
-	}
 
 	@Override
 	public boolean onCollision(Entity collidedWith) {
@@ -137,6 +111,10 @@ public abstract class Projectile extends Entity {
 	 */
 	public ProjectileType getType() {
 		return type;
+	}
+	
+	public void setFiredByID(int id) {
+		playerID = id;
 	}
 	
 	public int getFiredByID() {

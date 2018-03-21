@@ -70,7 +70,7 @@ public class MultiplayerScreen implements Screen {
 		btnRefresh = new TextButton("Refresh", UI.buttonStyle);
 		
 		//make background
-		Image background = new Image(new Texture(Gdx.files.internal("space.png")));
+		Image background = new Image(new Texture(Gdx.files.internal("backgrounds/hubble.jpg")));
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		

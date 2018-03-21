@@ -12,8 +12,6 @@ import backend.entities.Entity;
 import backend.entities.EntityManager;
 import backend.entities.MultiplayerPlayer;
 import backend.projectiles.Projectile;
-import backend.projectiles.ProjectileType;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
@@ -56,7 +54,8 @@ public class ServerGame extends Listener implements ApplicationListener {
 					MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
 					if (toUpdate != null) {
 						if (msg.buttonCode == Input.Buttons.LEFT) {
-							if (toUpdate.canFireLight()) {
+							Projectile pp = toUpdate.getLeftWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
+							if (pp != null) {
 								lastIDAssigned++;
 								String projectileType = "Light";
 								AddProjectile toSend = new AddProjectile();
@@ -64,19 +63,27 @@ public class ServerGame extends Listener implements ApplicationListener {
 								toSend.id = lastIDAssigned;
 								toSend.type = projectileType;
 								ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
-								em.addEntity(toUpdate.fire(Gdx.graphics.getDeltaTime(), projectileType, ProjectileType.PVP, lastIDAssigned));
+								
+								pp.setFiredByID(toUpdate.getMultiplayerID());
+								pp.setMultiplayerID(lastIDAssigned);
+								em.addEntity(pp);
 							}
 						}
 						if (msg.buttonCode == Input.Buttons.RIGHT) {
-							if (toUpdate.canFireHeavy()) {
+							Projectile pp = toUpdate.getRightWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
+							if (pp != null) {
 								lastIDAssigned++;
 								String projectileType = "Heavy";
+								
 								AddProjectile toSend = new AddProjectile();
 								toSend.playerID = toUpdate.getMultiplayerID();
 								toSend.id = lastIDAssigned;
 								toSend.type = projectileType;
 								ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
-								em.addEntity(toUpdate.fire(Gdx.graphics.getDeltaTime(), projectileType, ProjectileType.PVP, lastIDAssigned));
+								
+								pp.setFiredByID(toUpdate.getMultiplayerID());
+								pp.setMultiplayerID(lastIDAssigned);
+								em.addEntity(pp);
 							}
 						}
 					}
@@ -129,8 +136,9 @@ public class ServerGame extends Listener implements ApplicationListener {
 			ServerHandler.getInstance().getServer().sendToAllTCP(toSend);
 			
 			client.setPlayerID(lastIDAssigned);
-			
-			em.addEntity(new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, client.getNickname(), lastIDAssigned));
+			MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, client.getNickname());
+			toAdd.setMultiplayerID(lastIDAssigned);
+			em.addEntity(toAdd);
 			em.cycle();
 		}
 	}

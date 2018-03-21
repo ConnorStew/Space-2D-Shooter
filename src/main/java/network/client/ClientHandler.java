@@ -1,13 +1,6 @@
 package network.client;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
-
 import com.badlogic.gdx.Gdx;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -21,7 +14,6 @@ import network.Network.RoomUpdate;
 import network.Network.StartGame;
 import network.Network.JoinRoom;
 import network.Network.UpdateNickname;
-import network.server.DiscoveryThread;
 import ui.MPGame;
 import ui.MultiplayerScreen;
 import ui.UI;
@@ -80,52 +72,4 @@ public class ClientHandler {
 		toSend.roomName = selected;
 		client.sendTCP(toSend);
 	}
-	
-	/**
-	 * Pings all available broadcast addresses to find the server and request to connect.
-	 * @return 
-	 */
-	private String pingServerForConnection() {
-		try {
-			DatagramSocket socket = new DatagramSocket();
-			socket.setBroadcast(true);
-			byte[] sendData = "DR".getBytes();
-			
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-			while (interfaces.hasMoreElements()) {
-				NetworkInterface networkInterface = interfaces.nextElement();
-				
-				//skip the interface if its only local or if its down
-				if (networkInterface.isLoopback() || !networkInterface.isUp())
-					continue;
-				
-				//loop through all network addresses
-				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-					InetAddress broadcast = interfaceAddress.getBroadcast();
-					
-					//skip if there is no broadcast
-					if (broadcast == null)
-						continue;
-					
-					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, DiscoveryThread.DISCOVERY_PORT);
-					socket.send(sendPacket);
-					
-					System.out.println(getClass().getSimpleName() + " >>> Request packet sent to " + broadcast.getHostAddress() + ", Interface: "
-							+ networkInterface.getDisplayName() + ".");
-				}
-				
-			}
-			
-			byte[] buffer = new byte[256];
-			socket.receive(new DatagramPacket(buffer, buffer.length));
-			
-			socket.close();
-			
-			return new String(buffer);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return "localhost";
-	}
-
 }

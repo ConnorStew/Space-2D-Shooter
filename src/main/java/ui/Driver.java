@@ -2,8 +2,6 @@ package ui;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.esotericsoftware.minlog.Log;
-
 import network.server.ServerHandler;
 
 public class Driver {
@@ -11,7 +9,7 @@ public class Driver {
 	public static String clientIP;
 	
 	public static void main(String[] args) {
-		Log.set(Log.LEVEL_DEBUG);
+		//Log.set(Log.LEVEL_DEBUG);
 		
 		if (args.length > 0 && args[0].equals("server")) {
 			ServerHandler.getInstance();

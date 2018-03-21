@@ -22,7 +22,6 @@ import com.esotericsoftware.kryonet.Listener.ThreadedListener;
 import backend.entities.InanimateEntity;
 import backend.entities.MultiplayerPlayer;
 import backend.projectiles.Projectile;
-import backend.projectiles.ProjectileType;
 import network.Network;
 import network.Network.*;
 
@@ -71,7 +70,8 @@ public class MPGame implements Screen {
 					final AddPlayer msg = (AddPlayer) object;
 					Gdx.app.postRunnable(new Runnable() {
 						public void run() {
-							MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, msg.name, msg.id);
+							MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, msg.name);
+							toAdd.setMultiplayerID(msg.id);
 							players.add(toAdd);
 							
 							if (toAdd.getPlayerName().equals(clientNickname))
@@ -83,9 +83,20 @@ public class MPGame implements Screen {
 					final AddProjectile msg = (AddProjectile) object;
 					Gdx.app.postRunnable(new Runnable(){
 						public void run() {
-							Projectile toAdd = getPlayerByID(msg.playerID).fire(Gdx.graphics.getDeltaTime(), msg.type, ProjectileType.PVP, msg.id);
-							if (toAdd != null)
+							Projectile toAdd = null;
+							MultiplayerPlayer player = getPlayerByID(msg.playerID);
+							if (msg.type.equals("Light")) {
+								toAdd = player.getLeftWeapon().fire(player.getCenterX(), player.getCenterY(), player.getRotation());
+							} else {
+								toAdd = player.getRightWeapon().fire(player.getCenterX(), player.getCenterY(), player.getRotation());
+							}
+							 
+							if (toAdd != null) {
+								toAdd.setFiredByID(msg.playerID);
+								toAdd.setMultiplayerID(msg.id);
 								projectiles.add(toAdd);
+							}
+								
 						}
 					});
 				}
@@ -122,7 +133,7 @@ public class MPGame implements Screen {
 		System.out.println(getClass().getSimpleName() + " >>> Multiplayer game started!");
 		
 		//instantiate map
-		map = new InanimateEntity("redPlanet.png", Network.GAME_WIDTH, Network.GAME_HEIGHT);
+		map = new InanimateEntity("backgrounds/redPlanet.png", Network.GAME_WIDTH, Network.GAME_HEIGHT);
 		player = new MultiplayerPlayer(Network.GAME_WIDTH / 2, Network.GAME_HEIGHT / 2, "default");
 
 		//instantiate font for the score

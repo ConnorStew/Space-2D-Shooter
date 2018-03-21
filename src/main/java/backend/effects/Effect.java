@@ -1,7 +1,7 @@
 package backend.effects;
 
 /**
- * Generic class for things that affect the game.
+ * Generic class for things that affect the game as a whole.
  * @author Connor Stewart
  */
 public abstract class Effect {

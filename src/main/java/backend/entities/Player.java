@@ -4,10 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import backend.enemies.Enemy;
-import backend.projectiles.Beam;
-import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
+import backend.weapons.PlayerHeavyWeapon;
+import backend.weapons.PlayerLightWeapon;
+import backend.weapons.Weapon;
 import ui.SPGame;
 import ui.ScoreScreen;
 import ui.UI;
@@ -17,12 +18,6 @@ import ui.UI;
  * @author Connor Stewart
  */
 public class Player extends Entity {
-	
-	/** The cooldown in seconds of the light weapon. */
-	protected final double LIGHT_CD = 0.3;
-	
-	/** The cooldown in seconds of the light weapon. */
-	protected final double HEAVY_CD = 1.5;
 	
 	/** The amount of speed (pixels per second) to lose each second. */
 	protected final double DRAG = 5;
@@ -36,34 +31,29 @@ public class Player extends Entity {
 	/** The players current speed. */
 	protected static int speed = 20;
 	
-	/** The amount of time since the last light weapon was fired. */
-	protected double lightTimer = 0;
-	
-	/** The amount of time since the last heavy weapon was fired. */
-	protected double heavyTimer = 0;
-
 	/** The amount of x pixels the player is moving per second. */
 	protected double xDelta = 0;
 	
 	/** The amount of y pixels the player is moving per second. */
 	protected double yDelta = 0;
 	
+	protected Weapon leftWeapon;
+	
+	protected Weapon rightWeapon;
+
 	/**
 	 * Create a player object.
 	 * @param x the players starting x coordinate
 	 * @param y the players starting y coordinate
 	 */
 	public Player(float x, float y) {
-		super("ship.png", MAX_HEALTH, speed);
+		super("misc/ship.png", MAX_HEALTH, speed);
 		setSize(3, 3);
 		setPosition(x, y);
 		setOriginCenter();
-	}
-	public Player(float x, float y, int id) {
-		super("ship.png", MAX_HEALTH, speed, id);
-		setSize(3, 3);
-		setPosition(x, y);
-		setOriginCenter();
+		
+		leftWeapon = new PlayerLightWeapon();
+		rightWeapon = new PlayerHeavyWeapon();
 	}
 
 	/**
@@ -72,21 +62,14 @@ public class Player extends Entity {
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
 	public Projectile fire(float delta) {
-		lightTimer = lightTimer + delta;
-		heavyTimer = heavyTimer + delta;
-		
 		//if the lmb is pressed and the light weapon is above or equal to the cooldown time
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lightTimer >= LIGHT_CD) {
-			lightTimer = 0;
-			return new Beam(getCenterX(), getCenterY(), getRotation());
-		}
+		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+			return leftWeapon.fire(getCenterX(), getCenterY(), getRotation());
 		
-		//if the rmb is pressed and the heavy weapon is above or equal to the cooldown time
-		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && heavyTimer >= HEAVY_CD) {
-			heavyTimer = 0;
-			return new Missile(getCenterX(), getCenterY(), getRotation());
-		}
-		
+		//if the R is pressed and the heavy weapon is above or equal to the cooldown time
+		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+			return rightWeapon.fire(getCenterX(), getCenterY(), getRotation());
+			
 		return null; //return nothing if the validation is not passed
 	}
 	
@@ -126,7 +109,8 @@ public class Player extends Entity {
 
 	@Override
 	public void update(float delta) {
-		//lightTimer = lightTimer
+		leftWeapon.update(delta);
+		rightWeapon.update(delta);
 		
 		//increase momentum on button press
 		if (Gdx.input.isKeyPressed(Input.Keys.W) && yDelta < MAX_SPEED)
@@ -178,6 +162,22 @@ public class Player extends Entity {
 			setX(tempX);
 		}
 
+	}
+
+	public Weapon getLeftWeapon() {
+		return leftWeapon;
+	}
+
+	public void setLeftWeapon(Weapon toSet) {
+		leftWeapon = toSet;
+	}
+	
+	public Weapon getRightWeapon() {
+		return rightWeapon;
+	}
+
+	public void setRightWeapon(Weapon rightWeapon) {
+		this.rightWeapon = rightWeapon;
 	}
 
 

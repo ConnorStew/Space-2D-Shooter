@@ -12,10 +12,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
 import backend.effects.Effect;
+import backend.enemies.Asteroid;
+import backend.enemies.Enemy;
 import backend.entities.Entity;
 import backend.entities.InanimateEntity;
 import backend.entities.Player;
 import backend.logic.Spawner;
+import backend.projectiles.LockOn;
 import backend.projectiles.Projectile;
 
 /**
@@ -63,7 +66,7 @@ public class SPGame implements Screen {
 		player = new Player(SPGame.GAME_WIDTH / 2, SPGame.GAME_HEIGHT / 2);
 		
 		//instantiate map
-		map = new InanimateEntity("redPlanet.png", SPGame.GAME_WIDTH, SPGame.GAME_HEIGHT);
+		map = new InanimateEntity("backgrounds/redPlanet.png", SPGame.GAME_WIDTH, SPGame.GAME_HEIGHT);
 		
 		//instantiate shape renderer
 		sr = new ShapeRenderer();
@@ -138,6 +141,7 @@ public class SPGame implements Screen {
 		//draw 
 		for (Entity entity : activeEntities)
 			entity.draw(batch);
+			
 		
 		//stop drawing sprites
 		batch.end();
@@ -146,9 +150,14 @@ public class SPGame implements Screen {
 		sr.begin(ShapeRenderer.ShapeType.Filled);
 		
 		//draw health bars
-		for (Entity entity : activeEntities)
+		for (Entity entity : activeEntities) {
+			//if (entity instanceof LockOn)
+				//((LockOn) entity).drawDebug(cam);
+			
 			if (entity.hasHealth())
 				entity.drawHP(sr, cam); //draw health bar
+		}
+
 
 		//stop drawing shapes
 		sr.end();
@@ -244,6 +253,27 @@ public class SPGame implements Screen {
 
 	public Player getPlayer() {
 		return player;
+	}
+	
+	public Enemy getNearestVisibleEnemy(LockOn projectile) {
+		double lowestDistance = 100000000;
+		Enemy closestEnemy = null;
+		
+		for (Entity entity : activeEntities) {
+			if (entity instanceof Enemy) {
+				if (!(entity instanceof Asteroid)) {
+					if (projectile.canSee(entity)) {
+						double distance = projectile.distanceBetween(entity);
+						if (distance < lowestDistance) {
+							closestEnemy = (Enemy) entity;
+							lowestDistance = distance;
+						}
+					}
+				}
+			}
+		}
+		
+		return closestEnemy;
 	}
 	
 }

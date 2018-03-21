@@ -67,7 +67,7 @@ public class UI extends Game {
 	 */
 	private void loadFont() {
 		//load the font
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Star Trek Enterprise Future.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Star Trek Enterprise Future.ttf"));
 		
 		//setting font size
 		FreeTypeFontParameter fontParameter = new FreeTypeFontParameter();

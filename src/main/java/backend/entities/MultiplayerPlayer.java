@@ -1,7 +1,5 @@
 package backend.entities;
 
-import backend.projectiles.Ball;
-import backend.projectiles.Missile;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
 import network.Network;
@@ -15,9 +13,6 @@ public class MultiplayerPlayer extends Player {
 	/** The players nickname. */
 	private String playerName;
 	
-	/** Whether this player should fire. */
-	private boolean shouldFire;
-	
 	/** How many players this player has killed. */
 	private int kills;
 
@@ -25,16 +20,11 @@ public class MultiplayerPlayer extends Player {
 		super(x, y);
 		this.playerName = playerName;
 	}
-	
-	public MultiplayerPlayer(float x, float y, String playerName, int id) {
-		super(x, y, id);
-		this.playerName = playerName;
-	}
 
 	@Override
 	public void update(float delta) {
-		lightTimer += delta;
-		heavyTimer += delta;
+		leftWeapon.update(delta);
+		rightWeapon.update(delta);
 		
 		//apply drag
 		if (xDelta > 0)
@@ -74,28 +64,6 @@ public class MultiplayerPlayer extends Player {
 		}
 	}
 	
-	/**
-	 * Handles the players firing in multiplayer.
-	 * @param delta the time since the last frame was rendered.
-	 * @param type the type of projectile to fire
-	 * @param id 
-	 * @return null if the validation isn't met or a projectile object to be fired
-	 */
-	public Projectile fire(float delta, String type, ProjectileType pType, int id) {
-		if (type.equals("Light")) {
-			lightTimer = 0;
-			return new Ball(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
-		}
-			
-		
-		if (type.equals("Heavy")) {
-			heavyTimer = 0;
-			return new Missile(getCenterX(), getCenterY(), getRotation(), id, pType, getMultiplayerID());
-		}
-			
-		return null; //return nothing if the validation is not passed
-	}
-	
 	public void moveUp(float delta) {
 		if (yDelta < MAX_SPEED)
 			yDelta += (speed * delta);
@@ -118,22 +86,6 @@ public class MultiplayerPlayer extends Player {
 
 	public String getPlayerName() {
 		return playerName;
-	}
-
-	public boolean shouldFire() {
-		return shouldFire;
-	}
-
-	public void setShouldFire(boolean shouldFire) {
-		this.shouldFire = shouldFire;
-	}
-
-	public boolean canFireLight() {
-		return lightTimer >= LIGHT_CD;
-	}
-	
-	public boolean canFireHeavy() {
-		return heavyTimer >= HEAVY_CD;
 	}
 
 	public void resetHealth() {

@@ -23,10 +23,11 @@ public abstract class Entity extends InanimateEntity {
 	/** The maximum health of this entity. */
 	private double maxHealth;
 	
+	/** The id of this entity for use in a multiplayer game. */
+	private int multiplayerID;
+	
 	/** The base speed of this entity. */
 	public final double DEFAULT_SPEED;
-	
-	private int multiplayerID;
 
 	/**
 	 * Creates a new instance of entity. <br>
@@ -47,25 +48,6 @@ public abstract class Entity extends InanimateEntity {
 	}
 	
 	/**
-	 * Creates a new instance of entity for use in multiplayer. <br>
-	 * If this maxHealth parameter is set to zero this entity will have no health system.
-	 * @param imageLocation the path to the image file for this entity
-	 * @param maxHealth the maximum health of this entity
-	 * @param the speed of this entity (pixels per second)
-	 */
-	public Entity(String imageLocation, double maxHealth, double speed, int id) { 
-		super(imageLocation);
-		DEFAULT_SPEED = speed;
-		health = maxHealth;
-		this.speed = speed;
-		if (maxHealth != 0)
-			this.maxHealth = maxHealth;
-		else
-			hasHealth = false;
-		multiplayerID = id;
-	}
-	
-	/**
 	 * Called when this entity collides with another entity.
 	 * @param collidedWith the entity the enemy collided with
 	 * @return whether this entity should be destroyed
@@ -82,23 +64,6 @@ public abstract class Entity extends InanimateEntity {
 	 * @param delta the time since the last frame was rendered
 	 */
 	public abstract void update(float delta);
-	
-	/**
-	 * Gets the distance between this entity and the target.
-	 * @param target the target entity.
-	 */
-	public double distanceBetween(Entity target) {
-		float myX = getCenterX();
-		float myY = getCenterY();
-		
-		float targetX = target.getCenterX();
-		float targetY = target.getCenterY();
-		
-		//using distance formula to get the distance
-		double distance = Math.sqrt(Math.pow((targetX - myX), 2) + Math.pow((targetY - myY), 2));
-		
-		return distance;
-	}
 	
 	/**
 	 * Moves the entity forward
@@ -225,8 +190,29 @@ public abstract class Entity extends InanimateEntity {
 		return speed;
 	}
 	
+	/**
+	 * Gets the distance between this entity and the target.
+	 * @param target the target entity.
+	 */
+	public double distanceBetween(Entity target) {
+		float myX = getCenterX();
+		float myY = getCenterY();
+		
+		float targetX = target.getCenterX();
+		float targetY = target.getCenterY();
+		
+		//using distance formula to get the distance
+		double distance = Math.sqrt(Math.pow((targetX - myX), 2) + Math.pow((targetY - myY), 2));
+		
+		return distance;
+	}
+	
 	public int getMultiplayerID() {
 		return multiplayerID;
+	}
+
+	public void setMultiplayerID(int id) {
+		multiplayerID = id;
 	}
 	
 }
