@@ -188,7 +188,9 @@ public class SPGame implements Screen {
 		
 		//loop through effects
 		for (Effect effect : activeEffects)
-			effect.time(delta);
+			if (effect.time(delta))
+				activeEffects.remove(effect);
+			
 		
 		//move entities
 		for (Entity entity : activeEntities)

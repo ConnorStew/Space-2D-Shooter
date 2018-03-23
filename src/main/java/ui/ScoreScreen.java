@@ -59,7 +59,7 @@ public class ScoreScreen implements Screen {
 		uploaded = false;
 		
 		//make background
-		Image background = new Image(new Texture(Gdx.files.internal("sb2.jpg")));
+		Image background = new Image(new Texture(Gdx.files.internal("backgrounds/hubble.jpg")));
 		background.setFillParent(true);
 		background.setPosition(0, 0);
 		

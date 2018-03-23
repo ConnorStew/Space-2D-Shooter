@@ -2,30 +2,27 @@ package backend.effects;
 
 import backend.entities.Player;
 import backend.weapons.PlayerAutoWeapon;
-import backend.weapons.Weapon;
+import backend.weapons.PlayerLightWeapon;
 import ui.SPGame;
 
 public class BetterWeapon extends Effect {
 	
-	private Weapon defaultWeapon;
+	private Player player;
 
 	public BetterWeapon(double duration) {
 		super(duration);
+		player = SPGame.getInstance().getPlayer();
 	}
 
 	@Override
 	public void update() {
-		Player player = SPGame.getInstance().getPlayer();
-		
-		if (!(player.getLeftWeapon() instanceof PlayerAutoWeapon)) {
-			defaultWeapon = player.getLeftWeapon();
+		if (!(player.getLeftWeapon() instanceof PlayerAutoWeapon))
 			player.setLeftWeapon(new PlayerAutoWeapon());
-		}
 	}
 
 	@Override
 	public void end() {
-		SPGame.getInstance().getPlayer().setLeftWeapon(defaultWeapon);
+		player.setLeftWeapon(new PlayerLightWeapon());
 	}
 
 }

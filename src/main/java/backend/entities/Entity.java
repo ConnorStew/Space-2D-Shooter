@@ -125,9 +125,9 @@ public abstract class Entity extends InanimateEntity {
 		
 		sr.setProjectionMatrix(cam.combined);
 		
-		double width = ((int) getWidth() * 1.5);
-		int height = -1;
-		int depth = 0;
+		float width = getWidth() * 1.5f;
+		float height = 0.5f;
+		float depth = 0;
 		float xPos = entityPos.x - 0.5f;
 		float yPos = entityPos.y - 1;
 		float zPos = 0;

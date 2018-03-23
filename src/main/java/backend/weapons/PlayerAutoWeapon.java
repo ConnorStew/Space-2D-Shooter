@@ -10,7 +10,7 @@ import backend.projectiles.Projectile;
 public class PlayerAutoWeapon extends Weapon {
 
 	public PlayerAutoWeapon() {
-		super(0.3f);
+		super(0.05f);
 	}
 
 	@Override

@@ -86,9 +86,9 @@ public class MPGame implements Screen {
 							Projectile toAdd = null;
 							MultiplayerPlayer player = getPlayerByID(msg.playerID);
 							if (msg.type.equals("Light")) {
-								toAdd = player.getLeftWeapon().fire(player.getCenterX(), player.getCenterY(), player.getRotation());
+								toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
 							} else {
-								toAdd = player.getRightWeapon().fire(player.getCenterX(), player.getCenterY(), player.getRotation());
+								toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
 							}
 							 
 							if (toAdd != null) {
@@ -154,8 +154,6 @@ public class MPGame implements Screen {
 
 	public void render(float delta) {
 		checkInput();
-		
-		player.update(delta);
 		
 		//clear the last frame that was rendered
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);

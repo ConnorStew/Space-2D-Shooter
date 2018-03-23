@@ -64,7 +64,7 @@
 			            <configuration>
 			                <archive>
 			                <manifest>
-			                    <mainClass>ui.Driver </mainClass>
+			                    <mainClass>ui.Driver</mainClass>
 			                </manifest>
 			                </archive>
 			                <descriptorRefs>

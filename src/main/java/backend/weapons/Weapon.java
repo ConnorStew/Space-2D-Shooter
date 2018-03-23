@@ -40,12 +40,23 @@ public abstract class Weapon {
 	 * @return the projectile fired by this weapon
 	 */
 	public Projectile fire(float x, float y, float r) {
-		if (timer > cd) {
+		if (timer >= cd) {
 			timer = 0;
 			return getProjectile(x,y,r);
 		} else {
 			return null;
 		}
+	}
+	
+	/**
+	 * Returns this weapons projectile without any validation - for use on the clientside of a multiplayer game.
+	 * @param x the projectile's x position
+	 * @param y the projectile's y position
+	 * @param r the projectile's rotation
+	 * @return the projectile fired by this weapon
+	 */
+	public Projectile fireWithoutValidation(float x, float y, float r) {
+		return getProjectile(x,y,r);
 	}
 	
 	/**
