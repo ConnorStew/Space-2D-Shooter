@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 
+import backend.animations.AnimationHandler;
 import backend.effects.Effect;
 import backend.enemies.Asteroid;
 import backend.enemies.Enemy;
@@ -57,6 +58,8 @@ public class SPGame implements Screen {
 	private Player player;
 
 	private int score;
+
+	private CopyOnWriteArrayList<AnimationHandler> activeAnimations;
 	
 	public SPGame() {
 		SPGame.INSTANCE = this;
@@ -88,7 +91,7 @@ public class SPGame implements Screen {
 		spawner = new Spawner(this);
 		activeEntities = new CopyOnWriteArrayList<Entity>();
 		activeEffects = new CopyOnWriteArrayList<Effect>();
-		
+		activeAnimations = new CopyOnWriteArrayList<AnimationHandler>();
 		//reset score
 		score = 0;
 		
@@ -139,9 +142,13 @@ public class SPGame implements Screen {
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
 
 		//draw 
+
+		
+		for (AnimationHandler animation : activeAnimations)
+			animation.draw(batch);
+			
 		for (Entity entity : activeEntities)
 			entity.draw(batch);
-			
 		
 		//stop drawing sprites
 		batch.end();
@@ -195,6 +202,11 @@ public class SPGame implements Screen {
 		//move entities
 		for (Entity entity : activeEntities)
 			entity.update(delta);
+		
+		//update the animations and remove if they need to
+		for (AnimationHandler animation : activeAnimations)
+			if (animation.update(delta))
+				activeAnimations.remove(animation);
 
 	}
 
@@ -276,6 +288,10 @@ public class SPGame implements Screen {
 		}
 		
 		return closestEnemy;
+	}
+
+	public void addAnimation(AnimationHandler toAdd) {
+		activeAnimations.add(toAdd);
 	}
 	
 }

@@ -5,12 +5,20 @@ import backend.weapons.PlayerAutoWeapon;
 import backend.weapons.PlayerLightWeapon;
 import ui.SPGame;
 
+/**
+ * This class is used to define the automatic aiming powerup which gives the player the {@link backend.weapons.PlayerAutoWeapon} for the duration.
+ * @author Connor Stewart
+ */
 public class BetterWeapon extends Effect {
 	
-	private Player player;
+	/** The player that fired this weapon. */
+	private final Player player;
 
-	public BetterWeapon(double duration) {
-		super(duration);
+	/**
+	 * Gives the player an upgraded weapon for the duration of this effect.
+	 */
+	public BetterWeapon() {
+		super(10);
 		player = SPGame.getInstance().getPlayer();
 	}
 

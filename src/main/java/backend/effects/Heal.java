@@ -11,8 +11,11 @@ public class Heal extends Effect {
 	/** The amount the player is healed for. */
 	private final static int HEAL_AMOUNT = 5;
 
+	/**
+	 * Activates the heal effect on the current singleplayer player.
+	 */
 	public Heal() {
-		super(0); //instant effect
+		super(0);
 	}
 
 	@Override

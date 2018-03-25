@@ -45,6 +45,7 @@ public class Runner extends Enemy {
 
 	@Override
 	public void onDestroy() {
+		super.onDestroy();
 		//play the death sound when a runner is destroyed
 		DEATH_SOUND.setVolume(DEATH_SOUND.play(), DEATH_SOUND_VOLUME);
 	}

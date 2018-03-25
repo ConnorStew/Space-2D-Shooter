@@ -13,8 +13,11 @@ import ui.SPGame;
  */
 public class Slow extends Effect {
 
+	/**
+	 * Creates an instance of the slow effect with the desired duration.
+	 */
 	public Slow() {
-		super(7); //ten second duration
+		super(7);
 	}
 	
 	@Override

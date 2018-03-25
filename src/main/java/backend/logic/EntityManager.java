@@ -1,9 +1,11 @@
-package backend.entities;
+package backend.logic;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+
+import backend.entities.Entity;
 
 /**
  * This class manages the storage, removal and addition of entities in a game. 

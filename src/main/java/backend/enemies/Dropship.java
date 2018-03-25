@@ -54,9 +54,6 @@ public class Dropship extends Enemy {
 	}
 
 	@Override
-	public void onDestroy() {}
-
-	@Override
 	public void update(float delta) {
 		spawnTimer += delta; //update spawn timer every update
 		

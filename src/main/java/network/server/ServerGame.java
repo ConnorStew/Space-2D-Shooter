@@ -9,8 +9,8 @@ import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.graphics.GL20;
 
 import backend.entities.Entity;
-import backend.entities.EntityManager;
 import backend.entities.MultiplayerPlayer;
+import backend.logic.EntityManager;
 import backend.projectiles.Projectile;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;

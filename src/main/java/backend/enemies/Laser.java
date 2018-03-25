@@ -52,9 +52,6 @@ public class Laser extends Enemy {
 	}
 
 	@Override
-	public void onDestroy() {}
-
-	@Override
 	public void update(float delta) {
 		fireTimer += delta;
 		rotateTowards(SPGame.getInstance().getPlayer());

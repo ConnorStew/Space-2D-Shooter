@@ -1,5 +1,6 @@
 package backend.enemies;
 
+import backend.animations.ExplosionAnimation;
 import backend.entities.Entity;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
@@ -61,6 +62,11 @@ public abstract class Enemy extends Entity {
 	 */
 	public double getDamage() {
 		return DAMAGE;
+	}
+	
+	@Override
+	public void onDestroy() {
+		SPGame.getInstance().addAnimation(new ExplosionAnimation(this.getX(), this.getY(), this.getWidth(), this.getHeight()));
 	}
 	
 }
