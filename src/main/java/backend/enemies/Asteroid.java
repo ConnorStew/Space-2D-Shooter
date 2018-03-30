@@ -44,10 +44,8 @@ public class Asteroid extends Enemy {
 
 	@Override
 	public boolean onCollision(Entity collidedWith) {
-		if (collidedWith instanceof Player) //destroy the asteroid if it collides with the player
-			return true;
-		
-		return false;
+	    //destroy the asteroid if it collides with the player
+		return (collidedWith instanceof Player);
 	}
 
 
