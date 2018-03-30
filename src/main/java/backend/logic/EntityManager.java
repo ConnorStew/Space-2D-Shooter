@@ -22,15 +22,23 @@ public class EntityManager {
 	/** The entities queued to be added to the game. */
 	private Stack<Entity> entitiesToRemove = new Stack<Entity>();
 	
+	private boolean isCycling = false;
+	
 	/**
 	 * Adds and removes entities as necessary.
 	 */
 	public void cycle() {
-		while (!entitiesToRemove.isEmpty())
-			entities.remove(entitiesToRemove.pop());
+		if (isCycling == false) {
+			isCycling = true;
 			
-		while (!entitiesToAdd.isEmpty())
-			entities.add(entitiesToAdd.pop());
+			while (!entitiesToRemove.isEmpty())
+				entities.remove(entitiesToRemove.pop());
+				
+			while (!entitiesToAdd.isEmpty())
+				entities.add(entitiesToAdd.pop());
+		}
+
+		isCycling = false;
 	}
 	
 	/**
