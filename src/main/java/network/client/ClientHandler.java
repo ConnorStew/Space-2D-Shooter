@@ -14,9 +14,11 @@ import network.Network.RoomUpdate;
 import network.Network.StartGame;
 import network.Network.JoinRoom;
 import network.Network.UpdateNickname;
+import ui.ControlGame;
 import ui.MPGame;
 import ui.MultiplayerScreen;
-import ui.UI;
+
+import javax.naming.ldap.Control;
 
 public class ClientHandler {
 	
@@ -32,12 +34,12 @@ public class ClientHandler {
 			public void received(Connection connection, Object object) {
 				if (object instanceof RoomUpdate) {
 					RoomUpdate msg = (RoomUpdate) object;
-					MultiplayerScreen.populateRooms(msg.roomNames, msg.requiredPlayers);
+					((MultiplayerScreen)ControlGame.getInstance().getScreen()).populateRooms(msg.roomNames, msg.requiredPlayers);
 				}
 				if (object instanceof StartGame) {
 					Gdx.app.postRunnable(new Runnable() {
 						public void run() {
-							UI.getInstance().setScreen(new MPGame(client, nickname));
+							ControlGame.getInstance().setScreen(new MPGame(client, nickname));
 						}
 					});
 				}

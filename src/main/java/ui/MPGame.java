@@ -1,53 +1,32 @@
 package ui;
 
-import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.swing.JOptionPane;
-
+import backend.entities.InanimateEntity;
+import backend.entities.MultiplayerPlayer;
+import backend.projectiles.Projectile;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Listener.ThreadedListener;
-
-import backend.entities.InanimateEntity;
-import backend.entities.MultiplayerPlayer;
-import backend.projectiles.Projectile;
 import network.Network;
 import network.Network.*;
 
-public class MPGame implements Screen {
+import javax.swing.*;
+import java.io.IOException;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class MPGame extends GameScreen {
 	
 	/** Players that are currently active in the game. */
 	private CopyOnWriteArrayList<Projectile> projectiles  = new CopyOnWriteArrayList<Projectile>();
 
 	/** Players that are currently active in the game. */
 	private CopyOnWriteArrayList<MultiplayerPlayer> players  = new CopyOnWriteArrayList<MultiplayerPlayer>();	
-	
-	/** Font used to display score. */
-	private BitmapFont font;
 
-	/** Used to render the sprites/entities. */
-	private SpriteBatch batch;
-	
-	/** Shape renderer used to render health bars. */
-	private ShapeRenderer sr;
-	
-	/** The camera to render the game. */
-	private OrthographicCamera cam;
-	
-	/** The background image. */
-	private InanimateEntity map;
-	
 	/** This clients player. */
 	private MultiplayerPlayer player;
 	
@@ -56,7 +35,8 @@ public class MPGame implements Screen {
 	
 	/** The client connected to the server. */
 	private Client client;
-	
+
+	/** This clients nickname. */
 	private String clientNickname;
 	
 	public MPGame(Client client, String nickname) {
@@ -76,18 +56,20 @@ public class MPGame implements Screen {
 							
 							if (toAdd.getPlayerName().equals(clientNickname))
 								player = toAdd;
-						};
+						}
 					});
 				}
 				if (object instanceof AddProjectile) {
 					final AddProjectile msg = (AddProjectile) object;
 					Gdx.app.postRunnable(new Runnable(){
 						public void run() {
-							Projectile toAdd = null;
+							Projectile toAdd;
 							MultiplayerPlayer player = getPlayerByID(msg.playerID);
 							if (msg.type.equals("Light")) {
+								assert player != null;
 								toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
 							} else {
+								assert player != null;
 								toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
 							}
 							 
@@ -130,34 +112,18 @@ public class MPGame implements Screen {
 	}
 
 	public void show() {
+		super.show();
 		System.out.println(getClass().getSimpleName() + " >>> Multiplayer game started!");
 		
 		//instantiate map
 		map = new InanimateEntity("backgrounds/redPlanet.png", Network.GAME_WIDTH, Network.GAME_HEIGHT);
 		player = new MultiplayerPlayer(Network.GAME_WIDTH / 2, Network.GAME_HEIGHT / 2, "default");
-
-		//instantiate font for the score
-		font = new BitmapFont();
-		font.getData().setScale(0.2f);
-		font.setUseIntegerPositions(false);
-		
-		//instantiate shape renderer
-		sr = new ShapeRenderer();
-		
-		//instantiate sprite batch
-		batch = new SpriteBatch();
-		
-		//instantiate camera
-		cam = new OrthographicCamera(30, 30);
-		cam.zoom = 2;
 	}
 
 	public void render(float delta) {
+		super.render(delta);
+
 		checkInput();
-		
-		//clear the last frame that was rendered
-		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		//get the player name coordinates according to the current camera position
 		Vector3 nameCord = new Vector3(player.getCenterX(), player.getCenterY(), 0);
@@ -166,9 +132,6 @@ public class MPGame implements Screen {
 		//get the score coordinates according to the current camera position
 		Vector3 scoreCord = new Vector3(10, 10, 0);
 		cam.unproject(scoreCord);
-		
-		//update camera
-		cam.update();
 		
 		//the mouse position relative to the camera
 		Vector3 mousePos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
@@ -205,21 +168,21 @@ public class MPGame implements Screen {
 		//draw background
 		map.draw(batch);
 		
-		int yincrease = 5;
+		int yIncrease = 5;
 		font.setUseIntegerPositions(false);
 		
 		for (int i = 0; i < players.size(); i++) {
 			//draw the players name
 			font.draw(batch, players.get(i).getPlayerName(), players.get(i).getCenterX(), players.get(i).getCenterY());
 			//draw the players scores
-			font.draw(batch, players.get(i).getPlayerName() + ": " + players.get(i).getKills(), scoreCord.x, scoreCord.y - (i * yincrease));
+			font.draw(batch, players.get(i).getPlayerName() + ": " + players.get(i).getKills(), scoreCord.x, scoreCord.y - (i * yIncrease));
 		}
 
 		//draw players
 		for (MultiplayerPlayer player : players) {
 			player.draw(batch);
 			if (player.getKills() >= 10) {
-				UI.getInstance().setScreen(MenuScreen.getInstance());
+				ControlGame.getInstance().setScreen(new MenuScreen());
 				JOptionPane.showMessageDialog(null, player.getPlayerName() + " has won!", "Winner", JOptionPane.INFORMATION_MESSAGE);
 				client.close();
 				try {

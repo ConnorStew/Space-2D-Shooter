@@ -1,16 +1,5 @@
 package ui;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector3;
-
 import backend.animations.AnimationHandler;
 import backend.effects.Effect;
 import backend.enemies.Asteroid;
@@ -21,33 +10,27 @@ import backend.entities.Player;
 import backend.logic.Spawner;
 import backend.projectiles.LockOn;
 import backend.projectiles.Projectile;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * The screen that contains the main game.
+ * The screen that contains the singleplayer game.
  * @author Connor Stewart
  */
-public class SPGame implements Screen {
-	
+public class SPGame extends GameScreen {
+
+	/** The height of the game. */
 	public static final int GAME_HEIGHT = 100;
 
+	/** The width of the game. */
 	public static final int GAME_WIDTH = 100;
 
+	/** The current instance of a singleplayer game. */
 	private static SPGame INSTANCE;
-
-	/** Font used to display score. */
-	private BitmapFont font;
-
-	/** Used to render the entities. */
-	private SpriteBatch batch;
-	
-	/** Shape renderer used to render health bars. */
-	private ShapeRenderer sr;
-	
-	/** The camera to render the game. */
-	private OrthographicCamera cam;
-	
-	/** The background image. */
-	private InanimateEntity map;
 
 	private CopyOnWriteArrayList<Entity> activeEntities;
 
@@ -60,38 +43,28 @@ public class SPGame implements Screen {
 	private int score;
 
 	private CopyOnWriteArrayList<AnimationHandler> activeAnimations;
-	
+
 	public SPGame() {
 		SPGame.INSTANCE = this;
 	}
 
 	public void show() {
+		super.show();
+
 		player = new Player(SPGame.GAME_WIDTH / 2, SPGame.GAME_HEIGHT / 2);
 		
 		//instantiate map
 		map = new InanimateEntity("backgrounds/redPlanet.png", SPGame.GAME_WIDTH, SPGame.GAME_HEIGHT);
-		
-		//instantiate shape renderer
-		sr = new ShapeRenderer();
-		
-		//instantiate sprite batch
-		batch = new SpriteBatch();
-		
-		//instantiate font for the score
-		font = new BitmapFont();
-		font.getData().setScale(0.2f);
-		font.setUseIntegerPositions(false);
-		
-		//instantiate camera
-		cam = new OrthographicCamera(30, 30);
+
+		//instantiate camera position
 		cam.position.set(player.getX(), player.getY(), 0);
-		cam.zoom = 2;
 		
 		//instantiate logic entities
 		spawner = new Spawner(this);
 		activeEntities = new CopyOnWriteArrayList<Entity>();
 		activeEffects = new CopyOnWriteArrayList<Effect>();
 		activeAnimations = new CopyOnWriteArrayList<AnimationHandler>();
+
 		//reset score
 		score = 0;
 		
@@ -100,15 +73,10 @@ public class SPGame implements Screen {
 	}
 
 	public void render(float delta) {
+		super.render(delta);
 		checkInput(delta);
 		
-		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
 		update(delta);
-		
-		//update camera
-		cam.update();
 		
 		//the mouse position relative to the camera
 		Vector3 mousePos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
@@ -128,7 +96,7 @@ public class SPGame implements Screen {
 		if (player.getCenterX() - cam.viewportWidth > 0 && player.getCenterX() + cam.viewportWidth < map.getWidth())
 			cam.position.x = player.getCenterX();
 
-		//get the font coordinates according to the current camera position
+		//get the starTrekFont coordinates according to the current camera position
 		Vector3 fontCord = new Vector3(10, 10, 0);
 		cam.unproject(fontCord);
 		
@@ -141,9 +109,7 @@ public class SPGame implements Screen {
 		//draw the players score
 		font.draw(batch, Integer.toString(score), fontCord.x, fontCord.y);
 
-		//draw 
-
-		
+		//draw
 		for (AnimationHandler animation : activeAnimations)
 			animation.draw(batch);
 			
@@ -208,21 +174,6 @@ public class SPGame implements Screen {
 			if (animation.update(delta))
 				activeAnimations.remove(animation);
 
-	}
-
-	public void resize(int width, int height) {
-		cam.update();
-	}
-
-	public void pause() {}
-
-	public void resume() {}
-
-	public void hide() {}
-
-	public void dispose() {
-		batch.dispose();
-		sr.dispose();
 	}
 
 	public static SPGame getInstance() {

@@ -9,9 +9,9 @@ import backend.projectiles.ProjectileType;
 import backend.weapons.PlayerHeavyWeapon;
 import backend.weapons.PlayerLightWeapon;
 import backend.weapons.Weapon;
+import ui.ControlGame;
 import ui.SPGame;
 import ui.ScoreScreen;
-import ui.UI;
 
 /**
  * Class used to represent that player character.
@@ -104,7 +104,7 @@ public class Player extends Entity {
 
 	@Override
 	public void onDestroy() {
-		UI.getInstance().setScreen(new ScoreScreen(SPGame.getInstance().getScore()));
+		ControlGame.getInstance().setScreen(new ScoreScreen(SPGame.getInstance().getScore()));
 	}
 
 	@Override

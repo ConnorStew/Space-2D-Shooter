@@ -34,7 +34,7 @@ public abstract class Entity extends InanimateEntity {
 	 * If this maxHealth parameter is set to zero this entity will have no health system.
 	 * @param imageLocation the path to the image file for this entity
 	 * @param maxHealth the maximum health of this entity
-	 * @param the speed of this entity (pixels per second)
+	 * @param speed the speed of this entity (pixels per second)
 	 */
 	public Entity(String imageLocation, double maxHealth, double speed) { 
 		super(imageLocation);
