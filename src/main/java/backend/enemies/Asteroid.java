@@ -2,6 +2,7 @@ package backend.enemies;
 
 import backend.entities.Entity;
 import backend.entities.Player;
+import ui.SPGame;
 
 /**
  * An enemy that flies from one side of the screen to the other. <br>
@@ -10,28 +11,14 @@ import backend.entities.Player;
  */
 public class Asteroid extends Enemy {
 
-	/** An asteroids default pixels per second. */
-	private static final int SPEED = 10;
-	
-	/** Points awarded for killing an asteroid. */
-	private static final int POINTS = 0;
-	
-	/** Damage an asteroid does on collision with the player. */
-	private static final int DAMAGE = 5;
-	
-	/** An asteroids maximum health. */
-	private static final int MAX_HEALTH = 0; //zero because it cannot be damaged
-	
-	/** The size of the sprite. */
-	private static final int SIZE = 4;
-	
 	/**
 	 * Create an asteroid at an x and y location.
 	 * @param x the x location to spawn the asteroid at
 	 * @param y the y location to spawn the asteroid at
+	 * @param game the game this enemy has been spawned in
 	 */
-	public Asteroid(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemies/asteroid.png");
+	public Asteroid(float x, float y, SPGame game) {
+		super(x, y, 0, 10, 5, 0, 4, "enemies/asteroid.png", game);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package backend.effects;
 
+import ui.SPGame;
+
 /**
  * Generic class for things that affect the game as a whole.
  * @author Connor Stewart
@@ -7,17 +9,22 @@ package backend.effects;
 public abstract class Effect {
 	
 	/** The duration of this effect. */
-	protected final double DURATION;
-	
+	private final double DURATION;
+
 	/** The timer used to time this effect. */
-	protected double timer = 0;
-	
+	private double timer = 0;
+
+	/** The game screen this effect has been activated on. */
+	final SPGame GAME;
+
 	/**
 	 * Creates an effect.
-	 * @param duration the duration of the effect.
+	 * @param game the game this effect has been activated in
+	 * @param duration the duration of the effect
 	 */
-	public Effect(double duration) {
+	Effect(SPGame game, double duration) {
 		this.DURATION = duration;
+		this.GAME = game;
 	}
 	
 	/**
@@ -37,12 +44,11 @@ public abstract class Effect {
 		
 		if (DURATION > timer) {
 			update();
+			return false;
 		} else {
 			end();
 			return true;
 		}
-		
-		return false;
 	}
 	
 	/**

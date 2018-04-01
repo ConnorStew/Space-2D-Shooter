@@ -11,12 +11,9 @@ import backend.logic.Spawner;
 import backend.projectiles.LockOn;
 import backend.projectiles.Projectile;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
-
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import com.badlogic.gdx.utils.Array;
 /**
  * The screen that contains the singleplayer game.
  * @author Connor Stewart
@@ -32,17 +29,15 @@ public class SPGame extends GameScreen {
 	/** The current instance of a singleplayer game. */
 	private static SPGame INSTANCE;
 
-	private CopyOnWriteArrayList<Entity> activeEntities;
+	private Array<Entity> activeEntities;
+	private Array<AnimationHandler> activeAnimations;
+	private Array<Effect> activeEffects;
 
 	private Spawner spawner;
-
-	private CopyOnWriteArrayList<Effect> activeEffects;
 
 	private Player player;
 
 	private int score;
-
-	private CopyOnWriteArrayList<AnimationHandler> activeAnimations;
 
 	public SPGame() {
 		SPGame.INSTANCE = this;
@@ -51,7 +46,7 @@ public class SPGame extends GameScreen {
 	public void show() {
 		super.show();
 
-		player = new Player(SPGame.GAME_WIDTH / 2, SPGame.GAME_HEIGHT / 2);
+		player = new Player(SPGame.GAME_WIDTH / 2, SPGame.GAME_HEIGHT / 2, this);
 		
 		//instantiate map
 		map = new InanimateEntity("backgrounds/redPlanet.png", SPGame.GAME_WIDTH, SPGame.GAME_HEIGHT);
@@ -61,9 +56,9 @@ public class SPGame extends GameScreen {
 		
 		//instantiate logic entities
 		spawner = new Spawner(this);
-		activeEntities = new CopyOnWriteArrayList<Entity>();
-		activeEffects = new CopyOnWriteArrayList<Effect>();
-		activeAnimations = new CopyOnWriteArrayList<AnimationHandler>();
+		activeEntities = new Array<Entity>();
+		activeEffects = new Array<Effect>();
+		activeAnimations = new Array<AnimationHandler>();
 
 		//reset score
 		score = 0;
@@ -142,18 +137,20 @@ public class SPGame extends GameScreen {
 		
 		//spawn enemies
 		spawner.spawnEnemies(delta);
-		
+
 		//check for collisions between entities
-		for (Entity e1 : activeEntities) {
-			for (Entity e2 : activeEntities) {
+		for (int entity1Index = 0; entity1Index < activeEntities.size; entity1Index++) {
+			for (int entity2Index = 0; entity2Index < activeEntities.size; entity2Index++) {
+				Entity e1 = activeEntities.get(entity1Index);
+				Entity e2 = activeEntities.get(entity2Index);
 				if (e1.getBoundingRectangle().overlaps(e2.getBoundingRectangle())) {
-					if (e1.onCollision(e1)) {
+					if (e1.onCollision(e2)) {
 						e1.onDestroy();
-						activeEntities.remove(e1);
+						activeEntities.removeValue(e1, false);
 					}
 					if (e2.onCollision(e1)) {
 						e2.onDestroy();
-						activeEntities.remove(e2);
+						activeEntities.removeValue(e2, false);
 					}
 				}//end checking for collisions
 			}//end e2 loop
@@ -162,8 +159,7 @@ public class SPGame extends GameScreen {
 		//loop through effects
 		for (Effect effect : activeEffects)
 			if (effect.time(delta))
-				activeEffects.remove(effect);
-			
+				activeEffects.removeValue(effect, false);
 		
 		//move entities
 		for (Entity entity : activeEntities)
@@ -172,14 +168,9 @@ public class SPGame extends GameScreen {
 		//update the animations and remove if they need to
 		for (AnimationHandler animation : activeAnimations)
 			if (animation.update(delta))
-				activeAnimations.remove(animation);
+				activeAnimations.removeValue(animation, false);
 
 	}
-
-	public static SPGame getInstance() {
-		return INSTANCE;
-	}
-
 	public int getScore() {
 		return score;
 	}
@@ -189,7 +180,7 @@ public class SPGame extends GameScreen {
 	 * @param delta the time since the last frame was rendered
 	 */
 	private void checkInput(float delta) {
-		Projectile potentialProjectile = player.fire(delta);
+		Projectile potentialProjectile = player.fire();
 		if (potentialProjectile != null)
 			activeEntities.add(potentialProjectile);
 	}
@@ -202,7 +193,7 @@ public class SPGame extends GameScreen {
 		score += points;
 	}
 
-	public CopyOnWriteArrayList<Entity> getActiveEntities() {
+	public Array<Entity> getActiveEntities() {
 		return activeEntities;
 	}
 
@@ -224,7 +215,8 @@ public class SPGame extends GameScreen {
 		double lowestDistance = 100000000;
 		Enemy closestEnemy = null;
 		
-		for (Entity entity : activeEntities) {
+		for (int i = 0; i < activeEntities.size; i++) {
+			Entity entity = activeEntities.get(i);
 			if (entity instanceof Enemy) {
 				if (!(entity instanceof Asteroid)) {
 					if (projectile.canSee(entity)) {

@@ -2,9 +2,17 @@
   <dictionary name="Connor">
     <words>
       <w>cooldown</w>
+      <w>dropship</w>
+      <w>dropships</w>
       <w>kyronet</w>
       <w>multiplayer</w>
+      <w>overhealed</w>
+      <w>powerup</w>
+      <w>powerups</w>
       <w>singleplayer</w>
+      <w>spawner</w>
+      <w>spritesheet</w>
+      <w>tanc</w>
       <w>unavailible</w>
     </words>
   </dictionary>

@@ -12,20 +12,25 @@ import ui.SPGame;
 public abstract class Pickup extends Entity {
 	
 	/** The speed that pickups rotate at. */
-	private static int rotationSpeed = 20;
+	private static final int ROTATION_SPEED = 20;
 	
 	/** The effect that is triggered when this pickup is picked up. */
-	private Effect effect;
+	private final Effect EFFECT;
+
+	/** The game this pickup has been spawned in. */
+	private final SPGame GAME;
 
 	/**
 	 * Creates a pickup.
 	 * @param imageLocation the image to use
 	 * @param effect the effect to activate when collided with
+	 * @param game the game this pickup has been spawned in
 	 */
-	public Pickup(String imageLocation, Effect effect) {
-		//zero max health and zero speed because a powerup dosen't move and dosen't take damage
+	Pickup(String imageLocation, Effect effect, SPGame game) {
+		//zero max health and zero speed because a powerup doesn't move and doesn't take damage
 		super(imageLocation, 0, 0);
-		this.effect = effect;
+		this.GAME = game;
+		this.EFFECT = effect;
 	}
 	
 	@Override
@@ -34,14 +39,14 @@ public abstract class Pickup extends Entity {
 	@Override
 	public void update(float delta) {
 		//rotate pickups
-		rotate(rotationSpeed * delta);
+		rotate(ROTATION_SPEED * delta);
 	}
 	
 	@Override
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Player) {
 			//activate the effect on collision
-			SPGame.getInstance().addEffect(effect);
+			GAME.addEffect(EFFECT);
 			return true;
 		}
 			

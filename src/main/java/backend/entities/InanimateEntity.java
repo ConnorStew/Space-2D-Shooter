@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 /**
- * Used to represent an entity that does not interact with other entity.
+ * Used to represent an entity that does not interact with other entities.
  * @author Connor Stewart
  */
 public class InanimateEntity extends Sprite {
@@ -14,7 +14,7 @@ public class InanimateEntity extends Sprite {
 	 * Creates a new entity.
 	 * @param imageLocation the path to the image file for this entity
 	 */
-	public InanimateEntity(String imageLocation) {
+	InanimateEntity(String imageLocation) {
 		super(new Texture(Gdx.files.internal(imageLocation)));
 	}
 	

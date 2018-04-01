@@ -16,14 +16,14 @@ public class Slow extends Effect {
 	/**
 	 * Creates an instance of the slow effect with the desired duration.
 	 */
-	public Slow() {
-		super(7);
+	public Slow(SPGame screen) {
+		super(screen,7);
 	}
 	
 	@Override
 	public void end() {
 		//reset the speed of all enemies
-		for (Entity e : SPGame.getInstance().getActiveEntities()) {
+		for (Entity e : GAME.getActiveEntities()) {
 			if (e.getSpeed() != e.DEFAULT_SPEED) { //only reset if the entities speed is not at default
 				e.resetSpeed();
 				if (e instanceof Dropship) { //double dropship spawn timers
@@ -38,13 +38,12 @@ public class Slow extends Effect {
 		}
 	}
 
-
 	@Override
 	public void update() {
 		//slow all enemies
-		for (Entity e : SPGame.getInstance().getActiveEntities()) {
-			if ((!(e instanceof Player ))) {//doesen't affect the player
-				//dosen't affect player projectiles
+		for (Entity e : GAME.getActiveEntities()) {
+			if ((!(e instanceof Player ))) {//doesn't affect the player
+				//doesn't affect player projectiles
 				if (!(e instanceof Projectile && ((Projectile) e).getType().equals(ProjectileType.PLAYER))) {
 					if (e.getSpeed() == e.DEFAULT_SPEED) { //only reset if the entities speed is at default
 						e.reduceSpeed(e.DEFAULT_SPEED / 2);

@@ -20,34 +20,40 @@ import ui.ScoreScreen;
 public class Player extends Entity {
 	
 	/** The amount of speed (pixels per second) to lose each second. */
-	protected final double DRAG = 5;
+	static final double DRAG = 5;
 	
 	/** The maximum speed the player can travel at. */
-	protected final double MAX_SPEED = 15;
-	
+	static final double MAX_SPEED = 15;
+
 	/** The maximum amount of health the player can have. */
-	protected final static int MAX_HEALTH= 20;
-	
-	/** The players current speed. */
-	protected static int speed = 20;
+	static final int MAX_HEALTH = 15;
+
+	/** The game this player is in. */
+	private final SPGame GAME;
 	
 	/** The amount of x pixels the player is moving per second. */
-	protected double xDelta = 0;
+	double xDelta = 0;
 	
 	/** The amount of y pixels the player is moving per second. */
-	protected double yDelta = 0;
-	
-	protected Weapon leftWeapon;
-	
-	protected Weapon rightWeapon;
+	double yDelta = 0;
+
+	/** The weapon that is fired when the player left clicks. */
+	Weapon leftWeapon;
+
+	/** The weapon that is fired when the player right clicks. */
+	Weapon rightWeapon;
 
 	/**
 	 * Create a player object.
 	 * @param x the players starting x coordinate
 	 * @param y the players starting y coordinate
+	 * @param game the game this player is in
 	 */
-	public Player(float x, float y) {
-		super("misc/ship.png", MAX_HEALTH, speed);
+	public Player(float x, float y, SPGame game) {
+		super("misc/ship.png", MAX_HEALTH, 20);
+
+		this.GAME = game;
+
 		setSize(3, 3);
 		setPosition(x, y);
 		setOriginCenter();
@@ -58,10 +64,9 @@ public class Player extends Entity {
 
 	/**
 	 * Handles the players firing.
-	 * @param delta the time since the last frame was rendered.
 	 * @return null if the validation isn't met or a projectile object to be fired
 	 */
-	public Projectile fire(float delta) {
+	public Projectile fire() {
 		//if the lmb is pressed and the light weapon is above or equal to the cooldown time
 		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
 			return leftWeapon.fire(getCenterX(), getCenterY(), getRotation());
@@ -90,21 +95,18 @@ public class Player extends Entity {
 			reduceHealth(((Enemy) collidedWith).getDamage());
 		
 		if (collidedWith instanceof Projectile) {
-			//if colliding with a projectile thats not the players
+			//if colliding with a projectile that's not the players
 			if (!((Projectile) collidedWith).getType().equals(ProjectileType.PLAYER)) {
 				reduceHealth(((Projectile) collidedWith).getDamage());
 			}
 		}
 		
-		if (getHealth() <= 0)
-			return true;
-		
-		return false;
+		return getHealth() <= 0;
 	}
 
 	@Override
 	public void onDestroy() {
-		ControlGame.getInstance().setScreen(new ScoreScreen(SPGame.getInstance().getScore()));
+		ControlGame.getInstance().setScreen(new ScoreScreen(GAME.getScore()));
 	}
 
 	@Override
@@ -164,21 +166,26 @@ public class Player extends Entity {
 
 	}
 
+	/**
+	 * Sets the weapon that is fired when the player left clicks.
+	 * @param toSet the new weapon
+	 */
+	public void setLeftWeapon(Weapon toSet) {
+		leftWeapon = toSet;
+	}
+
+	/**
+	 * @return the weapon that is fired when the player left clicks
+	 */
 	public Weapon getLeftWeapon() {
 		return leftWeapon;
 	}
 
-	public void setLeftWeapon(Weapon toSet) {
-		leftWeapon = toSet;
-	}
-	
+	/**
+	 * @return the weapon that is fired when the player right clicks
+	 */
 	public Weapon getRightWeapon() {
 		return rightWeapon;
 	}
-
-	public void setRightWeapon(Weapon rightWeapon) {
-		this.rightWeapon = rightWeapon;
-	}
-
 
 }

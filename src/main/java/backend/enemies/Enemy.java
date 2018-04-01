@@ -17,6 +17,9 @@ public abstract class Enemy extends Entity {
 	
 	/** The amount of damage the enemy does. */
 	private final int DAMAGE;
+
+	/** The game screen this enemy has been spawned on. */
+	final SPGame GAME;
 	
 	/**
 	 * Create an enemy.
@@ -29,8 +32,9 @@ public abstract class Enemy extends Entity {
 	 * @param size the size of the sprite
 	 * @param imageLocation the location of this enemies image
 	 */
-	Enemy(float x, float y , int points, int speed, int damage, int maxHealth, int size, String imageLocation) {
+	Enemy(float x, float y , int points, int speed, int damage, int maxHealth, int size, String imageLocation, SPGame game) {
 		super(imageLocation, maxHealth, speed);
+		this.GAME = game;
 		this.POINTS = points;
 		this.DAMAGE = damage;
 		setSize(size,size);
@@ -43,13 +47,13 @@ public abstract class Enemy extends Entity {
 	 * @param collidedWith the entity this enemy collided with
 	 * @return whether the damage destroyed the enemy
 	 */
-	protected boolean takeProjectileDamage(Entity collidedWith) {
+	boolean takeProjectileDamage(Entity collidedWith) {
 		if (collidedWith instanceof Projectile) {
 			if (((Projectile) collidedWith).getType().equals(ProjectileType.PLAYER)) { //if the projectile was fired by a player
 				reduceHealth(((Projectile) collidedWith).getDamage());
 				
 				if (health <= 0) { //remove the enemy if it has no health left
-					SPGame.getInstance().addToScore(POINTS); //add this enemies points to the score
+					GAME.addToScore(POINTS); //add this enemies points to the score
 					return true; //destroy this enemy
 				}
 			}
@@ -66,7 +70,7 @@ public abstract class Enemy extends Entity {
 	
 	@Override
 	public void onDestroy() {
-		SPGame.getInstance().addAnimation(new ExplosionAnimation(this.getX(), this.getY(), this.getWidth(), this.getHeight()));
+		GAME.addAnimation(new ExplosionAnimation(this.getX(), this.getY(), this.getWidth(), this.getHeight()));
 	}
 	
 }

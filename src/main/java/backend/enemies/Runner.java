@@ -18,29 +18,15 @@ public class Runner extends Enemy {
 	
 	/** The volume to play the orbs death sound at. */
 	private static final float DEATH_SOUND_VOLUME = 0.2f;
-	
-	/** The orbs pixels per second. */
-	private static final int SPEED = 15;
-	
-	/** Points awarded for killing the orb. */
-	private static final int POINTS = 10;
-	
-	/** Damage the orb does on collision with the player. */
-	private static final int DAMAGE = 2;
-	
-	/** Orbs maximum health. */
-	private static final int MAX_HEALTH = 20;
-	
-	/** The size of the sprite. */
-	private static final int SIZE = 2;
 
 	/**
 	 * Create a runner at an x and y location.
 	 * @param x the x location to spawn the runner at
 	 * @param y the y location to spawn the runner at
+	 * @param game the game this enemy has been spawned in
 	 */
-	public Runner(float x, float y) {
-		super(x, y, POINTS, SPEED, DAMAGE, MAX_HEALTH, SIZE, "enemies/runner.png");
+	public Runner(float x, float y, SPGame game) {
+		super(x, y, 10, 15, 2, 20, 2, "enemies/runner.png", game);
 	}
 
 	@Override
@@ -52,7 +38,7 @@ public class Runner extends Enemy {
 	
 	@Override
 	public void update(float delta) {
-		moveTowards(SPGame.getInstance().getPlayer(), delta); //go towards the player
+		moveTowards(GAME.getPlayer(), delta); //go towards the player
 	}
 	
 	@Override
@@ -62,12 +48,8 @@ public class Runner extends Enemy {
 		
 		if (collidedWith instanceof Asteroid) //destroy the runner if it collides with an asteroid
 			return true;
-		
-		if (takeProjectileDamage(collidedWith))
-			return true; //destroy this enemy
-	
-		
-		return false; //don't destroy the runner if it collides with anything else e.g other enemies
+
+		return takeProjectileDamage(collidedWith);
 	}
 
 }

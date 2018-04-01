@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Polygon;
 
 import backend.enemies.Enemy;
 import backend.entities.Entity;
+import ui.GameScreen;
 import ui.SPGame;
 
 /**
@@ -28,10 +29,12 @@ public class LockOn extends Projectile {
 	
 	/** The max width this projectile can see. */
 	private static final int VIEW_WIDTH = 25;
-	
+
+	private SPGame screen;
+
 	private Polygon vision;
 
-	public LockOn(float x, float y, float rotation) {
+	public LockOn(float x, float y, float rotation, SPGame screen) {
 		super(x, y, rotation, DAMAGE, SPEED, SIZE, "projectiles/autoAim.png", ProjectileType.PLAYER);
 		vision = new Polygon();
 	}
@@ -49,7 +52,7 @@ public class LockOn extends Projectile {
 		vision.setOrigin(x, y);
 		vision.setRotation(this.getRotation() - 90);
 		
-		Enemy toChase = SPGame.getInstance().getNearestVisibleEnemy(this);
+		Enemy toChase = screen.getNearestVisibleEnemy(this);
 		if (toChase != null)
 			moveTowards(toChase, delta);
 		else

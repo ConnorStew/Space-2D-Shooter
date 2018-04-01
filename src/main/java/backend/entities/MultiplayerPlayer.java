@@ -17,7 +17,7 @@ public class MultiplayerPlayer extends Player {
 	private int kills;
 
 	public MultiplayerPlayer(float x, float y, String playerName) {
-		super(x, y);
+		super(x, y, null);
 		this.playerName = playerName;
 	}
 
@@ -63,43 +63,75 @@ public class MultiplayerPlayer extends Player {
 			setX(tempX);
 		}
 	}
-	
+
+	/**
+	 * Increase this plays y delta.
+	 * @param delta the time since the last frame was rendered
+	 */
 	public void moveUp(float delta) {
 		if (yDelta < MAX_SPEED)
 			yDelta += (speed * delta);
 	}
-	
+
+    /**
+     * Decreases this plays y delta.
+     * @param delta the time since the last frame was rendered
+     */
 	public void moveDown(float delta) {
 		if (yDelta > -MAX_SPEED)
 			yDelta -= (speed * delta);
 	}
-	
+
+    /**
+     * Decreases this plays x delta.
+     * @param delta the time since the last frame was rendered
+     */
 	public void moveLeft(float delta) {
 		if (xDelta > -MAX_SPEED)
 			xDelta -= (speed * delta);
 	}
-	
+
+    /**
+     * Increase this plays x delta.
+     * @param delta the time since the last frame was rendered
+     */
 	public void moveRight(float delta) {
 		if (xDelta < MAX_SPEED)
 			xDelta += (speed * delta);
 	}
 
+    /**
+     * Sets this players health to its maximum.
+     */
+    public void resetHealth() {
+        health = MAX_HEALTH;
+    }
+
+    /**
+     * Adds a kill to this players total kills.
+     */
+    public void incrementKills() {
+        kills++;
+    }
+
+    /**
+     * @return this players nickname used to identify them on the server
+     */
 	public String getPlayerName() {
 		return playerName;
 	}
 
-	public void resetHealth() {
-		health = MAX_HEALTH;
-	}
-
+    /**
+     * @return the amount of other players this player has killed
+     */
 	public int getKills() {
 		return kills;
 	}
 
-	public void incrementKills() {
-		kills++;
-	}
-
+    /**
+     * Sets the amount of kills this player has.
+     * @param kills the amount of kills
+     */
 	public void setKills(int kills) {
 		this.kills = kills;
 	}
@@ -108,15 +140,12 @@ public class MultiplayerPlayer extends Player {
 	public boolean onCollision(Entity collidedWith) {
 		if (collidedWith instanceof Projectile) {
 			Projectile projectile = (Projectile) collidedWith;
-			//if colliding with a projectile thats not the players and is not fired by this player
+			//if colliding with a projectile that's not the players and is not fired by this player
 			if (!projectile.getType().equals(ProjectileType.PLAYER) && projectile.getFiredByID() != getMultiplayerID())
 				reduceHealth(projectile.getDamage());
 		}
 		
-		if (getHealth() <= 0)
-			return true;
-		
-		return false;
+		return (getHealth() <= 0);
 	}
 
 }

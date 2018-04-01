@@ -13,14 +13,15 @@ public class Heal extends Effect {
 
 	/**
 	 * Activates the heal effect on the current singleplayer player.
+	 * @param game the game this effect has been activated in
 	 */
-	public Heal() {
-		super(0);
+	public Heal(SPGame game) {
+		super(game, 0);
 	}
 
 	@Override
 	public void update() {
-		SPGame.getInstance().getPlayer().heal(HEAL_AMOUNT);
+		GAME.getPlayer().heal(HEAL_AMOUNT);
 	}
 
 	@Override

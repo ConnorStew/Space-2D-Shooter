@@ -1,6 +1,5 @@
 package backend.animations;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -51,15 +50,15 @@ public class AnimationHandler {
 				spriteSheet.getWidth() / frameColumns,
 				spriteSheet.getHeight() / frameRows);
 
-		TextureRegion[] walkFrames = new TextureRegion[frameColumns * frameRows];
+		TextureRegion[] frames = new TextureRegion[frameColumns * frameRows];
 		int index = 0;
 		for (int i = 0; i < frameRows; i++) {
 			for (int j = 0; j < frameColumns; j++) {
-				walkFrames[index++] = tmp[i][j];
+				frames[index++] = tmp[i][j];
 			}
 		}
 		
-		animation = new Animation<TextureRegion>(0.050f, walkFrames);
+		animation = new Animation<TextureRegion>(0.050f, frames);
 	}
 	
 	/**
@@ -76,7 +75,7 @@ public class AnimationHandler {
 	 * @return whether this animation should be stopped
 	 */
 	public boolean update(float delta) {
-		stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
+		stateTime += delta;
 		return animation.isAnimationFinished(stateTime);
 	}
 	

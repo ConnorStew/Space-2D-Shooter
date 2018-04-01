@@ -69,7 +69,7 @@ public abstract class Entity extends InanimateEntity {
 	 * Moves the entity forward
 	 * @param pixels the amount of pixels to move the entity by
 	 */
-	public void moveForward(double pixels) {
+	protected void moveForward(double pixels) {
 		translateX((float) (Math.cos(Math.toRadians(getRotation())) * pixels));
 		translateY((float) (Math.sin(Math.toRadians(getRotation())) * pixels));
 	}
@@ -78,13 +78,14 @@ public abstract class Entity extends InanimateEntity {
 	 * Rotates this entity towards an entity.
 	 * @param target the entity to face towards
 	 */
-	public void rotateTowards(Entity target) {
+	protected void rotateTowards(Entity target) {
 		rotateTowards(target.getCenterX(), target.getCenterY());
 	}
 	
 	/** 
 	 * Moves towards an entity at this entities speed.
 	 * @param target the entity to move towards
+	 * @param delta the time since the last frame was rendered
 	 */
 	protected void moveTowards(Entity target, float delta) {
 		rotateTowards(target);
@@ -93,7 +94,8 @@ public abstract class Entity extends InanimateEntity {
 
 	/**
 	 * Rotates this entity towards a set of coordinates.
-	 * @param target the entity to face towards
+	 * @param targetX the x coordinate to face towards
+	 * @param targetY the y coordinate to face towards
 	 */
 	public void rotateTowards(float targetX, float targetY) {
 		double xDistance = getCenterX() - targetX;
@@ -113,11 +115,11 @@ public abstract class Entity extends InanimateEntity {
 	
 	/**
 	 * Draw a health bar under this entity.
-	 * @param sr the ShapeRenderer thats rending this entity
-	 * @param cam camera thats rendering this entity
+	 * @param sr the ShapeRenderer that's rending this entity
+	 * @param cam camera that's rendering this entity
 	 */
 	public void drawHP(ShapeRenderer sr, OrthographicCamera cam) {
-		//get the position of this entity relative to the camera thats rendering it
+		//get the position of this entity relative to the camera that's rendering it
 		Vector3 entityPos = new Vector3(getX(), getY(), 0);
 		
 		//get the percentage of current health left
@@ -134,11 +136,26 @@ public abstract class Entity extends InanimateEntity {
 		
 		//draw the outline
 		sr.setColor(Color.RED);
-		sr.box(xPos, yPos, zPos, (float) width, height, depth);
+		sr.box(xPos, yPos, zPos, width, height, depth);
 		
 		//draw the health bar
 		sr.setColor(Color.GREEN);
 		sr.box(xPos, yPos, zPos, (float) (width * percentage), height, depth);
+	}
+
+	/**
+	 * Gets the distance between this entity and the target.
+	 * @param target the target entity.
+	 */
+	public double distanceBetween(Entity target) {
+		float myX = getCenterX();
+		float myY = getCenterY();
+
+		float targetX = target.getCenterX();
+		float targetY = target.getCenterY();
+
+		//using distance formula to get the distance
+		return Math.sqrt(Math.pow((targetX - myX), 2) + Math.pow((targetY - myY), 2));
 	}
 	
 	/**
@@ -186,31 +203,24 @@ public abstract class Entity extends InanimateEntity {
 		speed = DEFAULT_SPEED;
 	}
 
+	/**
+	 * @return how many pixels this entity should move per second
+	 */
 	public double getSpeed() {
 		return speed;
 	}
-	
+
 	/**
-	 * Gets the distance between this entity and the target.
-	 * @param target the target entity.
+	 * @return the multiplayer id number of this entity
 	 */
-	public double distanceBetween(Entity target) {
-		float myX = getCenterX();
-		float myY = getCenterY();
-		
-		float targetX = target.getCenterX();
-		float targetY = target.getCenterY();
-		
-		//using distance formula to get the distance
-		double distance = Math.sqrt(Math.pow((targetX - myX), 2) + Math.pow((targetY - myY), 2));
-		
-		return distance;
-	}
-	
 	public int getMultiplayerID() {
 		return multiplayerID;
 	}
 
+	/**
+	 * Sets the multiplayer id number of this entity
+	 * @param id the id number
+	 */
 	public void setMultiplayerID(int id) {
 		multiplayerID = id;
 	}
