@@ -1,5 +1,6 @@
 package network.server;
 
+import com.badlogic.gdx.utils.Array;
 import org.mockito.Mockito;
 
 import com.badlogic.gdx.ApplicationListener;
@@ -10,7 +11,6 @@ import com.badlogic.gdx.graphics.GL20;
 
 import backend.entities.Entity;
 import backend.entities.MultiplayerPlayer;
-import backend.logic.EntityManager;
 import backend.projectiles.Projectile;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -30,10 +30,9 @@ public class ServerGame extends Listener implements ApplicationListener {
 	/** The last multiplayer ID assigned to an entity. */
 	private int lastIDAssigned;
 	
-	/** The object that stores the entities within this game. */
-	private EntityManager em = new EntityManager();
+	private Array<Entity> entities = new Array<Entity>();
 
-	public ServerGame(Room toHost) {
+	ServerGame(Room toHost) {
 		this.room = toHost;
 		
 		ServerHandler.getInstance().addListener(new Listener() {
@@ -66,7 +65,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 								
 								pp.setFiredByID(toUpdate.getMultiplayerID());
 								pp.setMultiplayerID(lastIDAssigned);
-								em.addEntity(pp);
+								entities.add(pp);
 							}
 						}
 						if (msg.buttonCode == Input.Buttons.RIGHT) {
@@ -83,7 +82,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 								
 								pp.setFiredByID(toUpdate.getMultiplayerID());
 								pp.setMultiplayerID(lastIDAssigned);
-								em.addEntity(pp);
+								entities.add(pp);
 							}
 						}
 					}
@@ -93,18 +92,20 @@ public class ServerGame extends Listener implements ApplicationListener {
 				if (object instanceof KeyInput) {
 					KeyInput msg = (KeyInput) object;
 					MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
-					
-					if (msg.keyCode == Input.Keys.W)
-						toUpdate.moveUp(Gdx.graphics.getDeltaTime());
-					
-					if (msg.keyCode == Input.Keys.S)
-						toUpdate.moveDown(Gdx.graphics.getDeltaTime());
-					
-					if (msg.keyCode == Input.Keys.D)
-						toUpdate.moveRight(Gdx.graphics.getDeltaTime());
-					
-					if (msg.keyCode == Input.Keys.A)
-						toUpdate.moveLeft(Gdx.graphics.getDeltaTime());
+
+					if (toUpdate != null) {
+						if (msg.keyCode == Input.Keys.W)
+							toUpdate.moveUp(Gdx.graphics.getDeltaTime());
+
+						if (msg.keyCode == Input.Keys.S)
+							toUpdate.moveDown(Gdx.graphics.getDeltaTime());
+
+						if (msg.keyCode == Input.Keys.D)
+							toUpdate.moveRight(Gdx.graphics.getDeltaTime());
+
+						if (msg.keyCode == Input.Keys.A)
+							toUpdate.moveLeft(Gdx.graphics.getDeltaTime());
+					}
 				}
 			}
 		});
@@ -138,20 +139,18 @@ public class ServerGame extends Listener implements ApplicationListener {
 			client.setPlayerID(lastIDAssigned);
 			MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, client.getNickname());
 			toAdd.setMultiplayerID(lastIDAssigned);
-			em.addEntity(toAdd);
-			em.cycle();
+			entities.add(toAdd);
 		}
 	}
 	
 	public void render() {
 		float delta = Gdx.graphics.getDeltaTime();
-		
-		em.cycle();
-		
-		for (Entity entity : em.getActiveEntities()) {
-			entity.update(delta);
-			if (entity instanceof Projectile) {
-				Projectile projectile = (Projectile) entity;
+
+		for (int i = 0 ; i < entities.size; i++) {
+			Entity currentEntity = entities.get(i);
+			currentEntity.update(delta);
+			if (currentEntity instanceof Projectile) {
+				Projectile projectile = (Projectile) currentEntity;
 				
 				//send the projectile update command to the clients
 				UpdateProjectile toSend = new UpdateProjectile();
@@ -164,8 +163,8 @@ public class ServerGame extends Listener implements ApplicationListener {
 				//remove the projectile if its outside the map
 				if (projectile.getX() > Network.GAME_WIDTH || projectile.getX() < 0 || projectile.getY() > Network.GAME_HEIGHT || projectile.getY() < 0)
 					removeProjectile(projectile);
-			} else if (entity instanceof MultiplayerPlayer) {
-				MultiplayerPlayer player = (MultiplayerPlayer) entity;
+			} else if (currentEntity instanceof MultiplayerPlayer) {
+				MultiplayerPlayer player = (MultiplayerPlayer) currentEntity;
 				
 				//send the player update command to the clients
 				UpdatePlayer toSend = new UpdatePlayer();
@@ -178,10 +177,10 @@ public class ServerGame extends Listener implements ApplicationListener {
 				ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
 			}
 			
-			//check if this entity collideds with any others
-			for (Entity e2 : em.getActiveEntities())
-				if (entity.getBoundingRectangle().overlaps(e2.getBoundingRectangle()) && !entity.equals(e2)) 
-					resolveCollision(entity, e2);
+			//check if this entity collides with any others
+			for (int j = 0; j < entities.size; j++)
+				if (currentEntity.getBoundingRectangle().overlaps(entities.get(j).getBoundingRectangle()) && !currentEntity.equals(entities.get(j)))
+					resolveCollision(currentEntity, entities.get(j));
 		}
 	}
 	
@@ -199,10 +198,14 @@ public class ServerGame extends Listener implements ApplicationListener {
 				//if the projectile was fired by another player
 				if (projectile.getFiredByID() != player.getMultiplayerID()) {
 					player.reduceHealth(projectile.getDamage());
-					em.removeEntity(projectile);
+					entities.removeValue(projectile, false);
 					
 					if (player.getHealth() <= 0) {
-						getPlayerByID(projectile.getFiredByID()).incrementKills();
+						MultiplayerPlayer toIncrement = getPlayerByID(projectile.getFiredByID());
+
+						if (toIncrement != null)
+							toIncrement.incrementKills();
+
 						player.resetHealth();
 						player.setPosition(Network.GAME_WIDTH / 2, Network.GAME_HEIGHT / 2);
 					}
@@ -225,7 +228,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 	 * @return the player that has a matching id or null
 	 */
 	private MultiplayerPlayer getPlayerByID(int id) {
-		for (Entity entity : em.getActiveEntities())
+		for (Entity entity : entities)
 			if (entity instanceof MultiplayerPlayer)
 				if (entity.getMultiplayerID() == id)
 					return (MultiplayerPlayer) entity;
@@ -245,7 +248,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 		
 		//remove on server
 		toRemove.onDestroy();
-		em.removeEntity(toRemove);
+		entities.removeValue(toRemove, false);
 	}
 
 	

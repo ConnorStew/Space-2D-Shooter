@@ -25,7 +25,7 @@ public class ServerHandler {
 
 	/** Whether the server is running. */
 	private boolean running = true;
-	
+
 	/** Open rooms on the server. */
 	private ArrayList<Room> rooms = new ArrayList<Room>();
 	
@@ -97,20 +97,16 @@ public class ServerHandler {
 		return instance;
 	}
 
-	public void addListener(Listener toAdd) {
+	void addListener(Listener toAdd) {
 		server.addListener(toAdd);
 	}
 
-	public boolean isRunning() {
-		return running ;
-	}
-
-	public void startGame(Room room) {
+	void startGame(Room room) {
 		System.out.println("Request to start room " + room.getRoomName());
 		new ServerGame(room);
 	}
 	
-	public ClientInfo getClientByConnection(Connection connection) {
+	ClientInfo getClientByConnection(Connection connection) {
 		for (ClientInfo client : clients)
 			if (client.getConnection().equals(connection))
 				return client;

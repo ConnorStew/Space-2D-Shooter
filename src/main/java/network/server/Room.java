@@ -1,6 +1,6 @@
 package network.server;
 
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * This class represents a room that is being hosted on the server.
@@ -15,7 +15,7 @@ public class Room {
 	private int requiredPlayers;
 	
 	/** Clients in the room. */
-	private CopyOnWriteArrayList<ClientInfo> clients = new CopyOnWriteArrayList<ClientInfo>();
+	private Array<ClientInfo> clients = new Array<ClientInfo>();
 
 	public Room(String name, int requiredPlayers) {
 		this.name = name;
@@ -27,7 +27,7 @@ public class Room {
 		clients.add(info);
 		
 		//game should start for all clients
-		if (clients.size() == requiredPlayers) {
+		if (clients.size == requiredPlayers) {
 			System.out.println(getClass().getSimpleName() + " >>> game ready to start.");
 			ServerHandler.getInstance().startGame(this);
 		}
@@ -37,7 +37,7 @@ public class Room {
 		return name;
 	}
 
-	public CopyOnWriteArrayList<ClientInfo> getClients() {
+	public Array<ClientInfo> getClients() {
 		return clients;
 	}
 

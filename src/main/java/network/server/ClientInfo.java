@@ -11,19 +11,19 @@ public class ClientInfo {
 	/** The id of the player this client controls. */
 	private int playerID;
 
-	public ClientInfo(Connection connection) {
+	ClientInfo(Connection connection) {
 		conn = connection;
 	}
 
-	public String getNickname() {
+	String getNickname() {
 		return nickname;
 	}
 
-	public Connection getConnection() {
+	Connection getConnection() {
 		return conn;
 	}
 
-	public void setNickname(String nickname) {
+	void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
 
@@ -31,7 +31,7 @@ public class ClientInfo {
 		return playerID;
 	}
 
-	public void setPlayerID(int playerID) {
+	void setPlayerID(int playerID) {
 		this.playerID = playerID;
 	}
 
