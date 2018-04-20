@@ -1,22 +1,18 @@
 package network.server;
 
-import com.badlogic.gdx.utils.Array;
-import org.mockito.Mockito;
-
+import backend.entities.Entity;
+import backend.entities.MultiplayerPlayer;
+import backend.projectiles.Projectile;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.graphics.GL20;
-
-import backend.entities.Entity;
-import backend.entities.MultiplayerPlayer;
-import backend.projectiles.Projectile;
-import com.esotericsoftware.kryonet.Connection;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Listener;
-
 import network.Network;
 import network.Network.*;
+import org.mockito.Mockito;
 
 /**
  * This thread hosts a server side game game once a room of players has been assembled.
@@ -28,87 +24,18 @@ public class ServerGame extends Listener implements ApplicationListener {
 	private final Room room;
 	
 	/** The last multiplayer ID assigned to an entity. */
-	private int lastIDAssigned;
-	
-	private Array<Entity> entities = new Array<Entity>();
+	private static int lastIDAssigned;
+
+	/** The entities in this game. */
+	private Array<Entity> entities = new Array<>();
+
+	/** The time inbetween game updates ticks in seconds. */
+	private float tickTime = 1;
+
+	private float tickTimer;
 
 	ServerGame(Room toHost) {
 		this.room = toHost;
-		
-		ServerHandler.getInstance().addListener(new Listener() {
-			@Override
-			public void received(Connection connection, Object object) {
-				if (object instanceof MouseMoved) {
-					MouseMoved msg = (MouseMoved) object;
-					MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
-					if (toUpdate != null) {
-						//rotate the player towards the mouse
-						toUpdate.rotateTowards(msg.x, msg.y);
-						toUpdate.setRotation(toUpdate.getRotation() - 90); //-90 due to how the player sprite is drawn
-					}
-				}
-				
-				if (object instanceof MouseInput) {
-					MouseInput msg = (MouseInput) object;
-					MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
-					if (toUpdate != null) {
-						if (msg.buttonCode == Input.Buttons.LEFT) {
-							Projectile pp = toUpdate.getLeftWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
-							if (pp != null) {
-								lastIDAssigned++;
-								String projectileType = "Light";
-								AddProjectile toSend = new AddProjectile();
-								toSend.playerID = toUpdate.getMultiplayerID();
-								toSend.id = lastIDAssigned;
-								toSend.type = projectileType;
-								ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
-								
-								pp.setFiredByID(toUpdate.getMultiplayerID());
-								pp.setMultiplayerID(lastIDAssigned);
-								entities.add(pp);
-							}
-						}
-						if (msg.buttonCode == Input.Buttons.RIGHT) {
-							Projectile pp = toUpdate.getRightWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
-							if (pp != null) {
-								lastIDAssigned++;
-								String projectileType = "Heavy";
-								
-								AddProjectile toSend = new AddProjectile();
-								toSend.playerID = toUpdate.getMultiplayerID();
-								toSend.id = lastIDAssigned;
-								toSend.type = projectileType;
-								ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
-								
-								pp.setFiredByID(toUpdate.getMultiplayerID());
-								pp.setMultiplayerID(lastIDAssigned);
-								entities.add(pp);
-							}
-						}
-					}
-
-				}
-				
-				if (object instanceof KeyInput) {
-					KeyInput msg = (KeyInput) object;
-					MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
-
-					if (toUpdate != null) {
-						if (msg.keyCode == Input.Keys.W)
-							toUpdate.moveUp(Gdx.graphics.getDeltaTime());
-
-						if (msg.keyCode == Input.Keys.S)
-							toUpdate.moveDown(Gdx.graphics.getDeltaTime());
-
-						if (msg.keyCode == Input.Keys.D)
-							toUpdate.moveRight(Gdx.graphics.getDeltaTime());
-
-						if (msg.keyCode == Input.Keys.A)
-							toUpdate.moveLeft(Gdx.graphics.getDeltaTime());
-					}
-				}
-			}
-		});
 		
 		ServerHandler.getInstance().addListener(this);
 		
@@ -117,9 +44,81 @@ public class ServerGame extends Listener implements ApplicationListener {
 		new HeadlessApplication(this);
 	}
 
+	public void message(Object object) {
+		if (object instanceof MouseMoved) {
+			MouseMoved msg = (MouseMoved) object;
+			MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
+			if (toUpdate != null) {
+				//rotate the player towards the mouse
+				toUpdate.rotateTowards(msg.x, msg.y);
+				toUpdate.setRotation(toUpdate.getRotation() - 90); //-90 due to how the player sprite is drawn
+			}
+		}
+
+		if (object instanceof MouseInput) {
+			MouseInput msg = (MouseInput) object;
+			MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
+			if (toUpdate != null) {
+				if (msg.buttonCode == Input.Buttons.LEFT) {
+					Projectile pp = toUpdate.getLeftWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
+					if (pp != null) {
+						lastIDAssigned++;
+						String projectileType = "Light";
+						AddProjectile toSend = new AddProjectile();
+						toSend.playerID = toUpdate.getMultiplayerID();
+						toSend.id = lastIDAssigned;
+						toSend.type = projectileType;
+						ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
+
+						pp.setFiredByID(toUpdate.getMultiplayerID());
+						pp.setMultiplayerID(lastIDAssigned);
+						entities.add(pp);
+					}
+				}
+				if (msg.buttonCode == Input.Buttons.RIGHT) {
+					Projectile pp = toUpdate.getRightWeapon().fire(toUpdate.getCenterX(), toUpdate.getCenterY(), toUpdate.getRotation());
+					if (pp != null) {
+						lastIDAssigned++;
+						String projectileType = "Heavy";
+
+						AddProjectile toSend = new AddProjectile();
+						toSend.playerID = toUpdate.getMultiplayerID();
+						toSend.id = lastIDAssigned;
+						toSend.type = projectileType;
+						ServerHandler.getInstance().getServer().sendToAllUDP(toSend);
+
+						pp.setFiredByID(toUpdate.getMultiplayerID());
+						pp.setMultiplayerID(lastIDAssigned);
+						entities.add(pp);
+					}
+				}
+			}
+		}
+
+		if (object instanceof KeyInput) {
+			KeyInput key = (KeyInput) object;
+			MultiplayerPlayer toUpdate = getPlayerByID(key.id);
+
+			if (toUpdate != null) {
+				if (key.keyCode == Input.Keys.W)
+					toUpdate.moveUp(Gdx.graphics.getDeltaTime());
+
+				if (key.keyCode == Input.Keys.S)
+					toUpdate.moveDown(Gdx.graphics.getDeltaTime());
+
+				if (key.keyCode == Input.Keys.D)
+					toUpdate.moveRight(Gdx.graphics.getDeltaTime());
+
+				if (key.keyCode == Input.Keys.A)
+					toUpdate.moveLeft(Gdx.graphics.getDeltaTime());
+			}
+		}
+	}
+
 	public void create() {
 		//tell the clients to open their game screens
-		ServerHandler.getInstance().getServer().sendToAllTCP(new StartGame());
+		for (ClientInfo client : room.getClients())
+			client.getConnection().sendTCP(new StartGame());
 		
 		try {
 			Thread.sleep(500L);
@@ -128,16 +127,17 @@ public class ServerGame extends Listener implements ApplicationListener {
 		}
 		
 		//tell the clients to add the player characters to the game
-		for (ClientInfo client : room.getClients()) {
+		for (int i = 0; i < room.getClients().size ; i++) {
 			lastIDAssigned++;
-			
+
+			room.getClients().get(i).setMultiplayerID(lastIDAssigned);
+
 			AddPlayer toSend = new AddPlayer();
 			toSend.id = lastIDAssigned;
-			toSend.name = client.getNickname();
-			ServerHandler.getInstance().getServer().sendToAllTCP(toSend);
-			
-			client.setPlayerID(lastIDAssigned);
-			MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, client.getNickname());
+			toSend.name = room.getClients().get(i).getNickname();
+			ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
+
+			MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, room.getClients().get(i).getNickname());
 			toAdd.setMultiplayerID(lastIDAssigned);
 			entities.add(toAdd);
 		}
@@ -182,8 +182,40 @@ public class ServerGame extends Listener implements ApplicationListener {
 				if (currentEntity.getBoundingRectangle().overlaps(entities.get(j).getBoundingRectangle()) && !currentEntity.equals(entities.get(j)))
 					resolveCollision(currentEntity, entities.get(j));
 		}
+
+		tickTimer =+ delta;
+
+		if (delta >= tickTimer)
+			tick();
 	}
-	
+
+	private void tick() {
+		tickTime = 0;
+
+		if (room.getClients().size <= 1) {
+			ClientInfo lastClient = room.getClients().get(0);
+			if (lastClient != null) {
+				sendWin(lastClient);
+				ServerHandler.getInstance().endGame(this);
+			}
+		}
+
+		for (ClientInfo client : room.getClients()) {
+			if (getPlayerByID(client.getID()).getKills() >= 10) {
+				sendWin(client);
+				ServerHandler.getInstance().endGame(this);
+			}
+		}
+	}
+
+	private void sendWin(ClientInfo lastClient) {
+		PlayerWon toSend = new PlayerWon();
+		toSend.id = lastClient.getID();
+		ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
+	}
+
+
+
 	/**
 	 * Resolves a collision between two entities.
 	 * @param entity1 the first entity in the collision
@@ -213,14 +245,6 @@ public class ServerGame extends Listener implements ApplicationListener {
 			}
 		}
 	}
-
-	public void resize(int width, int height) {}
-
-	public void pause() {}
-
-	public void resume() {}
-
-	public void dispose() {}
 	
 	/**
 	 * Gets a MultiplayerPlayer using its multiplayer id.
@@ -251,6 +275,20 @@ public class ServerGame extends Listener implements ApplicationListener {
 		entities.removeValue(toRemove, false);
 	}
 
-	
+	public void resize(int width, int height) {}
+	public void pause() {}
+	public void resume() {}
+	public void dispose() {}
 
+	Room getRoom() {
+		return room;
+	}
+
+	public void removePlayer(ClientInfo client) {
+		MultiplayerPlayer toRemove = getPlayerByID(client.getID());
+
+		RemovePlayer toSend = new RemovePlayer();
+		toSend.id = toRemove.getMultiplayerID();
+		ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
+	}
 }

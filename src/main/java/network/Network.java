@@ -1,7 +1,9 @@
 package network;
 
+import backend.entities.Player;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
+import network.server.ErrorType;
 
 /**
  * This class stores information relevant to both clients and the server.
@@ -44,16 +46,23 @@ public class Network {
 		kryo.register(UpdatePlayer.class);
 		kryo.register(MouseMoved.class);
 		kryo.register(AddProjectile.class);
+		kryo.register(JoinLobby.class);
+		kryo.register(RequestGameStart.class);
+		kryo.register(LeaveLobby.class);
+		kryo.register(LobbyPlayers.class);
+		kryo.register(LobbyClosed.class);
+		kryo.register(ErrorMessage.class);
+		kryo.register(ValidName.class);
+		kryo.register(ErrorType.class);
+		kryo.register(PlayerWon.class);
 	}
 	
 	public static class AddRoom {
 		public String roomName;
-		public String requiredPlayers;
 	}
 	
 	public static class RoomUpdate {
 		public String[] roomNames;
-		public String[] requiredPlayers;
 	}
 	
 	public static class JoinRoom {
@@ -114,7 +123,31 @@ public class Network {
 		public float x;
 		public float y;
 	}
-	
+
+	public static class JoinLobby {
+	    public boolean leader;
+    }
+
+    public static class LobbyPlayers {
+        public String[] players;
+    }
+
+    public static class PlayerWon {
+		public int id;
+	}
+
+    /** This class is used to send error messages to clients. */
+	public static class ErrorMessage {
+		public ErrorType type;
+		public String message;
+	}
+
+	public static class RequestGameStart {}
 	public static class StartGame {}
 	public static class RefreshRooms {}
+	public static class LeaveLobby {}
+    public static class LobbyClosed {}
+
+    /** This is sent by the server to indicate a valid name. */
+	public static class ValidName {}
 }

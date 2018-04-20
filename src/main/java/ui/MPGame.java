@@ -5,7 +5,6 @@ import backend.entities.MultiplayerPlayer;
 import backend.projectiles.Projectile;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Client;
@@ -53,6 +52,8 @@ public class MPGame extends GameScreen {
 							MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, msg.name);
 							toAdd.setMultiplayerID(msg.id);
 							players.add(toAdd);
+
+							System.out.println("Adding player: " + player.getPlayerName());
 							
 							if (toAdd.getPlayerName().equals(clientNickname))
 								player = toAdd;
@@ -63,16 +64,18 @@ public class MPGame extends GameScreen {
 					final AddProjectile msg = (AddProjectile) object;
 					Gdx.app.postRunnable(new Runnable(){
 						public void run() {
-							Projectile toAdd;
+							Projectile toAdd = null;
 							MultiplayerPlayer player = getPlayerByID(msg.playerID);
-							if (msg.type.equals("Light")) {
-								assert player != null;
-								toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
-							} else {
-								assert player != null;
-								toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
+							if (player != null) {
+								if (msg.type.equals("Light")) {
+									assert player != null;
+									toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
+								} else {
+									assert player != null;
+									toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
+								}
 							}
-							 
+
 							if (toAdd != null) {
 								toAdd.setFiredByID(msg.playerID);
 								toAdd.setMultiplayerID(msg.id);
@@ -106,6 +109,13 @@ public class MPGame extends GameScreen {
 					RemoveProjectile msg = (RemoveProjectile) object;
 					Projectile toRemove = getProjectileByID(msg.id);
 					projectiles.remove(toRemove);
+				}
+				if (object instanceof RemovePlayer) {
+					MultiplayerPlayer toRemove = getPlayerByID(((RemovePlayer) object).id);
+					players.remove(toRemove);
+				}
+				if (object instanceof PlayerWon) {
+					win(getPlayerByID(((PlayerWon) object).id));
 				}
 			}
 		}));
@@ -181,16 +191,6 @@ public class MPGame extends GameScreen {
 		//draw players
 		for (MultiplayerPlayer player : players) {
 			player.draw(batch);
-			if (player.getKills() >= 10) {
-				ControlGame.getInstance().setScreen(new MenuScreen());
-				JOptionPane.showMessageDialog(null, player.getPlayerName() + " has won!", "Winner", JOptionPane.INFORMATION_MESSAGE);
-				client.close();
-				try {
-					client.dispose();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 			
 		//draw projectiles
@@ -211,7 +211,16 @@ public class MPGame extends GameScreen {
 		//stop drawing shapes
 		sr.end();
 	}
-	
+
+	private void win(MultiplayerPlayer player) {
+		Gdx.app.postRunnable(() -> ControlGame.getInstance().setScreen(new MenuScreen()));
+
+		client.close();
+		dispose();
+
+		JOptionPane.showMessageDialog(null, player.getPlayerName() + " has won!", "Winner", JOptionPane.INFORMATION_MESSAGE);
+	}
+
 	public void resize(int width, int height) {}
 
 	public void pause() {}
