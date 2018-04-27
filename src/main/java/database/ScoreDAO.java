@@ -1,5 +1,6 @@
 package database;
 
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,15 +10,23 @@ import java.util.ArrayList;
  * @author Connor Stewart
  */
 public class ScoreDAO {
+
+	private static final String fileName = "scores.txt";
 	
 	/**
-	 * Uploads a new score to the server.
+	 * Writes a new score to the text file.
 	 * @param name a three letter name for the score
 	 * @param score the score
 	 */
-	public void uploadScore(String name, int score) {
-		if (DatabaseConnectionManager.exacuteSQLUpdate("INSERT INTO highscores (name, score) VALUES ('" + name + "', " + score + ");"))
-			System.out.println("Score uploaded!");
+	public void writeScore(String name, int score) {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+			writer.append(name + ":" + score);
+			writer.newLine();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -26,24 +35,17 @@ public class ScoreDAO {
 	 */
 	public ArrayList<Integer> getScores() {
 		ArrayList<Integer> scores = new ArrayList<Integer>();
-		
-		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores ORDER BY score DESC;");
-		
-		if (result == null)
-			return null;
-		
+
 		try {
-			result.next();
-			while(!result.isAfterLast()) {
-				scores.add(result.getInt(2));
-				result.next();
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
+			while (reader.ready()) {
+				String line = reader.readLine();
+				scores.add(Integer.parseInt(line.substring(line.indexOf(":"))));
 			}
-		} catch (SQLException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		DatabaseConnectionManager.disconnect();
-		
+
 		return scores;
 	}
 
@@ -53,24 +55,16 @@ public class ScoreDAO {
 	 */
 	public ArrayList<String> getNames() {
 		ArrayList<String> names = new ArrayList<String>();
-		
-		ResultSet result = DatabaseConnectionManager.exacuteSQLQuery("SELECT * FROM highscores ORDER BY score DESC;");
-		
-		if (result == null)
-			return null;
-		
+
 		try {
-			result.next();
-			
-			while(!result.isAfterLast()) {
-				names.add(result.getString(1));
-				result.next();
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
+			while (reader.ready()) {
+				String line = reader.readLine();
+				names.add(line.substring(0,line.indexOf(":")));
 			}
-		} catch (SQLException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		DatabaseConnectionManager.disconnect();
 		
 		return names;
 	}

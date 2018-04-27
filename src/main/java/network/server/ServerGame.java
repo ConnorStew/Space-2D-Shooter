@@ -29,22 +29,22 @@ public class ServerGame extends Listener implements ApplicationListener {
 	/** The entities in this game. */
 	private Array<Entity> entities = new Array<>();
 
-	/** The time inbetween game updates ticks in seconds. */
-	private float tickTime = 1;
+	/** The time in between game updates ticks in seconds. */
+	private static final float TICK_TIME = 1;
 
+	/** The time that has passes since the last tick. */
 	private float tickTimer;
+
+	private HeadlessApplication gdxApp;
 
 	ServerGame(Room toHost) {
 		this.room = toHost;
-		
 		ServerHandler.getInstance().addListener(this);
-		
 		Gdx.gl = Mockito.mock(GL20.class);
-		
-		new HeadlessApplication(this);
+		gdxApp = new HeadlessApplication(this);
 	}
 
-	public void message(Object object) {
+	void message(Object object) {
 		if (object instanceof MouseMoved) {
 			MouseMoved msg = (MouseMoved) object;
 			MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
@@ -183,14 +183,18 @@ public class ServerGame extends Listener implements ApplicationListener {
 					resolveCollision(currentEntity, entities.get(j));
 		}
 
-		tickTimer =+ delta;
+		tickTimer += delta;
 
-		if (delta >= tickTimer)
+        System.out.println(tickTimer);
+
+		if (tickTimer >= TICK_TIME)
 			tick();
 	}
 
 	private void tick() {
-		tickTime = 0;
+		tickTimer = 0;
+
+        System.out.println("ticked");
 
 		if (room.getClients().size <= 1) {
 			ClientInfo lastClient = room.getClients().get(0);
@@ -201,7 +205,8 @@ public class ServerGame extends Listener implements ApplicationListener {
 		}
 
 		for (ClientInfo client : room.getClients()) {
-			if (getPlayerByID(client.getID()).getKills() >= 10) {
+			MultiplayerPlayer player = getPlayerByID(client.getID());
+			if (player != null && player.getKills() >= 10) {
 				sendWin(client);
 				ServerHandler.getInstance().endGame(this);
 			}
@@ -284,11 +289,18 @@ public class ServerGame extends Listener implements ApplicationListener {
 		return room;
 	}
 
-	public void removePlayer(ClientInfo client) {
+	void removePlayer(ClientInfo client) {
 		MultiplayerPlayer toRemove = getPlayerByID(client.getID());
 
-		RemovePlayer toSend = new RemovePlayer();
-		toSend.id = toRemove.getMultiplayerID();
-		ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
+		if (toRemove != null) {
+			RemovePlayer toSend = new RemovePlayer();
+			toSend.id = toRemove.getMultiplayerID();
+			ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
+		}
 	}
+
+    public void close() {
+	    gdxApp.exit();
+        System.out.println("exited");
+    }
 }

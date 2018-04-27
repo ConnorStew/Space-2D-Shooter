@@ -2,10 +2,7 @@ package network.client;
 
 import com.badlogic.gdx.Gdx;
 import com.esotericsoftware.kryonet.Client;
-import network.Message;
-import network.MessageQueue;
-import network.MessageQueueListener;
-import network.Network;
+import network.*;
 import network.Network.*;
 import ui.ControlGame;
 import ui.LobbyScreen;
@@ -21,10 +18,11 @@ public class ClientHandler implements MessageQueueListener {
 
 	private String nickname;
 
-	private final MessageQueue queue;
-	
-	public ClientHandler() {
-        updateNickname();
+	private MessageQueue queue;
+
+	public ClientHandler(boolean nickName) {
+	    if (nickName)
+            updateNickname();
 
 	    queue = new MessageQueue();
 		queue.addListener(this);
@@ -39,10 +37,12 @@ public class ClientHandler implements MessageQueueListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		UpdateNickname toSend = new UpdateNickname();
-		toSend.nickname = nickname;
-		client.sendTCP(toSend);
+
+		if (nickName) {
+            UpdateNickname toSend = new UpdateNickname();
+            toSend.nickname = nickname;
+            client.sendTCP(toSend);
+        }
 	}
 
 	private void updateNickname() {
@@ -93,9 +93,9 @@ public class ClientHandler implements MessageQueueListener {
             JOptionPane.showMessageDialog(null, ((ErrorMessage) object).message, "Error", JOptionPane.ERROR_MESSAGE, null);
         }
 
-        if (object instanceof Network.ValidName) {
-            Gdx.app.postRunnable(() -> ControlGame.getInstance().setScreen(new MultiplayerScreen(this)));
-        }
+        if (object instanceof Network.ConfirmationMessage)
+            if (((ConfirmationMessage) object).type.equals(ConfirmType.ValidName))
+                Gdx.app.postRunnable(() -> ControlGame.getInstance().setScreen(new MultiplayerScreen(this)));
 
         return false;
     }

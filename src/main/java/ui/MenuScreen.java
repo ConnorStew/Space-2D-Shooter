@@ -52,7 +52,7 @@ public class MenuScreen extends UIScreen {
 		
 		//goto the multiplayer screen if the multiplayer button is pressed
 		if (btnMultiplayer.isPressed() && validateButtonPress())
-			new ClientHandler(); //attempt to connect to the server
+			new ClientHandler(true); //attempt to connect to the server
 
 			
 		//quit when the quit button is pressed

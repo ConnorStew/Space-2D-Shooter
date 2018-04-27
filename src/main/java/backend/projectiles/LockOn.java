@@ -37,6 +37,7 @@ public class LockOn extends Projectile {
 	public LockOn(float x, float y, float rotation, SPGame screen) {
 		super(x, y, rotation, DAMAGE, SPEED, SIZE, "projectiles/autoAim.png", ProjectileType.PLAYER);
 		vision = new Polygon();
+		this.screen = screen;
 	}
 	
 	@Override

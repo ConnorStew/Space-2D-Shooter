@@ -1,10 +1,12 @@
 package network.server;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import database.ScoreDAO;
+import network.ConfirmType;
+import network.ErrorType;
 import network.Network;
 import network.Network.*;
 
@@ -18,7 +20,7 @@ import java.net.InetSocketAddress;
 public class ServerHandler extends Listener {
 	
 	/** The singleton instance of the server handler. */
-	private final static ServerHandler instance = new ServerHandler();
+	private static ServerHandler instance = new ServerHandler();
 
 	/** The server that this handles. */
 	private Server server = new Server();
@@ -36,6 +38,8 @@ public class ServerHandler extends Listener {
 	 * Starts the server.
 	 */
 	private ServerHandler() {
+		ServerHandler.instance = this;
+
 		//start the server
 		server.start();
 		
@@ -168,6 +172,14 @@ public class ServerHandler extends Listener {
 				client.setNickname(msg.nickname);
 			}
 
+			if (msg.nickname == null || msg.nickname.isEmpty()) {
+				ErrorMessage em = new ErrorMessage();
+				em.message = "You must give a nickname!";
+				connection.sendTCP(em);
+				connection.close();
+				return;
+			}
+
 			if (msg.nickname.length() > ClientInfo.MAX_NAME_LENGTH) {
 				ErrorMessage em = new ErrorMessage();
 				em.message = "Your nickname is too long (max " + ClientInfo.MAX_NAME_LENGTH +  " characters).";
@@ -176,7 +188,9 @@ public class ServerHandler extends Listener {
 				return;
 			}
 
-			connection.sendTCP(new ValidName());
+			ConfirmationMessage reply = new ConfirmationMessage();
+			reply.type = ConfirmType.ValidName;
+			connection.sendTCP(reply);
 		}
 
 		//removes this client from its current room
@@ -200,6 +214,24 @@ public class ServerHandler extends Listener {
 				startGame(clientsRoom);
 				closeRoom(clientsRoom);
 			}
+		}
+
+		if (object instanceof Network.UploadScore) {
+			UploadScore msg = (UploadScore) object;
+			new ScoreDAO().writeScore(msg.name, msg.score);
+			ConfirmationMessage reply = new ConfirmationMessage();
+			reply.type = ConfirmType.ScoreAdded;
+			connection.sendTCP(reply);
+		}
+
+		if (object instanceof Network.RefreshScores) {
+			ScoreUpdate msg = new ScoreUpdate();
+			ScoreDAO dao = new ScoreDAO();
+
+			msg.names = dao.getNames();
+			msg.scores = dao.getScores();
+
+			connection.sendTCP(msg);
 		}
 	}
 
@@ -310,6 +342,7 @@ public class ServerHandler extends Listener {
 
 	public void endGame(ServerGame serverGame) {
 		games.removeValue(serverGame, false);
+		serverGame.close();
 		serverGame.dispose();
 	}
 }

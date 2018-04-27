@@ -126,7 +126,6 @@ public class SPGame extends GameScreen {
 				entity.drawHP(sr, cam); //draw health bar
 		}
 
-
 		//stop drawing shapes
 		sr.end();
 	}
@@ -236,5 +235,8 @@ public class SPGame extends GameScreen {
 	public void addAnimation(AnimationHandler toAdd) {
 		activeAnimations.add(toAdd);
 	}
-	
+
+	public void close() {
+		dispose();
+	}
 }
