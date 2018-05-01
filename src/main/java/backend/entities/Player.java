@@ -1,5 +1,6 @@
 package backend.entities;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
@@ -106,7 +107,8 @@ public class Player extends Entity {
 
 	@Override
 	public void onDestroy() {
-		ControlGame.getInstance().setScreen(new ScoreScreen(GAME.getScore()));
+		int score = GAME.getScore();
+		Gdx.app.postRunnable(() -> ControlGame.getInstance().setScreen(new ScoreScreen(score)));
 	}
 
 	@Override

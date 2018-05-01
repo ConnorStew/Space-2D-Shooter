@@ -7,6 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Array;
+import network.Message;
+import network.Network;
 import network.client.ClientHandler;
 
 import javax.swing.*;
@@ -17,6 +20,9 @@ import javax.swing.*;
  */
 public class MultiplayerScreen extends UIScreen {
 
+	/** The current instance of the this screen. */
+	private static MultiplayerScreen INSTANCE;
+
 	/** The button that allows the client to create a room. */
 	private TextButton btnRoom;
 	
@@ -25,12 +31,14 @@ public class MultiplayerScreen extends UIScreen {
 	
 	/** List to display available rooms. */
 	private List<String> roomList;
-	
-	/** List to display required players for a room. */
-	private List<String> playersList;
-	
+
 	/** The client that controls the connection to the server. */
 	private ClientHandler client;
+
+	public MultiplayerScreen(ClientHandler client) {
+		MultiplayerScreen.INSTANCE = this;
+		this.client = client;
+	}
 
 	public void show() {
 	    super.show();
@@ -47,25 +55,18 @@ public class MultiplayerScreen extends UIScreen {
 		
 		//initialising room and player lists
 		roomList = new List<String>(lstStyle);
-		playersList = new List<String>(lstStyle);
+
+		//check if a list of players is waiting in the queue
+		if (client.getQueue().haveReceived(Network.RoomUpdate.class)) {
+			Array<Message> messages = client.getQueue().getMessages(Network.RoomUpdate.class, true);
+			//add the latest RoomPlayers message
+			String[] playerNames = ((Network.RoomUpdate) messages.get(messages.size - 1).getMessage()).roomNames;
+			populateRooms(playerNames);
+		}
 		
 		lists.addActor(roomList);
-		lists.addActor(playersList);
 		lists.space(50f);
 
-		roomList.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-		    int index = roomList.getSelectedIndex();
-				
-			if (playersList.getItems().size > index)
-				playersList.setSelectedIndex(index);
-			}
-		});
-		
-		//can't select with the players list
-		playersList.setTouchable(Touchable.disabled);
-		
 		//initialising the scroll pane
 		ScrollPane pnlScroll = new ScrollPane(lists, scrStyle);
 		pnlScroll.setBounds(20, 100, 850, 500);
@@ -77,10 +78,8 @@ public class MultiplayerScreen extends UIScreen {
 		stage.addActor(pnlScroll);
 		stage.addActor(btnRoom);
 		stage.addActor(btnRefresh);
-		
-		String nickname = JOptionPane.showInputDialog(null, "Input your nickname.", "Nickname", JOptionPane.QUESTION_MESSAGE);
-		
-		client = new ClientHandler(nickname);
+
+		client.refreshRooms();
 	}
 
 	public void render(float delta) {
@@ -88,9 +87,7 @@ public class MultiplayerScreen extends UIScreen {
 
 		if (btnRoom.isPressed() && validateButtonPress()) {
 			String roomName = JOptionPane.showInputDialog(null, "Input your room's name.", "Room Name", JOptionPane.QUESTION_MESSAGE);
-			String roomNum = JOptionPane.showInputDialog(null, "Input the number of players.", "Room Number", JOptionPane.QUESTION_MESSAGE);
-			
-			client.addRoom(roomName, roomNum);
+			client.addRoom(roomName);
 		}
 		
 		if (btnRefresh.isPressed() && validateButtonPress())
@@ -104,12 +101,14 @@ public class MultiplayerScreen extends UIScreen {
 	 * Populates the rooms with a new set of rooms.
 	 * @param roomNames the room names to add
 	 */
-	public void populateRooms(String[] roomNames, String[] requiredPlayers) {
+	public void populateRooms(String[] roomNames) {
 		roomList.clearItems();
-		playersList.clearItems();
 		
 		roomList.setItems(roomNames);
-		playersList.setItems(requiredPlayers);
+	}
+
+	public static MultiplayerScreen getInstance() {
+		return INSTANCE;
 	}
 	
 }

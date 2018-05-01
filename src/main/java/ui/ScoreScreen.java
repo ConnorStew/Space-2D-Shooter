@@ -2,15 +2,16 @@ package ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-import database.ScoreDAO;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Listener.ThreadedListener;
+import network.ConfirmType;
+import network.Network;
+import network.client.ClientHandler;
 
 import java.util.ArrayList;
 
@@ -37,10 +38,59 @@ public class ScoreScreen extends UIScreen {
 
 	/** The players score. */
 	private int score;
-	
+
+	/** The connection to the server for score upload. */
+	private ClientHandler client;
+
 	public ScoreScreen(int score){
 		this.score = score;
 		uploaded = false;
+
+		//connect to the server
+		client = new ClientHandler(false);
+		client.getKyroClient().addListener(new ThreadedListener(new Listener(){
+			@Override
+			public void received(Connection connection, Object object) {
+				if (object instanceof Network.ConfirmationMessage) {
+					if (((Network.ConfirmationMessage) object).type.equals(ConfirmType.ScoreAdded)) {
+						updateScores();
+						txtName.setDisabled(true);
+						txtName.setText("");
+						uploaded = true;
+					}
+				}
+
+				if (object instanceof Network.ScoreUpdate) {
+					Network.ScoreUpdate msg = (Network.ScoreUpdate) object;
+
+					ArrayList<Integer> scores = msg.scores;
+					ArrayList<String> names = msg.names;
+
+					String[] sNames;
+
+					//scores and names
+					if (names.isEmpty()) { //if the names are unavailable
+						//change screen settings to display no scores
+						sNames = new String[]{"Scores Unavailible"};
+						txtName.setDisabled(true);
+						txtName.setVisible(false);
+						pnlScroll.setWidth(700);
+						btnUpload.setDisabled(true);
+						btnUpload.setVisible(false);
+						btnBack.setX(btnBack.getX() + 30);
+					} else {
+						sNames = new String[names.size()];
+
+						//populate sNames
+						for (int i = 0; i < sNames.length; i++)
+							sNames[i] = names.get(i) + ": " + scores.get(i);
+					}
+
+					lstScores.clearItems();
+					lstScores.setItems(sNames);
+				}
+			}
+		}));
 	}
 
 	public void show() {
@@ -70,9 +120,6 @@ public class ScoreScreen extends UIScreen {
 		txtName.setMaxLength(3);
 		txtName.setAlignment(Align.center);
 		
-		//initialising the stage which will stretch
-		stage = new Stage(new StretchViewport(900, 700));
-		
 		//initialising the score label
 		Label lblScore = new Label("Score:" + score, labelStyle);
 		lblScore.setPosition((Gdx.graphics.getWidth() / 2) - lblScore.getWidth() / 2, Gdx.graphics.getHeight() - 110);
@@ -89,33 +136,7 @@ public class ScoreScreen extends UIScreen {
 	}
 	
 	private void updateScores() {
-		ScoreDAO sDAO = new ScoreDAO();
-		
-		ArrayList<Integer> scores = sDAO.getScores();
-		ArrayList<String> names = sDAO.getNames();
-		
-		String[] sNames;
-		
-		//scores and names
-		if (names == null) { //if the names are unavailable
-			//change screen settings to display no scores
-			sNames = new String[]{"Scores Unavailible"};
-			txtName.setDisabled(true);
-			txtName.setVisible(false);
-			pnlScroll.setWidth(700);
-			btnUpload.setDisabled(true);
-			btnUpload.setVisible(false);
-			btnBack.setX(btnBack.getX() + 30);
-		} else {
-			 sNames = new String[names.size()];
-			
-			//populate sNames
-			for (int i = 0; i < sNames.length; i++)
-				sNames[i] = names.get(i) + ": " + scores.get(i);
-		}
-		
-		lstScores.clearItems();
-		lstScores.setItems(sNames);
+		client.getKyroClient().sendTCP(new Network.RefreshScores());
 	}
 
 	public void render(float delta) {
@@ -145,18 +166,15 @@ public class ScoreScreen extends UIScreen {
 				},2);
 				
 			} else {
-				ScoreDAO sDAO = new ScoreDAO();
-				sDAO.uploadScore(txtName.getText().toUpperCase(), score);
-				updateScores();
-				txtName.setDisabled(true);
-				txtName.setText("");
-				uploaded = true;
+				Network.UploadScore msg = new Network.UploadScore();
+				msg.name = txtName.getText().toUpperCase();
+				msg.score = score;
+				client.getKyroClient().sendTCP(msg);
 			}
 		}
 		
 		if (btnBack.isPressed() && validateButtonPress())
 			ControlGame.getInstance().setScreen(new MenuScreen());
-
 	}
 
 }

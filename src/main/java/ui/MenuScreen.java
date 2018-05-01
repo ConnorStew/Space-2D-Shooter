@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import network.client.ClientHandler;
 
 /**
  * This class is used to define the main menu layout.
@@ -51,7 +52,8 @@ public class MenuScreen extends UIScreen {
 		
 		//goto the multiplayer screen if the multiplayer button is pressed
 		if (btnMultiplayer.isPressed() && validateButtonPress())
-			ControlGame.getInstance().setScreen(new MultiplayerScreen());
+			new ClientHandler(true); //attempt to connect to the server
+
 			
 		//quit when the quit button is pressed
 		if (btnQuit.isPressed() && validateButtonPress())

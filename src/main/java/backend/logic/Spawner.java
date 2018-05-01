@@ -165,7 +165,7 @@ public class Spawner {
 			
 			Point spawnLoc = getPickupSpawnLocation();
 			
-			switch (2) {//RND.nextInt(3)) {
+			switch (RND.nextInt(3)) {
 				case 0:
 					 GAME.addEntity(new Health(spawnLoc.x, spawnLoc.y, GAME));
 					return;

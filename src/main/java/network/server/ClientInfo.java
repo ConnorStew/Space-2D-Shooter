@@ -2,37 +2,54 @@ package network.server;
 
 import com.esotericsoftware.kryonet.Connection;
 
-public class ClientInfo {
-	
+/**
+ * This class stores information that the server knows about a client.
+ */
+class ClientInfo {
+
+	/** This clients nickname. */
 	private String nickname;
-	
+
+	/** This clients connection to the server. */
 	private Connection conn;
-	
-	/** The id of the player this client controls. */
-	private int playerID;
+
+	/** The ID of this clients player. */
+	private int multiplayerID;
+
+	/** The maximum length of a nickname. */
+	public static int MAX_NAME_LENGTH = 30;
 
 	ClientInfo(Connection connection) {
 		conn = connection;
 	}
 
+	/**
+	 * @return this clients nickname
+	 */
 	String getNickname() {
 		return nickname;
 	}
 
+	/**
+	 * @return the connection this client is connected on
+	 */
 	Connection getConnection() {
 		return conn;
 	}
 
+	/**
+	 * @param nickname the clients new nickname
+	 */
 	void setNickname(String nickname) {
-		this.nickname = nickname;
+		if (nickname != null)
+			this.nickname = nickname;
 	}
 
-	public int getPlayerID() {
-		return playerID;
+	void setMultiplayerID(int id) {
+		multiplayerID = id;
 	}
 
-	void setPlayerID(int playerID) {
-		this.playerID = playerID;
-	}
-
+    public int getID() {
+		return multiplayerID;
+    }
 }
