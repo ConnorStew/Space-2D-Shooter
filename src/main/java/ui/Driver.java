@@ -3,13 +3,8 @@ package ui;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.esotericsoftware.minlog.Log;
-import database.ScoreDAO;
+import database.ScoreStorage;
 import network.server.ServerHandler;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 
 public class Driver {
 

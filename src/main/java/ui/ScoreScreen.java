@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Listener.ThreadedListener;
-import database.ScoreDAO;
 import network.ConfirmType;
 import network.Network;
 import network.client.ClientHandler;

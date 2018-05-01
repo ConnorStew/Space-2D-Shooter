@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import database.ScoreDAO;
+import database.ScoreStorage;
 import network.ConfirmType;
 import network.ErrorType;
 import network.Network;
@@ -218,7 +218,7 @@ public class ServerHandler extends Listener {
 
 		if (object instanceof Network.UploadScore) {
 			UploadScore msg = (UploadScore) object;
-			new ScoreDAO().writeScore(msg.name, msg.score);
+			new ScoreStorage().writeScore(msg.name, msg.score);
 			ConfirmationMessage reply = new ConfirmationMessage();
 			reply.type = ConfirmType.ScoreAdded;
 			connection.sendTCP(reply);
@@ -226,7 +226,7 @@ public class ServerHandler extends Listener {
 
 		if (object instanceof Network.RefreshScores) {
 			ScoreUpdate msg = new ScoreUpdate();
-			ScoreDAO dao = new ScoreDAO();
+			ScoreStorage dao = new ScoreStorage();
 
 			msg.names = dao.getNames();
 			msg.scores = dao.getScores();
