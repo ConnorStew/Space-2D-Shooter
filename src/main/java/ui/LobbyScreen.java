@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.kryonet.Client;
 import network.Message;
 import network.Network;
 import network.client.ClientHandler;
@@ -29,8 +28,6 @@ public class LobbyScreen extends UIScreen {
     /** Whether this client is the leader of the lobby. */
     private boolean isLeader;
 
-    /** The scrollPane to display players. */
-    private ScrollPane pnlScroll;
 
     public LobbyScreen(ClientHandler client, boolean leader) {
         this.client = client;
@@ -66,7 +63,7 @@ public class LobbyScreen extends UIScreen {
         lists.space(50f);
 
         //initialising the scroll pane
-        pnlScroll = new ScrollPane(lists, scrStyle);
+        ScrollPane pnlScroll = new ScrollPane(lists, scrStyle);
         pnlScroll.setBounds(20, 100, 850, 500);
 
         stage.addActor(background);

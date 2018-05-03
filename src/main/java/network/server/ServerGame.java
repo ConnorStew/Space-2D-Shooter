@@ -35,6 +35,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 	/** The time that has passes since the last tick. */
 	private float tickTimer;
 
+	/** The gdx application used to handle the server game. */
 	private HeadlessApplication gdxApp;
 
 	ServerGame(Room toHost) {
@@ -45,6 +46,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 	}
 
 	void message(Object object) {
+		//updates the players rotation based on mouse movement
 		if (object instanceof MouseMoved) {
 			MouseMoved msg = (MouseMoved) object;
 			MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
@@ -55,6 +57,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 			}
 		}
 
+		//fires projectiles depending on mouse input
 		if (object instanceof MouseInput) {
 			MouseInput msg = (MouseInput) object;
 			MultiplayerPlayer toUpdate = getPlayerByID(msg.id);
@@ -95,6 +98,7 @@ public class ServerGame extends Listener implements ApplicationListener {
 			}
 		}
 
+		//moves players depending on key input
 		if (object instanceof KeyInput) {
 			KeyInput key = (KeyInput) object;
 			MultiplayerPlayer toUpdate = getPlayerByID(key.id);
@@ -184,17 +188,15 @@ public class ServerGame extends Listener implements ApplicationListener {
 		}
 
 		tickTimer += delta;
-
-        System.out.println(tickTimer);
-
 		if (tickTimer >= TICK_TIME)
 			tick();
 	}
 
+	/**
+	 * Called every time the time the tickTimer reaches the TICK_TIME.
+	 */
 	private void tick() {
 		tickTimer = 0;
-
-        System.out.println("ticked");
 
 		if (room.getClients().size <= 1) {
 			ClientInfo lastClient = room.getClients().get(0);
@@ -213,13 +215,15 @@ public class ServerGame extends Listener implements ApplicationListener {
 		}
 	}
 
-	private void sendWin(ClientInfo lastClient) {
+	/**
+	 * Sends a message to end the game to all players within the game.
+	 * @param winningClient the winning client
+	 */
+	private void sendWin(ClientInfo winningClient) {
 		PlayerWon toSend = new PlayerWon();
-		toSend.id = lastClient.getID();
+		toSend.id = winningClient.getID();
 		ServerHandler.getInstance().sendTCPTo(room.getClients(), toSend);
 	}
-
-
 
 	/**
 	 * Resolves a collision between two entities.
@@ -280,15 +284,17 @@ public class ServerGame extends Listener implements ApplicationListener {
 		entities.removeValue(toRemove, false);
 	}
 
-	public void resize(int width, int height) {}
-	public void pause() {}
-	public void resume() {}
-	public void dispose() {}
-
+	/**
+	 * @return the room containing clients within the game
+	 */
 	Room getRoom() {
 		return room;
 	}
 
+	/**
+	 * Removes a player from the game.
+	 * @param client the client to remove
+	 */
 	void removePlayer(ClientInfo client) {
 		MultiplayerPlayer toRemove = getPlayerByID(client.getID());
 
@@ -299,8 +305,16 @@ public class ServerGame extends Listener implements ApplicationListener {
 		}
 	}
 
-    public void close() {
-	    gdxApp.exit();
-        System.out.println("exited");
-    }
+	/**
+	 * Closes the gdx app that runs this game.
+	 */
+	void close() {
+		gdxApp.exit();
+	}
+
+	public void resize(int width, int height) {}
+	public void pause() {}
+	public void resume() {}
+	public void dispose() {}
+
 }

@@ -1,15 +1,13 @@
 package backend.entities;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-
 import backend.enemies.Enemy;
 import backend.projectiles.Projectile;
 import backend.projectiles.ProjectileType;
 import backend.weapons.PlayerHeavyWeapon;
 import backend.weapons.PlayerLightWeapon;
 import backend.weapons.Weapon;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import ui.ControlGame;
 import ui.SPGame;
 import ui.ScoreScreen;

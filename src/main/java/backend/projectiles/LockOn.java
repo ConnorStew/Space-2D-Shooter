@@ -1,12 +1,8 @@
 package backend.projectiles;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Polygon;
-
 import backend.enemies.Enemy;
 import backend.entities.Entity;
-import ui.GameScreen;
+import com.badlogic.gdx.math.Polygon;
 import ui.SPGame;
 
 /**
@@ -58,15 +54,6 @@ public class LockOn extends Projectile {
 			moveTowards(toChase, delta);
 		else
 			moveForward(speed * delta);
-	}
-	
-	public void drawDebug(OrthographicCamera cam) {
-		ShapeRenderer sr = new ShapeRenderer();
-		sr.setProjectionMatrix(cam.combined);
-		sr.setAutoShapeType(true);
-		sr.begin();
-		sr.polygon(vision.getTransformedVertices());
-		sr.end();
 	}
 
 	@Override

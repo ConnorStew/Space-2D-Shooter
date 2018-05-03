@@ -3,7 +3,6 @@ package ui;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import network.client.ClientHandler;
 
 /**
  * This class is used to control which screen is being displayed and dispose of old screens.

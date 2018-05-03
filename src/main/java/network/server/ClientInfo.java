@@ -17,7 +17,7 @@ class ClientInfo {
 	private int multiplayerID;
 
 	/** The maximum length of a nickname. */
-	public static int MAX_NAME_LENGTH = 30;
+	static int MAX_NAME_LENGTH = 30;
 
 	ClientInfo(Connection connection) {
 		conn = connection;
@@ -38,6 +38,14 @@ class ClientInfo {
 	}
 
 	/**
+	 * @return this clients multiplayer ID
+	 */
+	int getID() {
+		return multiplayerID;
+	}
+
+	/**
+	 * Assigns this client a nickname.
 	 * @param nickname the clients new nickname
 	 */
 	void setNickname(String nickname) {
@@ -45,11 +53,12 @@ class ClientInfo {
 			this.nickname = nickname;
 	}
 
+	/**
+	 * Set the clients multiplayer ID
+	 * @param id the new ID
+	 */
 	void setMultiplayerID(int id) {
 		multiplayerID = id;
 	}
 
-    public int getID() {
-		return multiplayerID;
-    }
 }

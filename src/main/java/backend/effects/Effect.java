@@ -15,7 +15,7 @@ public abstract class Effect {
 	private double timer = 0;
 
 	/** The game screen this effect has been activated on. */
-	final SPGame GAME;
+	protected final SPGame GAME;
 
 	/**
 	 * Creates an effect.

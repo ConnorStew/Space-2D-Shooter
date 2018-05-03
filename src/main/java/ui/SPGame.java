@@ -26,22 +26,23 @@ public class SPGame extends GameScreen {
 	/** The width of the game. */
 	public static final int GAME_WIDTH = 100;
 
-	/** The current instance of a singleplayer game. */
-	private static SPGame INSTANCE;
-
+	/** The entities currently active within the game. */
 	private Array<Entity> activeEntities;
+
+	/** The animations currently active within the game. */
 	private Array<AnimationHandler> activeAnimations;
+
+	/** The effects currently active within the game. */
 	private Array<Effect> activeEffects;
 
+	/** The spawner responsible for spawning enemies. */
 	private Spawner spawner;
 
+	/** The player controlled by the user. */
 	private Player player;
 
+	/** The players score. */
 	private int score;
-
-	public SPGame() {
-		SPGame.INSTANCE = this;
-	}
 
 	public void show() {
 		super.show();
@@ -69,7 +70,7 @@ public class SPGame extends GameScreen {
 
 	public void render(float delta) {
 		super.render(delta);
-		checkInput(delta);
+		checkInput();
 		
 		update(delta);
 		
@@ -132,29 +133,34 @@ public class SPGame extends GameScreen {
 	
 	public void update(float delta) {
 		//poll for user input
-		checkInput(delta);
+		checkInput();
 		
 		//spawn enemies
 		spawner.spawnEnemies(delta);
 
-		//check for collisions between entities
-		for (int entity1Index = 0; entity1Index < activeEntities.size; entity1Index++) {
-			for (int entity2Index = 0; entity2Index < activeEntities.size; entity2Index++) {
-				Entity e1 = activeEntities.get(entity1Index);
-				Entity e2 = activeEntities.get(entity2Index);
-				if (e1.getBoundingRectangle().overlaps(e2.getBoundingRectangle())) {
-					if (e1.onCollision(e2)) {
-						e1.onDestroy();
-						activeEntities.removeValue(e1, false);
-					}
-					if (e2.onCollision(e1)) {
-						e2.onDestroy();
-						activeEntities.removeValue(e2, false);
-					}
-				}//end checking for collisions
-			}//end e2 loop
-		}//end e1 loop
-		
+		try {
+			//check for collisions between entities
+			for (int entity1Index = 0; entity1Index < activeEntities.size; entity1Index++) {
+				for (int entity2Index = 0; entity2Index < activeEntities.size; entity2Index++) {
+					Entity e1 = activeEntities.get(entity1Index);
+					Entity e2 = activeEntities.get(entity2Index);
+					if (e1.getBoundingRectangle().overlaps(e2.getBoundingRectangle())) {
+						if (e1.onCollision(e2)) {
+							e1.onDestroy();
+							activeEntities.removeValue(e1, false);
+						}
+						if (e2.onCollision(e1)) {
+							e2.onDestroy();
+							activeEntities.removeValue(e2, false);
+						}
+					}//end checking for collisions
+				}//end e2 loop
+			}//end e1 loop
+		} catch (IndexOutOfBoundsException e2) {
+			//TODO: keep an eye on this bug.
+			System.out.println("Index Exception Bug");
+		}
+
 		//loop through effects
 		for (Effect effect : activeEffects)
 			if (effect.time(delta))
@@ -170,50 +176,25 @@ public class SPGame extends GameScreen {
 				activeAnimations.removeValue(animation, false);
 
 	}
-	public int getScore() {
-		return score;
-	}
-	
+
 	/**
 	 * Checks for user input and reacts accordingly.
-	 * @param delta the time since the last frame was rendered
 	 */
-	private void checkInput(float delta) {
+	private void checkInput() {
 		Projectile potentialProjectile = player.fire();
 		if (potentialProjectile != null)
 			activeEntities.add(potentialProjectile);
 	}
-	
+
 	/**
-	 * Adds an amount to the score.
-	 * @param points the amount of points to add to the score.
+	 * Gets the nearest enemy that the LockOn projectile can see.
+	 * @param projectile the projectile to check
+	 * @return the closest enemy that the projectile can see if any are found, if not null is returned
 	 */
-	public void addToScore(int points) {
-		score += points;
-	}
-
-	public Array<Entity> getActiveEntities() {
-		return activeEntities;
-	}
-
-	public void addEntity(Entity toAdd) {
-		activeEntities.add(toAdd);
-		
-	}
-
-	public void addEffect(Effect effect) {
-		activeEffects.add(effect);
-		
-	}
-
-	public Player getPlayer() {
-		return player;
-	}
-	
 	public Enemy getNearestVisibleEnemy(LockOn projectile) {
 		double lowestDistance = 100000000;
 		Enemy closestEnemy = null;
-		
+
 		for (int i = 0; i < activeEntities.size; i++) {
 			Entity entity = activeEntities.get(i);
 			if (entity instanceof Enemy) {
@@ -228,15 +209,61 @@ public class SPGame extends GameScreen {
 				}
 			}
 		}
-		
+
 		return closestEnemy;
 	}
 
+	/**
+	 * @return the players score
+	 */
+	public int getScore() {
+		return score;
+	}
+	
+	/**
+	 * Adds an amount to the score.
+	 * @param points the amount of points to add to the score.
+	 */
+	public void addToScore(int points) {
+		score += points;
+	}
+
+	/**
+	 * @return the entities currently active in the game
+	 */
+	public Array<Entity> getActiveEntities() {
+		return activeEntities;
+	}
+
+	/**
+	 * Adds a new entity to the game.
+	 * @param toAdd the entity to add
+	 */
+	public void addEntity(Entity toAdd) {
+		activeEntities.add(toAdd);
+	}
+
+	/**
+	 * Adds a new effect to the game.
+	 * @param effect the effect to add
+	 */
+	public void addEffect(Effect effect) {
+		activeEffects.add(effect);
+	}
+
+	/**
+	 * @return the player the user is controlling
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+
+	/**
+	 * Adds a new animation to game.
+	 * @param toAdd the animation to add.
+	 */
 	public void addAnimation(AnimationHandler toAdd) {
 		activeAnimations.add(toAdd);
 	}
 
-	public void close() {
-		dispose();
-	}
 }
