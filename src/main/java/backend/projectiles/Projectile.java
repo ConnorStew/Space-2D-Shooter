@@ -1,12 +1,10 @@
 package backend.projectiles;
 
-import com.badlogic.gdx.Gdx;
-
 import backend.enemies.Asteroid;
 import backend.enemies.Enemy;
 import backend.entities.Entity;
-import backend.entities.MultiplayerPlayer;
 import backend.entities.Player;
+import com.badlogic.gdx.Gdx;
 
 /**
  * Represents something the player can fire.
@@ -60,13 +58,12 @@ public abstract class Projectile extends Entity {
 			if (type.equals(ProjectileType.PLAYER)) //if the projectile was fired by the player
 				return true;
 		
-		if (collidedWith instanceof Player || collidedWith instanceof MultiplayerPlayer) //destroy the projectile if it collides with a player
+		if (collidedWith instanceof Player) //destroy the projectile if it collides with a player
 			if (type.equals(ProjectileType.ENEMEY)) //if the projectile was fired by an enemy
 				return true;
 		
 		if (collidedWith instanceof Asteroid)
-			if (type.equals(ProjectileType.ENEMEY))
-				return true;
+			return type.equals(ProjectileType.ENEMEY);
 		
 		return false;
 	}
@@ -121,12 +118,5 @@ public abstract class Projectile extends Entity {
 		return playerID;
 	}
 
-	public float getTimeSinceLastValidation() {
-		return timeSinceLastValidation;
-	}
-
-	public void setTimeSinceLastValidation(float timeSinceLastValidation) {
-		this.timeSinceLastValidation = timeSinceLastValidation;
-	}
 	
 }

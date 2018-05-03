@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import database.ScoreStorage;
+import backend.ScoreStorage;
 import network.ConfirmType;
 import network.ErrorType;
 import network.Network;
@@ -13,6 +13,7 @@ import network.Network.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 /**
  * This class handles server functions.
@@ -71,6 +72,15 @@ public class ServerHandler extends Listener {
 			}
 		}
 
+		//Array<Room> toRemove = new Array<>();
+
+		//remove the clients room if they were the leader of any
+		for (Room room : rooms)
+			if (room.getLeader().equals(left))
+				destroyRoom(room);
+
+		//rooms.removeAll(toRemove, false);
+
 		//remove client from rooms
 		for (Room room : rooms) {
 			if (room.getClients().contains(left, false)) {
@@ -81,12 +91,21 @@ public class ServerHandler extends Listener {
 		clients.removeValue(left, false);
 	}
 
+	/**
+	 * Removes all players from a room and removes the room.
+	 * @param room the room to destroy
+	 */
+	private void destroyRoom(Room room) {
+		rooms.removeValue(room, false);
+		sendTCPToAll(new Network.LobbyClosed());
+	}
+
 	@Override
 	public void received(Connection connection, Object object) {
 		ClientInfo client = getClientInfoByConnection(connection);
 
 		serverMessages(client, connection, object);
-		gameMessages(client, connection, object);
+		gameMessages(client, object);
 	}
 
 	/**
@@ -100,6 +119,13 @@ public class ServerHandler extends Listener {
 			AddRoom msg = (AddRoom) object;
 			String roomName = msg.roomName;
 
+			if (msg.roomName.replaceAll("\\s+","").isEmpty()) {
+				ErrorMessage em = new ErrorMessage();
+				em.message = "Your must provide a room name!";
+				connection.sendTCP(em);
+				return;
+			}
+
 			if (roomName.length() > Room.MAX_NAME_LEN) {
 				ErrorMessage em = new ErrorMessage();
 				em.message = "Your room name is too long (max " + Room.MAX_NAME_LEN +  " characters), your room has not been added.";
@@ -109,21 +135,14 @@ public class ServerHandler extends Listener {
 
 			boolean duplicateName = false;
 
-			for (Room room : rooms) {
-				if (room.getRoomName().equals(roomName)) {
+			for (Room room : rooms)
+				if (room.getRoomName().equals(roomName))
 					duplicateName = true;
-					continue;
-				}
-			}
 
-			if (duplicateName == false) {
-				for (ServerGame game : games) {
-					if (game.getRoom().getRoomName().equals(roomName)) {
+			if (!duplicateName)
+				for (ServerGame game : games)
+					if (game.getRoom().getRoomName().equals(roomName))
 						duplicateName = true;
-						continue;
-					}
-				}
-			}
 
 			if (duplicateName) {
 				ErrorMessage em = new ErrorMessage();
@@ -172,7 +191,7 @@ public class ServerHandler extends Listener {
 				client.setNickname(msg.nickname);
 			}
 
-			if (msg.nickname == null || msg.nickname.isEmpty()) {
+			if (msg.nickname == null || msg.nickname.replaceAll("\\s+","").isEmpty()) {
 				ErrorMessage em = new ErrorMessage();
 				em.message = "You must give a nickname!";
 				connection.sendTCP(em);
@@ -238,10 +257,9 @@ public class ServerHandler extends Listener {
 	/**
 	 * This class responds to messages about a game a client is in.
 	 * @param client the client that sent the message
-	 * @param connection the connection the client is on
 	 * @param object the message the client sent
 	 */
-	private void gameMessages(ClientInfo client, Connection connection, Object object) {
+	private void gameMessages(ClientInfo client, Object object) {
 		for (ServerGame game : games) {
 			if (game.getRoom().getClients().contains(client, false)) {
 				game.message(object);
@@ -340,7 +358,7 @@ public class ServerHandler extends Listener {
 		return toSend;
 	}
 
-	public void endGame(ServerGame serverGame) {
+	void endGame(ServerGame serverGame) {
 		games.removeValue(serverGame, false);
 		serverGame.close();
 		serverGame.dispose();

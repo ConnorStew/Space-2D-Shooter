@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -15,16 +16,17 @@ import network.Network;
 import network.Network.*;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * This class handles displaying a multiplayer game for the client.
+ */
 public class MPGame extends GameScreen {
 	
 	/** Players that are currently active in the game. */
-	private CopyOnWriteArrayList<Projectile> projectiles  = new CopyOnWriteArrayList<Projectile>();
+	private Array<Projectile> projectiles  = new Array<Projectile>();
 
 	/** Players that are currently active in the game. */
-	private CopyOnWriteArrayList<MultiplayerPlayer> players  = new CopyOnWriteArrayList<MultiplayerPlayer>();	
+	private Array<MultiplayerPlayer> players  = new Array<MultiplayerPlayer>();
 
 	/** This clients player. */
 	private MultiplayerPlayer player;
@@ -47,42 +49,36 @@ public class MPGame extends GameScreen {
 			public void received(Connection connection, Object object) {
 				if (object instanceof AddPlayer) {
 					final AddPlayer msg = (AddPlayer) object;
-					Gdx.app.postRunnable(new Runnable() {
-						public void run() {
-							MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, msg.name);
-							toAdd.setMultiplayerID(msg.id);
-							players.add(toAdd);
+					Gdx.app.postRunnable(() -> {
+						MultiplayerPlayer toAdd = new MultiplayerPlayer(Network.GAME_HEIGHT / 2, Network.GAME_HEIGHT / 2, msg.name);
+						toAdd.setMultiplayerID(msg.id);
+						players.add(toAdd);
 
-							System.out.println("Adding player: " + player.getPlayerName());
-							
-							if (toAdd.getPlayerName().equals(clientNickname))
-								player = toAdd;
-						}
+						System.out.println("Adding player: " + player.getPlayerName());
+
+						if (toAdd.getPlayerName().equals(clientNickname))
+							player = toAdd;
 					});
 				}
 				if (object instanceof AddProjectile) {
 					final AddProjectile msg = (AddProjectile) object;
-					Gdx.app.postRunnable(new Runnable(){
-						public void run() {
-							Projectile toAdd = null;
-							MultiplayerPlayer player = getPlayerByID(msg.playerID);
-							if (player != null) {
-								if (msg.type.equals("Light")) {
-									assert player != null;
-									toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
-								} else {
-									assert player != null;
-									toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
-								}
+					Gdx.app.postRunnable(() -> {
+						Projectile toAdd = null;
+						MultiplayerPlayer player = getPlayerByID(msg.playerID);
+						if (player != null) {
+							if (msg.type.equals("Light")) {
+								toAdd = player.getLeftWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
+							} else {
+								toAdd = player.getRightWeapon().fireWithoutValidation(player.getCenterX(), player.getCenterY(), player.getRotation());
 							}
-
-							if (toAdd != null) {
-								toAdd.setFiredByID(msg.playerID);
-								toAdd.setMultiplayerID(msg.id);
-								projectiles.add(toAdd);
-							}
-								
 						}
+
+						if (toAdd != null) {
+							toAdd.setFiredByID(msg.playerID);
+							toAdd.setMultiplayerID(msg.id);
+							projectiles.add(toAdd);
+						}
+
 					});
 				}
 				if (object instanceof UpdatePlayer) {
@@ -108,14 +104,16 @@ public class MPGame extends GameScreen {
 				if (object instanceof RemoveProjectile) {
 					RemoveProjectile msg = (RemoveProjectile) object;
 					Projectile toRemove = getProjectileByID(msg.id);
-					projectiles.remove(toRemove);
+					projectiles.removeValue(toRemove, false);
 				}
 				if (object instanceof RemovePlayer) {
 					MultiplayerPlayer toRemove = getPlayerByID(((RemovePlayer) object).id);
-					players.remove(toRemove);
+					players.removeValue(toRemove, false);
 				}
 				if (object instanceof PlayerWon) {
-					win(getPlayerByID(((PlayerWon) object).id));
+					MultiplayerPlayer winningPlayer = getPlayerByID(((PlayerWon) object).id);
+					if (winningPlayer != null)
+						win(winningPlayer);
 				}
 			}
 		}));
@@ -170,7 +168,7 @@ public class MPGame extends GameScreen {
 		//validate the all projectiles are still moving
 		for (Projectile projectile : projectiles)
 			if (projectile.isDead(delta))
-				projectiles.remove(projectile);
+				projectiles.removeValue(projectile, false);
 		
 		//start drawing sprites
 		batch.begin(); 
@@ -181,7 +179,7 @@ public class MPGame extends GameScreen {
 		int yIncrease = 5;
 		font.setUseIntegerPositions(false);
 		
-		for (int i = 0; i < players.size(); i++) {
+		for (int i = 0; i < players.size; i++) {
 			//draw the players name
 			font.draw(batch, players.get(i).getPlayerName(), players.get(i).getCenterX(), players.get(i).getCenterY());
 			//draw the players scores
@@ -260,47 +258,38 @@ public class MPGame extends GameScreen {
 	/**
 	 * Send player key presses to the server.
 	 */
-	
 	private void checkInput() {
-		if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+		checkKeyInput(Input.Keys.W);
+		checkKeyInput(Input.Keys.S);
+		checkKeyInput(Input.Keys.D);
+		checkKeyInput(Input.Keys.A);
+
+		checkMouseInput(Input.Buttons.LEFT);
+		checkMouseInput(Input.Buttons.RIGHT);
+	}
+
+	/**
+	 * Checks if a key has been pressed and notifies the server if so.
+	 * @param keyCode the keyCode to check
+	 */
+	private void checkKeyInput(int keyCode) {
+		if (Gdx.input.isKeyPressed(keyCode)) {
 			KeyInput toSend = new KeyInput();
 			toSend.id = player.getMultiplayerID();
-			toSend.keyCode = Input.Keys.W;
+			toSend.keyCode = keyCode;
 			client.sendTCP(toSend);
 		}
-			
-		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-			KeyInput toSend = new KeyInput();
-			toSend.id = player.getMultiplayerID();
-			toSend.keyCode = Input.Keys.S;
-			client.sendTCP(toSend);
-		}
-			
-		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-			KeyInput toSend = new KeyInput();
-			toSend.id = player.getMultiplayerID();
-			toSend.keyCode = Input.Keys.D;
-			client.sendTCP(toSend);
-		}
-			
-		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-			KeyInput toSend = new KeyInput();
-			toSend.id = player.getMultiplayerID();
-			toSend.keyCode = Input.Keys.A;
-			client.sendTCP(toSend);
-		}
-			
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+	}
+
+	/**
+	 * Checks if a mouse button has been pressed and notifies the server if so.
+	 * @param buttonCode the buttonCode to check
+	 */
+	private void checkMouseInput(int buttonCode) {
+		if (Gdx.input.isButtonPressed(buttonCode)) {
 			MouseInput toSend = new MouseInput();
 			toSend.id = player.getMultiplayerID();
-			toSend.buttonCode = Input.Buttons.LEFT;
-			client.sendTCP(toSend);
-		}
-			
-		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-			MouseInput toSend = new MouseInput();
-			toSend.id = player.getMultiplayerID();
-			toSend.buttonCode = Input.Buttons.RIGHT;
+			toSend.buttonCode = buttonCode;
 			client.sendTCP(toSend);
 		}
 	}

@@ -3,7 +3,6 @@ package ui;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.esotericsoftware.minlog.Log;
-import database.ScoreStorage;
 import network.server.ServerHandler;
 
 public class Driver {

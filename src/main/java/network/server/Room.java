@@ -10,7 +10,7 @@ import network.Network;
 class Room {
 
 	/** The maximum length of room's name. */
-	public static final int MAX_NAME_LEN = 30;
+	static final int MAX_NAME_LEN = 20;
 
 	/** The rooms name. */
 	private String name;
@@ -21,6 +21,11 @@ class Room {
 	/** Clients in the room. */
 	private Array<ClientInfo> clients = new Array<>();
 
+	/**
+	 * Creates a new room with a name and a leader.
+	 * @param name the rooms name
+	 * @param leader the client that owns the room
+	 */
 	Room(String name, ClientInfo leader) {
 		this.name = name;
 		this.leader = leader;
@@ -31,12 +36,10 @@ class Room {
 	 * @param info the clients information
 	 */
 	void addClient(ClientInfo info) {
-		if (clients.contains(info, false)) {
-			System.out.println(getClass().getSimpleName() + " >>> " + info.getNickname() + " has already joined room '" + name + "', ignoring request.");
+		//don't allow duplicate clients in the same room
+		if (clients.contains(info, false))
 			return;
-		}
 
-		System.out.println(getClass().getSimpleName() + " >>> " + info.getNickname() + " joined room '" + name + "'.");
 		clients.add(info);
 
 		//tell the player to move to the lobby screen
@@ -109,6 +112,9 @@ class Room {
 		}
 	}
 
+	/**
+	 * @return the client that owns this game
+	 */
 	ClientInfo getLeader() {
 		return leader;
 	}

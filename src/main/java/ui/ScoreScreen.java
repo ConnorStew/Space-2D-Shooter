@@ -2,6 +2,8 @@ package ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Timer;
@@ -45,56 +47,39 @@ public class ScoreScreen extends UIScreen {
 	public ScoreScreen(int score){
 		this.score = score;
 		uploaded = false;
-
-		//connect to the server
-		client = new ClientHandler(false);
-		client.getKyroClient().addListener(new ThreadedListener(new Listener(){
-			@Override
-			public void received(Connection connection, Object object) {
-				if (object instanceof Network.ConfirmationMessage) {
-					if (((Network.ConfirmationMessage) object).type.equals(ConfirmType.ScoreAdded)) {
-						updateScores();
-						txtName.setDisabled(true);
-						txtName.setText("");
-						uploaded = true;
-					}
-				}
-
-				if (object instanceof Network.ScoreUpdate) {
-					Network.ScoreUpdate msg = (Network.ScoreUpdate) object;
-
-					ArrayList<Integer> scores = msg.scores;
-					ArrayList<String> names = msg.names;
-
-					String[] sNames;
-
-					//scores and names
-					if (names.isEmpty()) { //if the names are unavailable
-						//change screen settings to display no scores
-						sNames = new String[]{"Scores Unavailible"};
-						txtName.setDisabled(true);
-						txtName.setVisible(false);
-						pnlScroll.setWidth(700);
-						btnUpload.setDisabled(true);
-						btnUpload.setVisible(false);
-						btnBack.setX(btnBack.getX() + 30);
-					} else {
-						sNames = new String[names.size()];
-
-						//populate sNames
-						for (int i = 0; i < sNames.length; i++)
-							sNames[i] = names.get(i) + ": " + scores.get(i);
-					}
-
-					lstScores.clearItems();
-					lstScores.setItems(sNames);
-				}
-			}
-		}));
 	}
 
 	public void show() {
 		super.show();
+
+		//connect to the server
+		client = new ClientHandler(false);
+
+		if (client.isConnected()) {
+			client.getKyroClient().addListener(new ThreadedListener(new Listener(){
+				@Override
+				public void received(Connection connection, Object object) {
+					if (object instanceof Network.ConfirmationMessage) {
+						if (((Network.ConfirmationMessage) object).type.equals(ConfirmType.ScoreAdded)) {
+							client.getKyroClient().sendTCP(new Network.RefreshScores());
+							txtName.setDisabled(true);
+							txtName.setText("");
+							uploaded = true;
+						}
+					}
+
+					if (object instanceof Network.ScoreUpdate) {
+						Network.ScoreUpdate msg = (Network.ScoreUpdate) object;
+						ArrayList<Integer> scores = msg.scores;
+						ArrayList<String> names = msg.names;
+
+						updateScores(scores, names);
+					}
+				}
+			}));
+
+			client.getKyroClient().sendTCP(new Network.RefreshScores());
+		}
 
 		//make background
 		Image background = new Image(new Texture(Gdx.files.internal("backgrounds/hubble.jpg")));
@@ -131,12 +116,40 @@ public class ScoreScreen extends UIScreen {
 		stage.addActor(txtName);
 		stage.addActor(pnlScroll);
 		stage.addActor(btnBack);
-		
-		updateScores();
+
+
+
+		if (client.isConnected())
+			client.getKyroClient().sendTCP(new Network.RefreshScores());
+		else
+			updateScores(null, null);
 	}
 	
-	private void updateScores() {
-		client.getKyroClient().sendTCP(new Network.RefreshScores());
+	private void updateScores(ArrayList<Integer> scores, ArrayList<String> names) {
+		String[] sNames;
+
+		//scores and names
+		if (names == null || scores == null) { //if the names are unavailable
+			//change screen settings to display no scores
+			sNames = new String[]{"Scores Unavailible"};
+			txtName.setDisabled(true);
+			txtName.setVisible(false);
+			pnlScroll.setWidth(700);
+			btnUpload.setDisabled(true);
+			btnUpload.setVisible(false);
+			btnBack.setX(btnBack.getX() + 30);
+		} else {
+			sNames = new String[names.size()];
+
+			//populate sNames
+			for (int i = 0; i < sNames.length; i++)
+				sNames[i] = names.get(i) + ": " + scores.get(i);
+		}
+
+		if (lstScores != null) {
+			lstScores.clearItems();
+			lstScores.setItems(sNames);
+		}
 	}
 
 	public void render(float delta) {
@@ -145,27 +158,17 @@ public class ScoreScreen extends UIScreen {
 		//goto the game screen if the play button is pressed
 		if (btnUpload.isPressed() && validateButtonPress() && !uploaded) {
 			if (txtName.getText().length() != 3) {
-				Window.WindowStyle wStyle = new Window.WindowStyle();
-
-				wStyle.titleFont = starTrekFont;
-				
-				final Dialog dialog = new Dialog("You must input a three letter name!", wStyle) {
-				    public void result(Object obj) {
-				        System.out.println("result "+obj);
-				    }
-				};
-				
-				dialog.show(stage);
-				dialog.setBounds(100, 500, 800, 60);
-				
-				new Timer().scheduleTask(new Task(){
-					@Override
-					public void run() {
-						dialog.hide();
-					}
-				},2);
-				
+				displayMessage("You must input a three letter name!");
+				txtName.setText("");
+			} else if (txtName.getText().replaceAll("\\s+","").isEmpty()) {
+				displayMessage("You must input a name!");
+				txtName.setText("");
+			} else if (txtName.getText().contains(" ")) {
+				displayMessage("Your name cannot contain spaces!");
+				txtName.setText("");
 			} else {
+				displayMessage("Score Uploaded!");
+				uploaded = true;
 				Network.UploadScore msg = new Network.UploadScore();
 				msg.name = txtName.getText().toUpperCase();
 				msg.score = score;
@@ -175,6 +178,40 @@ public class ScoreScreen extends UIScreen {
 		
 		if (btnBack.isPressed() && validateButtonPress())
 			ControlGame.getInstance().setScreen(new MenuScreen());
+	}
+
+	/**
+	 * Displays a message to the user.
+	 * @param message the message to display.
+	 */
+	private void displayMessage(String message) {
+		Window.WindowStyle wStyle = new Window.WindowStyle();
+
+		//load the starTrekFont
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/AstronBoyWonder.ttf"));
+
+		//setting starTrekFont size
+		FreeTypeFontGenerator.FreeTypeFontParameter fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		fontParameter.size = 50;
+
+		//creating the starTrekFont based on the starTrekFont parameters
+		BitmapFont errorFont = generator.generateFont(fontParameter);
+
+		wStyle.titleFont = errorFont;
+
+		final Dialog dialog = new Dialog(message, wStyle) {
+			public void result(Object obj) {}
+		};
+
+		dialog.show(stage);
+		dialog.setBounds(100, 500, 800, 60);
+
+		new Timer().scheduleTask(new Task(){
+			@Override
+			public void run() {
+				dialog.hide();
+			}
+		},2);
 	}
 
 }

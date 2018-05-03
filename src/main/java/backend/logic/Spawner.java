@@ -144,7 +144,7 @@ public class Spawner {
 			if (y > maxHeight - pickupHeight)
 				y = maxHeight - pickupHeight;
 			
-			//make sure the pickup hasen't spawned on another pickup
+			//make sure the pickup hasn't spawned on another pickup
 			for (Entity entity : GAME.getActiveEntities()) {
 				overlapping = entity.getBoundingRectangle().overlaps(new Rectangle(x, y, pickupWidth, pickupHeight));
 			}
@@ -239,18 +239,13 @@ public class Spawner {
 			asteroidSpawnTimer = 0;
 
 			Point spawnLoc = getEnemySpawnLocation();
-
-			int maxHeight = SPGame.GAME_HEIGHT;
-			int maxWidth = SPGame.GAME_WIDTH;
 			float rotation;
 			
-			if (spawnLoc.y == maxWidth) {
+			if (spawnLoc.y == SPGame.GAME_WIDTH) {
 				rotation = -180;
-			} else if (spawnLoc.y == maxHeight) {
-				rotation = -90;
 			} else if (spawnLoc.y == 0) {
 				rotation = 90;
-			} else {
+			} else { //will trigger if spawnLoc y is equal to SPGame.GAME_HEIGHT
 				rotation = 0;
 			}
 			

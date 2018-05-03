@@ -10,14 +10,14 @@ import com.esotericsoftware.kryonet.Listener;
 public class MessageQueue extends Listener {
 
     /** Messages that have been received. */
-    Array<Message> messages = new Array<Message>();
+    private Array<Message> messages = new Array<Message>();
 
     /** Listeners who want to receive messages. */
-    Array<MessageQueueListener> listeners = new Array<MessageQueueListener>();
+    private Array<MessageQueueListener> listeners = new Array<MessageQueueListener>();
 
     @Override
     public void received(Connection connection, Object object) {
-        Message received = new Message(connection, object);
+        Message received = new Message(object);
 
         for (MessageQueueListener listener : listeners) {
             if (listener.received(received)) {
