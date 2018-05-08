@@ -10,6 +10,7 @@ import network.client.ClientHandler;
 
 /**
  * This class displays users who are waiting for a game to start.
+ * @author Connor Stewart
  */
 public class LobbyScreen extends UIScreen {
 
@@ -27,7 +28,6 @@ public class LobbyScreen extends UIScreen {
 
     /** Whether this client is the leader of the lobby. */
     private boolean isLeader;
-
 
     public LobbyScreen(ClientHandler client, boolean leader) {
         this.client = client;
@@ -92,6 +92,10 @@ public class LobbyScreen extends UIScreen {
 
     }
 
+    /**
+     * Adds a new list of players to the UI.
+     * @param players the players names to add
+     */
     public void populatePlayers(String[] players) {
         playerList.setItems(players);
     }

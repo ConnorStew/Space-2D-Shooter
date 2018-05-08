@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 
 /**
  * This class is used to control which screen is being displayed and dispose of old screens.
+ * @author Connor Stewart
  */
 public class ControlGame extends Game {
 

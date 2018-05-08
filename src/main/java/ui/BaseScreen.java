@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 /**
  * This class is the superclass for all screens. <br>
  * This class was created to reduce the bloat of the pause, resume and hide Screen methods because they are not used.
+ * @author Connor Stewart
  */
 public abstract class BaseScreen implements Screen {
 

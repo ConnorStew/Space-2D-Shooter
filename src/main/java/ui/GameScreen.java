@@ -8,6 +8,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+/**
+ * This is a generic class used to define rending a game.
+ * @author Connor Stewart
+ */
 abstract public class GameScreen extends BaseScreen {
 
     /** Font used to display score. */

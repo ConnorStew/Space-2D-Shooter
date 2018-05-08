@@ -2,6 +2,7 @@ package network;
 
 /**
  * This class is used to receive messages from the MessageQueue.
+ * @author Connor Stewart
  */
 public interface MessageQueueListener {
 

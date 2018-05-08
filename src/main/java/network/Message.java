@@ -2,6 +2,7 @@ package network;
 
 /**
  * This class stores a message sent between the server & client along with the connection that sent it.
+ * @author Connor Stewart
  */
 public class Message {
 

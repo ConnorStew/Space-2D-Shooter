@@ -3,6 +3,10 @@ package backend.pickups;
 import backend.effects.BetterWeapon;
 import ui.SPGame;
 
+/**
+ * This pickup upgrades the players light weapon.
+ * @author Connor Stewart
+ */
 public class AutoAim extends Pickup {
 
 	public AutoAim(int x, int y, SPGame game) {

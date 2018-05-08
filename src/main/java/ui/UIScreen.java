@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 /**
  * This class is used as a base for menu screens.
+ * @author Connor Stewart
  */
 abstract public class UIScreen extends BaseScreen {
 
@@ -40,6 +41,10 @@ abstract public class UIScreen extends BaseScreen {
         stage.draw(); //draw actors
     }
 
+    /**
+     * Validates that the button cooldown time has passed.
+     * @return whether this button is clickable
+     */
     boolean validateButtonPress() {
         if (timeSinceButtonPressed > BUTTON_COOLDOWN) {
             timeSinceButtonPressed = 0;
