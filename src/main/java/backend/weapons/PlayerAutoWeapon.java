@@ -5,7 +5,7 @@ import backend.projectiles.Projectile;
 import ui.SPGame;
 
 /**
- * Weapon for use with the {@link backend.effects.BetterWeapon}
+ * Weapon for use with the {@link backend.effects.BetterWeapon}.
  * @author Connor Stewart
  */
 public class PlayerAutoWeapon extends Weapon {

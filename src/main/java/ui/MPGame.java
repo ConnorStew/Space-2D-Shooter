@@ -19,6 +19,7 @@ import javax.swing.*;
 
 /**
  * This class handles displaying a multiplayer game for the client.
+ * @author Connor Stewart
  */
 public class MPGame extends GameScreen {
 	
@@ -166,9 +167,9 @@ public class MPGame extends GameScreen {
 			cam.position.x = player.getCenterX();
 		
 		//validate the all projectiles are still moving
-		for (Projectile projectile : projectiles)
-			if (projectile.isDead(delta))
-				projectiles.removeValue(projectile, false);
+		for (int i = 0; i < projectiles.size; i++)
+			if (projectiles.get(i).isDead(delta))
+				projectiles.removeValue(projectiles.get(i), false);
 		
 		//start drawing sprites
 		batch.begin(); 
@@ -187,24 +188,23 @@ public class MPGame extends GameScreen {
 		}
 
 		//draw players
-		for (MultiplayerPlayer player : players) {
-			player.draw(batch);
-		}
+		for (int i = 0; i < players.size; i++)
+			players.get(i).draw(batch);
 			
 		//draw projectiles
-		for (Projectile projectile : projectiles)
-			projectile.draw(batch);
+		for (int i = 0; i < projectiles.size; i++)
+			projectiles.get(i).draw(batch);
 		
 		//stop drawing sprites
 		batch.end();
 		
 		//start drawing shapes
 		sr.begin(ShapeRenderer.ShapeType.Filled);
-		
+
 		//draw health bars
-		for (MultiplayerPlayer player : players)
-			if (player.hasHealth())
-				player.drawHP(sr, cam);
+		for (int i = 0; i < players.size; i++)
+			if (players.get(i).hasHealth())
+				players.get(i).drawHP(sr, cam);
 
 		//stop drawing shapes
 		sr.end();

@@ -15,6 +15,7 @@ import java.net.SocketException;
 
 /**
  * This class is used to handle functions related to connecting to the server and sending/receiving messages to/from it.
+ * @author Connor Stewart
  */
 public class ClientHandler implements MessageQueueListener {
 
@@ -172,6 +173,9 @@ public class ClientHandler implements MessageQueueListener {
 	    return client;
     }
 
+    /**
+     * @return whether this client is connected to the server
+     */
     public boolean isConnected() {
         return connected;
     }

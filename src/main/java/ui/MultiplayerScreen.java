@@ -104,6 +104,9 @@ public class MultiplayerScreen extends UIScreen {
 		roomList.setItems(roomNames);
 	}
 
+	/**
+	 * @return the current instance of this class
+	 */
 	public static MultiplayerScreen getInstance() {
 		return INSTANCE;
 	}

@@ -5,10 +5,14 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.esotericsoftware.minlog.Log;
 import network.server.ServerHandler;
 
+/**
+ * This class starts the a game or server depending on command line arguments.
+ * @author Connor Stewart
+ */
 public class Driver {
 
 	public static void main(String[] args) {
-		Log.set(Log.LEVEL_DEBUG);
+		//Log.set(Log.LEVEL_DEBUG);
 
 		if (args.length > 0 && args[0].equals("server")) {
 			ServerHandler.getInstance();

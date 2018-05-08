@@ -206,7 +206,8 @@ public class ServerGame extends Listener implements ApplicationListener {
 			}
 		}
 
-		for (ClientInfo client : room.getClients()) {
+		for (int i = 0; i < room.getClients().size; i++) {
+			ClientInfo client = room.getClients().get(i);
 			MultiplayerPlayer player = getPlayerByID(client.getID());
 			if (player != null && player.getKills() >= 10) {
 				sendWin(client);

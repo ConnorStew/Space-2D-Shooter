@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 
 /**
  * This class stores information that the server knows about a client.
+ * @author Connor Stewart
  */
 class ClientInfo {
 

@@ -6,6 +6,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 /**
  * This class stores messages that are not consumed by listeners.
+ * @author Connor Stewart
  */
 public class MessageQueue extends Listener {
 

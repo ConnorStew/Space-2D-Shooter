@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 /**
  * This class handles server functions.
+ * @author Connor Stewart
  */
 public class ServerHandler extends Listener {
 	
@@ -358,6 +359,10 @@ public class ServerHandler extends Listener {
 		return toSend;
 	}
 
+	/**
+	 * Closes a game that is running on the server.
+	 * @param serverGame the game to close.
+	 */
 	void endGame(ServerGame serverGame) {
 		games.removeValue(serverGame, false);
 		serverGame.close();
