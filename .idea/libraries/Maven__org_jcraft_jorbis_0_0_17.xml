@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: org.jcraft:jorbis:0.0.17">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../maven/repository/org/jcraft/jorbis/0.0.17/jorbis-0.0.17.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jcraft/jorbis/0.0.17/jorbis-0.0.17.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/../../maven/repository/org/jcraft/jorbis/0.0.17/jorbis-0.0.17-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jcraft/jorbis/0.0.17/jorbis-0.0.17-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/../../maven/repository/org/jcraft/jorbis/0.0.17/jorbis-0.0.17-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jcraft/jorbis/0.0.17/jorbis-0.0.17-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

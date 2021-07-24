@@ -1,10 +1,6 @@
 # Space Defence
-######
 
-This is a top-down shooter game for my college graded unit. It uses the libGdx library.
+I created this game for my second year graded unit at Fourth Valley College, it's a top-down shooter.
 
-## Features
-######
-
-### Powerups
-######
+## Libraries
+ * [libGdx](https://libgdx.com/)
